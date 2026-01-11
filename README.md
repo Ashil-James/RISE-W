@@ -1,1 +1,1 @@
-# RISE-W: Resedential Infrastructure Support System - Wayand
+# RISE-W: Residential Infrastructure Support System - Wayand
