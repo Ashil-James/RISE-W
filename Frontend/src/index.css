@@ -1,14 +1,14 @@
 @import "tailwindcss";
 
 @theme {
-  /* Custom Color Palette */
-  --color-wayanad-dark: #02120f; /* Deepest background */
-  --color-wayanad-panel: #07221d; /* Card background */
-  --color-wayanad-primary: #10b981; /* Bright Emerald */
-  --color-wayanad-accent: #059669; /* Hover state */
-  --color-wayanad-danger: #ef4444; /* Alerts */
-  --color-wayanad-text: #ecfdf5; /* Text */
-  --color-wayanad-muted: #6ee7b7; /* Secondary text */
+  /* Custom Color Palette - Wayanad Forest Theme */
+  --color-wayanad-dark: #02120f;
+  --color-wayanad-panel: #07221d;
+  --color-wayanad-primary: #10b981;
+  --color-wayanad-accent: #059669;
+  --color-wayanad-danger: #ef4444;
+  --color-wayanad-text: #ecfdf5;
+  --color-wayanad-muted: #6ee7b7;
 
   /* Custom Animations */
   --animate-fade-in: fade-in 0.5s ease-out;
@@ -43,4 +43,18 @@ body {
     system-ui,
     -apple-system,
     sans-serif;
+}
+
+/* --- SCROLLBAR UTILITY FIX --- */
+/* This fixes the "invalid utility name" error by using CSS nesting */
+@utility scrollbar-hide {
+  /* Firefox */
+  scrollbar-width: none;
+  /* IE and Edge */
+  -ms-overflow-style: none;
+
+  /* Chrome, Safari and Opera */
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
