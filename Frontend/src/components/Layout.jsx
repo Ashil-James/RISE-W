@@ -1,38 +1,44 @@
 import React from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import ThemeToggle from "./ThemeToggle";
 
 const Layout = () => {
-  return (
-    <div className="min-h-screen w-full bg-wayanad-bg text-wayanad-text transition-colors duration-500 font-sans relative flex flex-col selection:bg-emerald-500/30">
-      {/* ANIMATED BACKGROUND BLOBS */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        {/* Blob 1 */}
-        <div className="absolute top-0 left-0 w-96 h-96 bg-emerald-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob dark:bg-emerald-500/10 dark:mix-blend-screen" />
-        {/* Blob 2 */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob delay-2000 dark:bg-cyan-500/10 dark:mix-blend-screen" />
-        {/* Blob 3 */}
-        <div className="absolute -bottom-32 left-20 w-96 h-96 bg-teal-400/20 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob delay-4000 dark:bg-teal-500/10 dark:mix-blend-screen" />
-      </div>
+  const navigate = useNavigate();
 
+  return (
+    <div className="min-h-screen w-full flex flex-col font-sans selection:bg-emerald-500/30">
       {/* HEADER */}
-      <header className="sticky top-0 z-50 w-full bg-wayanad-bg/80 backdrop-blur-xl border-b border-wayanad-border/50 transition-all duration-300">
+      <header className="sticky top-0 z-50 w-full border-b border-wayanad-border bg-wayanad-bg/80 backdrop-blur-md">
         <div className="w-full px-6 md:px-12 py-4 flex justify-between items-center">
-          <h1 className="text-xl md:text-2xl font-bold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-500 cursor-pointer hover:opacity-80 transition-opacity">
-            WAYANAD CONNECT
+          {/* Logo: Added onClick handler */}
+          <h1
+            onClick={() => navigate("/")} // 3. Redirect to Home on click
+            className="text-xl md:text-2xl font-black tracking-tight flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
+          >
+            <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_10px_#10B981]" />{" "}
+            {/* Status Indicator */}
+            <span className="text-wayanad-text">WAYANAD</span>
+            <span className="text-emerald-500">CONNECT</span>
           </h1>
+
+          {/* Controls */}
           <div className="flex items-center gap-4">
             <ThemeToggle />
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-600 p-[2px] cursor-pointer hover:scale-105 transition-transform shadow-lg shadow-emerald-500/20">
-              <div className="w-full h-full rounded-full bg-wayanad-bg/90 backdrop-blur-sm" />{" "}
-              {/* Profile Avatar Placeholder */}
+            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-gray-200 to-gray-400 dark:from-zinc-700 dark:to-zinc-600 p-[1px] cursor-pointer hover:ring-2 ring-emerald-500/50 transition-all">
+              <div className="w-full h-full rounded-full bg-wayanad-bg flex items-center justify-center overflow-hidden">
+                <img
+                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
+                  alt="User"
+                  className="w-full h-full"
+                />
+              </div>
             </div>
           </div>
         </div>
       </header>
 
       {/* CONTENT */}
-      <div className="flex-1 w-full max-w-4xl mx-auto relative z-10">
+      <div className="flex-1 w-full max-w-5xl mx-auto relative z-10">
         <main className="p-6 md:p-10 pb-24">
           <Outlet />
         </main>

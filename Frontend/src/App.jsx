@@ -3,7 +3,7 @@ import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import ReportIncident from "./pages/ReportIncident";
 import MyReports from "./pages/MyReports";
-import Alerts from "./pages/Alerts"; // Import the real page
+import Alerts from "./pages/Alerts";
 
 function App() {
   return (
