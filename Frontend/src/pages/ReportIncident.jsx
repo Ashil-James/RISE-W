@@ -12,17 +12,14 @@ import {
 
 const ReportIncident = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1); // 1: Category, 2: Details, 3: Success
+  const [step, setStep] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState(null);
-
-  // State for Form Data
   const [formData, setFormData] = useState({
     specificIssue: "",
     poleNumber: "",
     description: "",
   });
 
-  // Data Categories
   const categories = [
     {
       id: "water",
@@ -69,61 +66,63 @@ const ReportIncident = () => {
   };
 
   const handleSubmit = async () => {
-    // API Payload Preparation
-    const apiPayload = {
-      category: selectedCategory.id,
-      issue_type: formData.specificIssue,
-      pole_id: formData.poleNumber || null,
-      description: formData.description,
-      location: "User_GPS_Coordinates_Here",
-      status: "OPEN",
-    };
-
-    console.log("SENDING TO BACKEND /api/v1/incidents:", apiPayload);
-    // Simulate API delay
     setTimeout(() => setStep(3), 800);
   };
 
   // --- SCREEN 1: SELECT CATEGORY ---
   if (step === 1)
     return (
-      // Responsive Container: 4xl on desktop for grid layout
-      <div className="space-y-6 animate-slide-up max-w-4xl mx-auto">
+      <div className="animate-slide-up w-full max-w-2xl mx-auto">
+        {/* Back Button (Floating on top) */}
         <div
-          className="flex items-center gap-2 text-wayanad-muted mb-4 cursor-pointer hover:text-wayanad-primary transition-colors"
+          className="flex items-center gap-2 text-wayanad-muted mb-6 cursor-pointer hover:text-wayanad-primary transition-colors self-start"
           onClick={() => navigate(-1)}
         >
           <ArrowLeft size={18} />
           <span className="text-sm font-medium">Back to Home</span>
         </div>
 
-        <h2 className="text-2xl font-bold text-wayanad-text">
-          Select Incident Type
-        </h2>
+        {/* Main Card Panel */}
+        <div className="bg-transparent md:bg-wayanad-panel md:border md:border-wayanad-border md:p-10 md:rounded-3xl md:shadow-2xl">
+          {/* Header - Centered on Desktop */}
+          <div className="mb-8 md:text-center">
+            <h2 className="text-2xl md:text-3xl font-bold text-wayanad-text">
+              Select Incident Type
+            </h2>
+            <p className="text-wayanad-muted text-sm mt-2 hidden md:block">
+              Choose the category that best describes the issue.
+            </p>
+          </div>
 
-        {/* Responsive Grid: 1 col on mobile, 2 cols on desktop */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {categories.map((cat) => (
-            <div
-              key={cat.id}
-              onClick={() => handleCategorySelect(cat)}
-              className={`group flex items-center p-4 rounded-2xl bg-wayanad-panel border border-wayanad-border backdrop-blur-sm transition-all cursor-pointer active:scale-[0.98] shadow-sm hover:bg-wayanad-panel/80 ${cat.border}`}
-            >
+          {/* THE GRID */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {categories.map((cat) => (
               <div
-                className={`p-3 rounded-xl ${cat.bg} ${cat.color} mr-4 shadow-sm`}
+                key={cat.id}
+                onClick={() => handleCategorySelect(cat)}
+                // Mobile: Row layout (flex-row)
+                // Desktop: Column layout (flex-col) + Centered Text + Taller padding
+                className={`group flex md:flex-col items-center md:justify-center text-left md:text-center p-4 md:p-8 rounded-2xl bg-wayanad-panel md:bg-wayanad-bg/50 border border-wayanad-border backdrop-blur-sm transition-all cursor-pointer active:scale-[0.98] shadow-sm hover:bg-wayanad-primary/5 hover:border-wayanad-primary/30 hover:shadow-lg ${cat.border}`}
               >
-                <cat.icon size={24} />
+                {/* Icon Circle */}
+                <div
+                  className={`p-3 md:p-5 rounded-full ${cat.bg} ${cat.color} mr-4 md:mr-0 md:mb-4 shadow-sm group-hover:scale-110 transition-transform`}
+                >
+                  <cat.icon size={28} />
+                </div>
+
+                {/* Text Content */}
+                <div className="flex-1 md:flex-none">
+                  <h3 className="font-semibold text-lg text-wayanad-text group-hover:text-wayanad-primary transition-colors">
+                    {cat.label}
+                  </h3>
+                  <p className="text-xs text-wayanad-muted mt-1 opacity-80 md:hidden">
+                    Report {cat.label.toLowerCase()}
+                  </p>
+                </div>
               </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-lg text-wayanad-text group-hover:text-wayanad-primary transition-colors">
-                  {cat.label}
-                </h3>
-                <p className="text-xs text-wayanad-muted mt-0.5 opacity-80">
-                  Report issues related to {cat.label.toLowerCase()}
-                </p>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -131,31 +130,28 @@ const ReportIncident = () => {
   // --- SCREEN 2: DETAILS FORM ---
   if (step === 2)
     return (
-      // Responsive Container: 2xl on desktop (keeps form readable)
-      <div className="space-y-6 animate-slide-up max-w-2xl mx-auto">
+      <div className="animate-slide-up w-full max-w-2xl mx-auto">
         <div
-          className="flex items-center gap-2 text-wayanad-muted mb-2 cursor-pointer hover:text-wayanad-primary transition-colors"
+          className="flex items-center gap-2 text-wayanad-muted mb-4 cursor-pointer hover:text-wayanad-primary transition-colors"
           onClick={() => setStep(1)}
         >
           <ArrowLeft size={18} />
           <span className="text-sm font-medium">Change Category</span>
         </div>
 
-        {/* Form Container */}
-        <div className="bg-wayanad-panel p-6 md:p-8 rounded-3xl border border-wayanad-border backdrop-blur-md space-y-6 shadow-xl">
-          {/* Header */}
-          <div className="flex items-center gap-3 pb-4 border-b border-wayanad-border">
+        {/* Form Card */}
+        <div className="bg-wayanad-panel p-6 md:p-10 rounded-3xl border border-wayanad-border backdrop-blur-md space-y-6 md:space-y-8 shadow-xl">
+          <div className="flex items-center gap-4 pb-4 border-b border-wayanad-border">
             <div
-              className={`p-2 rounded-lg ${selectedCategory.bg} ${selectedCategory.color}`}
+              className={`p-3 rounded-xl ${selectedCategory.bg} ${selectedCategory.color}`}
             >
-              <selectedCategory.icon size={20} />
+              <selectedCategory.icon size={24} />
             </div>
-            <h2 className="text-xl font-bold text-wayanad-text">
+            <h2 className="text-xl md:text-2xl font-bold text-wayanad-text">
               {selectedCategory.label}
             </h2>
           </div>
 
-          {/* Dynamic Inputs */}
           <div className="space-y-5">
             <div className="space-y-2">
               <label className="text-xs font-semibold tracking-wider text-wayanad-muted uppercase">
@@ -167,7 +163,7 @@ const ReportIncident = () => {
                 onChange={handleInputChange}
                 className="w-full bg-wayanad-bg border border-wayanad-border rounded-xl p-3.5 text-wayanad-text focus:outline-none focus:border-wayanad-primary focus:ring-1 focus:ring-wayanad-primary appearance-none transition-colors"
               >
-                <option value="" className="bg-wayanad-panel text-gray-500">
+                <option value="" className="bg-wayanad-panel">
                   Select Option...
                 </option>
                 <option value="General Failure" className="bg-wayanad-panel">
@@ -195,7 +191,7 @@ const ReportIncident = () => {
                   value={formData.poleNumber}
                   onChange={handleInputChange}
                   placeholder="e.g. SL-45"
-                  className="w-full bg-wayanad-bg border border-wayanad-border rounded-xl p-3.5 text-wayanad-text placeholder:text-gray-400 focus:outline-none focus:border-wayanad-primary focus:ring-1 focus:ring-wayanad-primary transition-colors"
+                  className="w-full bg-wayanad-bg border border-wayanad-border rounded-xl p-3.5 text-wayanad-text focus:outline-none focus:border-wayanad-primary focus:ring-1 focus:ring-wayanad-primary transition-colors"
                 />
               </div>
             )}
@@ -208,27 +204,25 @@ const ReportIncident = () => {
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}
-                rows="3"
+                rows="4"
                 placeholder="Describe what you observed..."
-                className="w-full bg-wayanad-bg border border-wayanad-border rounded-xl p-3.5 text-wayanad-text placeholder:text-gray-400 focus:outline-none focus:border-wayanad-primary focus:ring-1 focus:ring-wayanad-primary resize-none transition-colors"
+                className="w-full bg-wayanad-bg border border-wayanad-border rounded-xl p-3.5 text-wayanad-text focus:outline-none focus:border-wayanad-primary focus:ring-1 focus:ring-wayanad-primary resize-none transition-colors"
               />
             </div>
 
-            {/* Upload Button */}
-            <div className="border-2 border-dashed border-wayanad-border rounded-xl p-6 flex flex-col items-center justify-center text-wayanad-muted hover:bg-wayanad-primary/5 hover:border-wayanad-primary/30 cursor-pointer transition gap-2">
-              <div className="bg-wayanad-bg p-2 rounded-full">
-                <Camera size={20} />
+            <div className="border-2 border-dashed border-wayanad-border rounded-xl p-6 md:p-8 flex flex-col items-center justify-center text-wayanad-muted hover:bg-wayanad-primary/5 hover:border-wayanad-primary/30 cursor-pointer transition gap-2">
+              <div className="bg-wayanad-bg p-3 rounded-full">
+                <Camera size={24} />
               </div>
-              <span className="text-xs font-medium">
+              <span className="text-sm font-medium">
                 Upload Photo (Optional)
               </span>
             </div>
           </div>
 
-          {/* Submit Action */}
           <button
             onClick={handleSubmit}
-            className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 py-4 rounded-xl font-bold text-white shadow-lg hover:shadow-emerald-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
+            className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 py-4 rounded-xl font-bold text-white text-lg shadow-lg hover:shadow-emerald-500/30 hover:scale-[1.01] active:scale-[0.98] transition-all duration-300"
           >
             SUBMIT INCIDENT
           </button>
@@ -239,28 +233,27 @@ const ReportIncident = () => {
   // --- SCREEN 3: SUCCESS ---
   if (step === 3)
     return (
-      <div className="h-[70vh] flex flex-col items-center justify-center text-center space-y-6 animate-slide-up px-4 max-w-lg mx-auto">
-        {/* Animated Success Icon */}
+      <div className="h-[70vh] flex flex-col items-center justify-center text-center space-y-8 animate-slide-up px-4 max-w-lg mx-auto">
         <div className="relative">
           <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-full"></div>
           <CheckCircle2
-            size={80}
+            size={100}
             className="text-emerald-500 relative z-10 drop-shadow-md"
           />
         </div>
-
-        <div className="space-y-2">
-          <h2 className="text-3xl font-bold text-wayanad-text">Report Sent!</h2>
-          <p className="text-wayanad-muted text-sm leading-relaxed max-w-[250px] mx-auto">
+        <div className="space-y-3">
+          <h2 className="text-3xl md:text-4xl font-bold text-wayanad-text">
+            Report Sent!
+          </h2>
+          <p className="text-wayanad-muted text-base md:text-lg leading-relaxed">
             Ticket <span className="text-emerald-500 font-mono">#343387</span>{" "}
-            has been created. Authorities will be notified immediately.
+            has been created.
           </p>
         </div>
-
-        <div className="w-full max-w-xs space-y-3 mt-8">
+        <div className="w-full max-w-sm space-y-3 mt-8">
           <button
             onClick={() => navigate("/my-reports")}
-            className="w-full bg-wayanad-panel border border-wayanad-border py-3.5 rounded-xl font-medium text-wayanad-text hover:bg-wayanad-primary/5 transition"
+            className="w-full bg-wayanad-panel border border-wayanad-border py-4 rounded-xl font-medium text-wayanad-text hover:bg-wayanad-primary/5 transition"
           >
             Track Status
           </button>
