@@ -1,45 +1,9 @@
-import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
 import ReportIncident from "./pages/ReportIncident";
-
-// Placeholders
-const MyReports = () => {
-  const navigate = useNavigate();
-  return (
-    <div className="animate-fade-in space-y-4">
-      <div
-        className="flex items-center gap-2 text-wayanad-muted mb-4 cursor-pointer"
-        onClick={() => navigate(-1)}
-      >
-        <ArrowLeft size={18} /> <span className="text-sm">Back</span>
-      </div>
-      <h2 className="text-xl font-bold text-wayanad-text">My Reports</h2>
-      <div className="p-8 text-center border border-dashed border-wayanad-border rounded-xl text-wayanad-muted">
-        Connecting to /api/v1/user/reports...
-      </div>
-    </div>
-  );
-};
-
-const Alerts = () => {
-  const navigate = useNavigate();
-  return (
-    <div className="animate-fade-in space-y-4">
-      <div
-        className="flex items-center gap-2 text-wayanad-muted mb-4 cursor-pointer"
-        onClick={() => navigate(-1)}
-      >
-        <ArrowLeft size={18} /> <span className="text-sm">Back</span>
-      </div>
-      <h2 className="text-xl font-bold text-wayanad-text">Safety Alerts</h2>
-      <div className="p-8 text-center border border-dashed border-wayanad-border rounded-xl text-wayanad-muted">
-        Connecting to /api/v1/alerts...
-      </div>
-    </div>
-  );
-};
+import MyReports from "./pages/MyReports";
+import Alerts from "./pages/Alerts"; // Import the real page
 
 function App() {
   return (
