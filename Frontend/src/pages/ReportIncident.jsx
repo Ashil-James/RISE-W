@@ -25,6 +25,7 @@ const ReportIncident = () => {
     specificIssue: "",
     poleNumber: "",
     description: "",
+    address: "", // Added address field
   });
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageFile, setImageFile] = useState(null);
@@ -97,16 +98,10 @@ const ReportIncident = () => {
             `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
           );
           const data = await response.json();
+
           if (data.display_name) {
-            // Formatting address to be concise
             const addressParts = data.display_name.split(',').slice(0, 4).join(', ');
-            // We don't have a direct "location" field in step 2 form for user to edit easily except "description"
-            // Or we can just set it as the location string for the report.
-            // The user asked for "option to type if it is not correct".
-            // Best approach: Add a new form state for 'resolvedAddress' and allow editing in UI.
-            // For now, let's update this function to store the address, 
-            // and we will update the UI below to show an input field for it.
-            setFormData(prev => ({ ...prev, description: prev.description + (prev.description ? "\n\n" : "") + `Location: ${addressParts}` }));
+            setFormData(prev => ({ ...prev, address: addressParts }));
           }
         } catch (e) {
           console.error("Geocoding failed", e);
@@ -127,10 +122,12 @@ const ReportIncident = () => {
       id: "#" + Math.floor(10000 + Math.random() * 90000),
       category: selectedCategory.label,
       issue: formData.specificIssue || selectedCategory.label,
-      // Use GPS if available, otherwise generic
-      location: coords
+      description: formData.description, // User description
+      // Use resolved address if available, otherwise GPS or manual
+      location: formData.address || (coords
         ? `GPS: ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`
-        : "Manual Location Entry",
+        : "Manual Location Entry"),
+      userImage: selectedImage, // Include the image
       date: "Just now",
       status: "Open",
       statusColor: "text-orange-500 bg-orange-500/10",
@@ -227,10 +224,10 @@ const ReportIncident = () => {
                   locationStatus === "success" || locationStatus === "loading"
                 }
                 className={`text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1 transition-all ${locationStatus === "success"
-                    ? "bg-emerald-500 text-white"
-                    : locationStatus === "error"
-                      ? "bg-red-500 text-white"
-                      : "bg-wayanad-bg border border-wayanad-border text-emerald-600 hover:bg-emerald-50"
+                  ? "bg-emerald-500 text-white"
+                  : locationStatus === "error"
+                    ? "bg-red-500 text-white"
+                    : "bg-wayanad-bg border border-wayanad-border text-emerald-600 hover:bg-emerald-50"
                   }`}
               >
                 {locationStatus === "loading" && (
@@ -249,6 +246,22 @@ const ReportIncident = () => {
                 )}
               </button>
             </div>
+
+            {/* Address Field - ONLY SHOW IF LOCATION IS FETCHED OR manually entering */}
+            <div className="mb-4">
+              <label className="text-xs font-bold text-wayanad-muted uppercase mb-2 block">
+                Location Address
+              </label>
+              <textarea
+                name="address"
+                rows="2"
+                value={formData.address}
+                onChange={handleInputChange}
+                className="w-full bg-wayanad-bg border border-wayanad-border rounded-xl p-4 text-wayanad-text outline-none focus:border-emerald-500 resize-none"
+                placeholder="Address will appear here..."
+              />
+            </div>
+
             <textarea
               name="description"
               rows="3"
