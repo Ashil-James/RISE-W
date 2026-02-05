@@ -9,24 +9,29 @@ import {
   Camera,
   Check,
   X,
-  Image as ImageIcon,
+  MapPin,
+  Loader2,
 } from "lucide-react";
+import { useReports } from "../context/ReportContext"; // Assuming you kept the context
 
 const ReportIncident = () => {
   const navigate = useNavigate();
-  const fileInputRef = useRef(null); // Reference to the hidden file input
+  const fileInputRef = useRef(null);
+  const { addReport } = useReports(); // Use context to save
 
   const [step, setStep] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState(null);
-
-  // State for Form Data & Image
   const [formData, setFormData] = useState({
     specificIssue: "",
     poleNumber: "",
     description: "",
   });
-  const [selectedImage, setSelectedImage] = useState(null); // Stores the preview URL
-  const [imageFile, setImageFile] = useState(null); // Stores the actual file for API
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+
+  // --- GPS STATE ---
+  const [locationStatus, setLocationStatus] = useState("idle"); // idle | loading | success | error
+  const [coords, setCoords] = useState(null);
 
   const categories = [
     {
@@ -63,90 +68,105 @@ const ReportIncident = () => {
     setSelectedCategory(cat);
     setStep(2);
   };
+  const handleInputChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // --- NEW: Image Handling Logic ---
   const handleImagePick = (e) => {
     const file = e.target.files[0];
     if (file) {
       setImageFile(file);
-      const imageUrl = URL.createObjectURL(file); // Create a local preview URL
-      setSelectedImage(imageUrl);
+      setSelectedImage(URL.createObjectURL(file));
     }
   };
 
-  const removeImage = (e) => {
-    e.stopPropagation(); // Prevent triggering the upload click again
-    setSelectedImage(null);
-    setImageFile(null);
-    if (fileInputRef.current) fileInputRef.current.value = ""; // Reset input
+  // --- GPS FUNCTION ---
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+    setLocationStatus("loading");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setCoords({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+        setLocationStatus("success");
+      },
+      () => {
+        setLocationStatus("error");
+        alert("Unable to retrieve your location");
+      },
+    );
   };
 
   const handleSubmit = async () => {
-    // Here you would append 'imageFile' to your FormData for the backend
-    console.log("Submitting with image:", imageFile);
-    setTimeout(() => setStep(3), 500);
+    // Prepare Data
+    const newReport = {
+      id: "#" + Math.floor(10000 + Math.random() * 90000),
+      category: selectedCategory.label,
+      issue: formData.specificIssue || selectedCategory.label,
+      // Use GPS if available, otherwise generic
+      location: coords
+        ? `GPS: ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`
+        : "Manual Location Entry",
+      date: "Just now",
+      status: "Open",
+      statusColor: "text-orange-500 bg-orange-500/10",
+      authorityMessage: null,
+      authorityProof: null,
+    };
+
+    addReport(newReport); // Save to context
+    setTimeout(() => setStep(3), 800);
   };
 
-  // --- STEP 1: GRID (Unchanged) ---
+  // --- STEP 1 ---
   if (step === 1)
     return (
       <div className="w-full max-w-3xl mx-auto animate-enter">
         <button
-          className="flex items-center gap-2 text-wayanad-muted mb-8 hover:text-wayanad-text transition-colors"
+          className="flex items-center gap-2 text-wayanad-muted mb-8 hover:text-wayanad-text"
           onClick={() => navigate(-1)}
         >
           <ArrowLeft size={20} /> <span className="font-medium">Back</span>
         </button>
-
         <h2 className="text-3xl font-bold text-wayanad-text mb-2">
           Select Category
         </h2>
-        <p className="text-wayanad-muted mb-8">
-          What kind of issue are you facing?
-        </p>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8">
           {categories.map((cat) => (
             <div
               key={cat.id}
               onClick={() => handleCategorySelect(cat)}
-              className="group flex items-center p-6 rounded-2xl bg-wayanad-panel border border-wayanad-border cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:border-emerald-500 hover:shadow-lg"
+              className="group flex items-center p-6 rounded-2xl bg-wayanad-panel border border-wayanad-border cursor-pointer transition-all hover:scale-[1.02] hover:border-emerald-500 hover:shadow-lg"
             >
               <div className={`p-4 rounded-xl ${cat.bg} ${cat.color} mr-5`}>
                 <cat.icon size={28} />
               </div>
-              <div>
-                <h3 className="font-bold text-lg text-wayanad-text">
-                  {cat.label}
-                </h3>
-                <span className="text-xs font-bold text-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity">
-                  SELECT &rarr;
-                </span>
-              </div>
+              <h3 className="font-bold text-lg text-wayanad-text">
+                {cat.label}
+              </h3>
             </div>
           ))}
         </div>
       </div>
     );
 
-  // --- STEP 2: FORM (Updated with Image Preview) ---
+  // --- STEP 2 ---
   if (step === 2)
     return (
       <div className="w-full max-w-2xl mx-auto animate-enter">
         <button
-          className="flex items-center gap-2 text-wayanad-muted mb-6 hover:text-wayanad-text transition-colors"
+          className="flex items-center gap-2 text-wayanad-muted mb-6"
           onClick={() => setStep(1)}
         >
-          <ArrowLeft size={20} /> <span className="font-medium">Back</span>
+          <ArrowLeft size={20} /> Back
         </button>
-
-        <div className="bg-wayanad-panel border border-wayanad-border p-8 rounded-3xl shadow-sm">
-          <div className="flex items-center gap-4 mb-8 pb-6 border-b border-wayanad-border">
+        <div className="bg-wayanad-panel border border-wayanad-border p-8 rounded-3xl shadow-sm space-y-6">
+          {/* Header */}
+          <div className="flex items-center gap-4 pb-4 border-b border-wayanad-border">
             <div
               className={`p-3 rounded-xl ${selectedCategory.bg} ${selectedCategory.color}`}
             >
@@ -157,99 +177,121 @@ const ReportIncident = () => {
             </h2>
           </div>
 
-          <div className="space-y-6">
-            <div>
-              <label className="text-xs font-bold text-wayanad-muted uppercase tracking-wider mb-2 block">
-                Issue Details
-              </label>
-              <select
-                name="specificIssue"
-                value={formData.specificIssue}
-                onChange={handleInputChange}
-                className="w-full bg-wayanad-bg border border-wayanad-border rounded-xl p-4 text-wayanad-text outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all"
-              >
-                <option value="">Select specific problem...</option>
-                <option>General Issue</option>
-                <option>Urgent Safety Risk</option>
-              </select>
-            </div>
+          {/* Issue Type */}
+          <div>
+            <label className="text-xs font-bold text-wayanad-muted uppercase mb-2 block">
+              Specific Issue
+            </label>
+            <select
+              name="specificIssue"
+              onChange={handleInputChange}
+              className="w-full bg-wayanad-bg border border-wayanad-border rounded-xl p-4 text-wayanad-text outline-none focus:border-emerald-500"
+            >
+              <option value="">Select Option...</option>
+              <option>General Failure</option>
+              <option>Critical Emergency</option>
+            </select>
+          </div>
 
-            <div>
-              <label className="text-xs font-bold text-wayanad-muted uppercase tracking-wider mb-2 block">
+          {/* Description & Location */}
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <label className="text-xs font-bold text-wayanad-muted uppercase">
                 Description
               </label>
-              <textarea
-                name="description"
-                rows="3"
-                value={formData.description}
-                onChange={handleInputChange}
-                className="w-full bg-wayanad-bg border border-wayanad-border rounded-xl p-4 text-wayanad-text outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all resize-none"
-                placeholder="Where is it? What happened?"
-              />
+
+              {/* GPS BUTTON */}
+              <button
+                onClick={handleGetLocation}
+                disabled={
+                  locationStatus === "success" || locationStatus === "loading"
+                }
+                className={`text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1 transition-all ${
+                  locationStatus === "success"
+                    ? "bg-emerald-500 text-white"
+                    : locationStatus === "error"
+                      ? "bg-red-500 text-white"
+                      : "bg-wayanad-bg border border-wayanad-border text-emerald-600 hover:bg-emerald-50"
+                }`}
+              >
+                {locationStatus === "loading" && (
+                  <Loader2 size={12} className="animate-spin" />
+                )}
+                {locationStatus === "success" ? (
+                  <>
+                    <Check size={12} /> Location Attached
+                  </>
+                ) : locationStatus === "error" ? (
+                  "Retry Location"
+                ) : (
+                  <>
+                    <MapPin size={12} /> Get My Location
+                  </>
+                )}
+              </button>
             </div>
-
-            {/* --- IMAGE UPLOAD SECTION --- */}
-            <div>
-              <label className="text-xs font-bold text-wayanad-muted uppercase tracking-wider mb-2 block">
-                Photo Evidence
-              </label>
-
-              {/* Hidden Input */}
-              <input
-                type="file"
-                accept="image/*"
-                ref={fileInputRef}
-                onChange={handleImagePick}
-                className="hidden"
-              />
-
-              {!selectedImage ? (
-                // Upload Placeholder State
-                <div
-                  onClick={() => fileInputRef.current.click()}
-                  className="border-2 border-dashed border-wayanad-border bg-wayanad-bg/50 rounded-xl p-8 flex flex-col items-center justify-center text-wayanad-muted cursor-pointer hover:bg-wayanad-bg hover:border-emerald-500/50 hover:text-emerald-600 transition-all gap-3"
-                >
-                  <div className="p-3 bg-wayanad-panel rounded-full shadow-sm">
-                    <Camera size={24} />
-                  </div>
-                  <span className="text-sm font-medium">
-                    Tap to upload photo
-                  </span>
-                </div>
-              ) : (
-                // Image Preview State
-                <div className="relative w-full h-48 rounded-xl overflow-hidden border border-wayanad-border group">
-                  <img
-                    src={selectedImage}
-                    alt="Preview"
-                    className="w-full h-full object-cover"
-                  />
-
-                  {/* Overlay with Remove Button */}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <button
-                      onClick={removeImage}
-                      className="bg-red-500 text-white px-4 py-2 rounded-full text-sm font-bold flex items-center gap-2 hover:bg-red-600 hover:scale-105 transition-all shadow-lg"
-                    >
-                      <X size={16} /> Remove
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <button
-              onClick={handleSubmit}
-              className="w-full py-4 rounded-xl bg-emerald-600 font-bold text-white shadow-lg hover:bg-emerald-500 hover:scale-[1.01] active:scale-[0.99] transition-all"
-            >
-              Submit Report
-            </button>
+            <textarea
+              name="description"
+              rows="3"
+              onChange={handleInputChange}
+              className="w-full bg-wayanad-bg border border-wayanad-border rounded-xl p-4 text-wayanad-text outline-none focus:border-emerald-500 resize-none"
+              placeholder="Details..."
+            />
+            {locationStatus === "success" && (
+              <p className="text-xs text-emerald-500 mt-2 font-mono">
+                Lat: {coords.lat.toFixed(5)}, Lng: {coords.lng.toFixed(5)}
+              </p>
+            )}
           </div>
+
+          {/* Image Upload */}
+          <div>
+            <label className="text-xs font-bold text-wayanad-muted uppercase mb-2 block">
+              Photo Evidence
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              onChange={handleImagePick}
+              className="hidden"
+            />
+            {!selectedImage ? (
+              <div
+                onClick={() => fileInputRef.current.click()}
+                className="border-2 border-dashed border-wayanad-border bg-wayanad-bg/50 rounded-xl p-6 flex flex-col items-center justify-center text-wayanad-muted cursor-pointer hover:border-emerald-500 hover:text-emerald-600"
+              >
+                <Camera size={24} className="mb-2" />{" "}
+                <span className="text-sm font-medium">Tap to upload</span>
+              </div>
+            ) : (
+              <div className="relative w-full h-40 rounded-xl overflow-hidden border border-wayanad-border group">
+                <img
+                  src={selectedImage}
+                  alt="Preview"
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  onClick={() => setSelectedImage(null)}
+                  className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={handleSubmit}
+            className="w-full py-4 rounded-xl bg-emerald-600 font-bold text-white shadow-lg hover:bg-emerald-500 hover:scale-[1.01] active:scale-[0.99] transition-all"
+          >
+            Submit Report
+          </button>
         </div>
       </div>
     );
 
-  // --- STEP 3: SUCCESS (Unchanged) ---
+  // --- STEP 3 ---
   if (step === 3)
     return (
       <div className="h-[60vh] flex flex-col items-center justify-center text-center animate-enter max-w-md mx-auto">
@@ -259,16 +301,10 @@ const ReportIncident = () => {
         <h2 className="text-3xl font-bold text-wayanad-text mb-2">
           Sent Successfully
         </h2>
-        <p className="text-wayanad-muted mb-8">
-          Ticket{" "}
-          <span className="font-mono text-emerald-500 font-bold">#99281</span>{" "}
-          has been logged.
-        </p>
-
-        <div className="w-full grid grid-cols-2 gap-4">
+        <div className="w-full grid grid-cols-2 gap-4 mt-8">
           <button
             onClick={() => navigate("/my-reports")}
-            className="py-3 rounded-xl border border-wayanad-border font-bold text-wayanad-text hover:bg-wayanad-panel transition-colors"
+            className="py-3 rounded-xl border border-wayanad-border font-bold text-wayanad-text hover:bg-wayanad-panel"
           >
             View Status
           </button>
@@ -277,7 +313,7 @@ const ReportIncident = () => {
               setStep(1);
               navigate("/");
             }}
-            className="py-3 rounded-xl bg-emerald-600 font-bold text-white hover:bg-emerald-500 transition-colors"
+            className="py-3 rounded-xl bg-emerald-600 font-bold text-white hover:bg-emerald-500"
           >
             Done
           </button>
