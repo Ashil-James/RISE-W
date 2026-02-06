@@ -1,14 +1,28 @@
 import React, { useState } from "react";
-import { Mail, Lock, ArrowRight, Leaf } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Mail, Lock, ArrowRight, Leaf, LogIn } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import ThemeToggle from "../components/ThemeToggle";
+import { useUser } from "../context/UserContext";
 
 const Login = () => {
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const navigate = useNavigate();
+  const { login } = useUser();
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Login logic here...", formData);
+    setLoading(true);
+
+    // Simulate API call
+    setTimeout(() => {
+      login(formData.email);
+      setLoading(false);
+      navigate("/");
+    }, 1500);
   };
 
   return (

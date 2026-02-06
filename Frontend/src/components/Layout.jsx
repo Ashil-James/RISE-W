@@ -1,9 +1,12 @@
 import React from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import ThemeToggle from "./ThemeToggle";
+import Avatar from "./Avatar";
+import { useUser } from "../context/UserContext";
 
 const Layout = () => {
   const navigate = useNavigate();
+  const { user } = useUser();
 
   return (
     <div className="min-h-screen w-full flex flex-col font-sans selection:bg-emerald-500/30">
@@ -24,14 +27,15 @@ const Layout = () => {
           {/* Controls */}
           <div className="flex items-center gap-4">
             <ThemeToggle />
-            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-gray-200 to-gray-400 dark:from-zinc-700 dark:to-zinc-600 p-[1px] cursor-pointer hover:ring-2 ring-emerald-500/50 transition-all">
-              <div className="w-full h-full rounded-full bg-wayanad-bg flex items-center justify-center overflow-hidden">
-                <img
-                  src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"
-                  alt="User"
-                  className="w-full h-full"
-                />
-              </div>
+            <div
+              onClick={() => navigate("/profile")}
+              className="cursor-pointer hover:ring-2 ring-emerald-500/50 rounded-full transition-all"
+            >
+              <Avatar
+                src={user.avatar}
+                name={user.name}
+                size="sm"
+              />
             </div>
           </div>
         </div>
