@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { User, Mail, Lock, Phone, ArrowRight, Leaf } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -7,7 +7,7 @@ import { useUser } from "../context/UserContext";
 
 const Signup = () => {
   const navigate = useNavigate();
-  const { login } = useUser();
+  const { user, login } = useUser();
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     firstName: "",
@@ -16,6 +16,12 @@ const Signup = () => {
     email: "",
     password: "",
   });
+
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
