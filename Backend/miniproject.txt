@@ -1,0 +1,2 @@
+MONGODB_URI=mongodb+srv://arjunanil246_db_user:01OzRrxbSDEaP7Rk@cluster0.tyrdwsw.mongodb.net/?appName=Cluster0_here
+PORT=5000

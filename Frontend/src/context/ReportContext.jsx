@@ -5,42 +5,82 @@ const ReportContext = createContext();
 export const useReports = () => useContext(ReportContext);
 
 export const ReportProvider = ({ children }) => {
-  // Initialize with some dummy data for demo purposes
-  const [reports, setReports] = useState([
-    {
-      id: "#99281",
-      category: "Power Issue",
-      issue: "Streetlight Failure",
-      description: "The streetlight at the corner has been flickering for a week and is now completely out. It's very dark here at night.",
-      location: "Sector B",
-      date: "2 hours ago",
-      status: "Resolved",
-      statusColor: "text-blue-500 bg-blue-500/10",
-      userImage: "https://images.unsplash.com/photo-1595878715977-2a8f87b81b2a?auto=format&fit=crop&w=600&q=80",
-      authorityMessage: "Bulb replaced.",
-      authorityProof:
-        "https://images.unsplash.com/photo-1563245372-f21724e3a899?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-      id: "#99282",
-      category: "Road Issue",
-      issue: "Pothole on Main Road",
-      description: "Deep pothole causing traffic slowdowns and potential vehicle damage.",
-      location: "Main Market Road",
-      date: "5 hours ago",
-      status: "Open",
-      statusColor: "text-orange-500 bg-orange-500/10",
-      userImage: "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=600&q=80",
-      authorityMessage: "",
-      authorityProof: "",
-    },
-  ]);
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const addReport = (newReport) => {
-    setReports((prev) => [newReport, ...prev]);
+  // Fetch reports from backend on mount
+  React.useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/incidents');
+        if (!response.ok) {
+          throw new Error('Failed to fetch reports');
+        }
+        const data = await response.json();
+        // Map backend data to frontend structure if necessary
+        // Backend: { _id, title, description, date }
+        // Frontend expects: { id, issue, description, date, status, category, etc... }
+        // For now, we'll map what we have and provide defaults for others
+        const mappedReports = data.map(item => ({
+          id: item._id,
+          issue: item.title,
+          description: item.description,
+          date: item.date,
+          category: "General", // Default as backend doesn't save this yet
+          location: "Unknown", // Default
+          status: "Open", // Default
+          statusColor: "text-orange-500 bg-orange-500/10",
+        }));
+        setReports(mappedReports);
+      } catch (err) {
+        console.error(err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchReports();
+  }, []);
+
+  const addReport = async (newReport) => {
+    try {
+      // Optimistic update
+      setReports((prev) => [newReport, ...prev]);
+
+      const response = await fetch('http://localhost:5000/incidents', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: newReport.issue, // Mapping 'issue' to 'title'
+          description: newReport.description,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save report');
+      }
+
+      const savedReport = await response.json();
+
+      // Update the local state with the real ID from backend
+      setReports((prev) =>
+        prev.map(r => r.id === newReport.id ? { ...r, id: savedReport._id } : r)
+      );
+
+    } catch (err) {
+      console.error("Error saving report:", err);
+      // Optionally rollback optimistic update here
+      alert("Failed to save report to server. It may not persist on reload.");
+    }
   };
 
   const updateReportStatus = (id, newStatus) => {
+    // Note: Backend implementation for status update is pending.
+    // This currently only updates local state.
     setReports((prev) =>
       prev.map((r) => {
         if (r.id === id) {

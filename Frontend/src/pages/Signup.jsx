@@ -1,9 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { User, Mail, Lock, Phone, ArrowRight, Leaf } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import ThemeToggle from "../components/ThemeToggle";
+import { useUser } from "../context/UserContext";
 
 const Signup = () => {
+  const navigate = useNavigate();
+  const { user, login } = useUser();
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -12,13 +17,41 @@ const Signup = () => {
     password: "",
   });
 
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Signup logic here...", formData);
+    setError("");
+
+    try {
+      // Backend expects: name, email, password
+      // We combine firstName and lastName for name
+      const { data } = await axios.post("http://localhost:5000/api/auth/register", {
+        name: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+        password: formData.password,
+        // phone is not in our backend User model yet, but we can send it or ignore it
+        // If we want to save phone, we need to update backend model. 
+        // For now, we just register with required fields.
+      });
+
+      login(data);
+      navigate("/");
+    } catch (err) {
+      setError(
+        err.response && err.response.data.message
+          ? err.response.data.message
+          : "Error creating account"
+      );
+    }
   };
 
   return (
@@ -57,6 +90,11 @@ const Signup = () => {
             <p className="text-wayanad-muted mt-2">
               Create your account to contribute to Wayanad
             </p>
+            {error && (
+              <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded relative" role="alert">
+                <span className="block sm:inline">{error}</span>
+              </div>
+            )}
           </div>
 
           {/* Form */}

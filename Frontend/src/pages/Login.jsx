@@ -1,21 +1,41 @@
+<<<<<<< HEAD
 import React, { useState } from "react";
 import { Mail, Lock, ArrowRight, Leaf, LogIn } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+=======
+import React, { useState, useEffect } from "react";
+import { Mail, Lock, ArrowRight, Leaf, LogIn } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+>>>>>>> a44f1fb674b30254a424a840f7b1af31d7aa4c1a
 import ThemeToggle from "../components/ThemeToggle";
 import { useUser } from "../context/UserContext";
 
 const Login = () => {
   const navigate = useNavigate();
+<<<<<<< HEAD
   const { login } = useUser();
   const [loading, setLoading] = useState(false);
+=======
+  const { user, login } = useUser();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+>>>>>>> a44f1fb674b30254a424a840f7b1af31d7aa4c1a
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+<<<<<<< HEAD
 
     // Simulate API call
     setTimeout(() => {
@@ -23,6 +43,27 @@ const Login = () => {
       setLoading(false);
       navigate("/");
     }, 1500);
+=======
+    setError("");
+
+    try {
+      const { data } = await axios.post("http://localhost:5000/api/auth/login", {
+        email: formData.email,
+        password: formData.password,
+      });
+
+      login(data);
+      setLoading(false);
+      navigate("/");
+    } catch (err) {
+      setLoading(false);
+      setError(
+        err.response && err.response.data.message
+          ? err.response.data.message
+          : "Invalid email or password"
+      );
+    }
+>>>>>>> a44f1fb674b30254a424a840f7b1af31d7aa4c1a
   };
 
   return (
@@ -61,6 +102,11 @@ const Login = () => {
             <p className="text-wayanad-muted mt-2">
               Sign in to manage Wayanad Township
             </p>
+            {error && (
+              <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded relative" role="alert">
+                <span className="block sm:inline">{error}</span>
+              </div>
+            )}
           </div>
 
           {/* Form */}

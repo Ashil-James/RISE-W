@@ -5,6 +5,7 @@ const UserContext = createContext();
 export const useUser = () => useContext(UserContext);
 
 export const UserProvider = ({ children }) => {
+<<<<<<< HEAD
     // Initial Mock Data
     const defaultUser = {
         name: "Felix The Cat",
@@ -23,10 +24,24 @@ export const UserProvider = ({ children }) => {
     const [user, setUser] = useState(() => {
         const savedUser = localStorage.getItem("wayanad_user");
         return savedUser ? JSON.parse(savedUser) : defaultUser;
+=======
+    // Initial Mock Data Structure (for UI compatibility)
+    const defaultStats = {
+        total: 0,
+        resolved: 0,
+        pending: 0
+    };
+
+    // Load from localStorage
+    const [user, setUser] = useState(() => {
+        const savedUser = localStorage.getItem("wayanad_user");
+        return savedUser ? JSON.parse(savedUser) : null;
+>>>>>>> a44f1fb674b30254a424a840f7b1af31d7aa4c1a
     });
 
     // Save to localStorage whenever user changes
     useEffect(() => {
+<<<<<<< HEAD
         localStorage.setItem("wayanad_user", JSON.stringify(user));
     }, [user]);
 
@@ -48,6 +63,29 @@ export const UserProvider = ({ children }) => {
         // or handle "isAuthenticated" state separately.
         // Keeping it simple: Logout just navigates away in the UI components, 
         // but here we can reset to default if we want "fresh" session next time.
+=======
+        if (user) {
+            localStorage.setItem("wayanad_user", JSON.stringify(user));
+        } else {
+            localStorage.removeItem("wayanad_user");
+        }
+    }, [user]);
+
+    const login = (userData) => {
+        // Merge with default structure if needed, or just use userData
+        // We'll ensure userData includes the token from backend
+        setUser({
+            ...userData,
+            stats: defaultStats, // Add default stats if missing from backend
+            location: "Wayanad", // Default location
+            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.name}`
+        });
+    };
+
+    const logout = () => {
+        setUser(null);
+        localStorage.removeItem("wayanad_user");
+>>>>>>> a44f1fb674b30254a424a840f7b1af31d7aa4c1a
     };
 
     const updateProfile = (updates) => {
