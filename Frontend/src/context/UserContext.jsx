@@ -34,7 +34,7 @@ export const UserProvider = ({ children }) => {
       ...userData,
       stats: defaultStats, // Add default stats if missing from backend
       location: "Wayanad", // Default location
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.name}`,
+      avatar: null,
     });
   };
 
