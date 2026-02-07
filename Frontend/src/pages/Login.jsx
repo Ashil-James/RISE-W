@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Mail, Lock, ArrowRight, Leaf, LogIn } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
 import ThemeToggle from "../components/ThemeToggle";
 import { useUser } from "../context/UserContext";
 
@@ -8,21 +9,34 @@ const Login = () => {
   const navigate = useNavigate();
   const { login } = useUser();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
 
-    // Simulate API call
-    setTimeout(() => {
-      login(formData.email);
+    try {
+      const { data } = await axios.post("http://localhost:5000/api/auth/login", {
+        email: formData.email,
+        password: formData.password,
+      });
+
+      login(data);
       setLoading(false);
       navigate("/");
-    }, 1500);
+    } catch (err) {
+      setLoading(false);
+      setError(
+        err.response && err.response.data.message
+          ? err.response.data.message
+          : "Invalid email or password"
+      );
+    }
   };
 
   return (
@@ -61,6 +75,11 @@ const Login = () => {
             <p className="text-wayanad-muted mt-2">
               Sign in to manage Wayanad Township
             </p>
+            {error && (
+              <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded relative" role="alert">
+                <span className="block sm:inline">{error}</span>
+              </div>
+            )}
           </div>
 
           {/* Form */}
