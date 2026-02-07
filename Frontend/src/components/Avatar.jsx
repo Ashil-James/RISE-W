@@ -3,9 +3,7 @@ import React from 'react';
 const Avatar = ({ src, name, size = "md", className = "", onClick }) => {
     const getInitials = (fullName) => {
         if (!fullName) return "U";
-        const names = fullName.trim().split(" ");
-        if (names.length === 1) return names[0].charAt(0).toUpperCase();
-        return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
+        return fullName.trim().charAt(0).toUpperCase();
     };
 
     // Size mapping using Tailwind classes for width/height/text
