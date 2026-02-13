@@ -2,10 +2,12 @@ const express = require('express');
 const router = express.Router();
 const Incident = require('../models/Incident');
 
-// Get all incidents
-router.get('/', async (req, res) => {
+const { protect } = require('../middleware/authMiddleware');
+
+// Get all incidents for the logged-in user
+router.get('/', protect, async (req, res) => {
     try {
-        const incidents = await Incident.find();
+        const incidents = await Incident.find({ user: req.user._id });
         res.json(incidents);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -26,10 +28,12 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create one incident
-router.post('/', async (req, res) => {
+router.post('/', protect, async (req, res) => {
     const incident = new Incident({
         title: req.body.title,
-        description: req.body.description
+        description: req.body.description,
+        user: req.user._id,
+        status: 'pending' // Default status
     });
     try {
         const newIncident = await incident.save();

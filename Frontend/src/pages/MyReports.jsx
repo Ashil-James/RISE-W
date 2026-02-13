@@ -12,11 +12,12 @@ const MyReports = () => {
 
 
 
-  const filteredReports = reports.filter((r) =>
-    filter === "active"
-      ? ["Open", "In Progress", "Resolved"].includes(r.status)
-      : r.status === "Closed",
-  );
+  const filteredReports = reports.filter((r) => {
+    const status = r.status.toLowerCase();
+    return filter === "active"
+      ? ["open", "in progress", "resolved", "pending"].includes(status)
+      : ["closed", "revoked"].includes(status);
+  });
 
   return (
     <div className="w-full max-w-3xl mx-auto animate-fade-in">
