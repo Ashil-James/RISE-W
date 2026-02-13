@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext } from "react";
+import { useUser } from "./UserContext";
 
 const ReportContext = createContext();
 
@@ -8,12 +9,25 @@ export const ReportProvider = ({ children }) => {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { user, refreshUser } = useUser();
 
   // Fetch reports from backend on mount
   React.useEffect(() => {
     const fetchReports = async () => {
       try {
-        const response = await fetch('http://localhost:5000/incidents');
+        const token = user?.token;
+        if (!token) {
+          setReports([]);
+          setLoading(false);
+          return;
+        }
+
+        const response = await fetch('http://localhost:5000/incidents', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
         if (!response.ok) {
           throw new Error('Failed to fetch reports');
         }
@@ -29,8 +43,8 @@ export const ReportProvider = ({ children }) => {
           date: item.date,
           category: "General", // Default as backend doesn't save this yet
           location: "Unknown", // Default
-          status: "Open", // Default
-          statusColor: "text-orange-500 bg-orange-500/10",
+          status: item.status || "Open", // Map backend status
+          statusColor: item.status === 'resolved' ? "text-blue-500 bg-blue-500/10" : "text-orange-500 bg-orange-500/10",
         }));
         setReports(mappedReports);
       } catch (err) {
@@ -42,17 +56,23 @@ export const ReportProvider = ({ children }) => {
     };
 
     fetchReports();
-  }, []);
+  }, [user?.token]);
 
   const addReport = async (newReport) => {
     try {
       // Optimistic update
       setReports((prev) => [newReport, ...prev]);
 
+      const token = user?.token;
+      if (!token) {
+        throw new Error("User not authenticated");
+      }
+
       const response = await fetch('http://localhost:5000/incidents', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
           title: newReport.issue, // Mapping 'issue' to 'title'
@@ -72,9 +92,9 @@ export const ReportProvider = ({ children }) => {
       );
 
     } catch (err) {
-      console.error("Error saving report:", err);
-      // Optionally rollback optimistic update here
       alert("Failed to save report to server. It may not persist on reload.");
+    } finally {
+      if (refreshUser) refreshUser();
     }
   };
 

@@ -27,7 +27,11 @@ import { useUser } from "../context/UserContext";
 const Profile = () => {
     const navigate = useNavigate();
     const fileInputRef = useRef(null);
-    const { user, updateProfile, logout } = useUser();
+    const { user, updateProfile, changePassword, logout, refreshUser } = useUser();
+
+    useEffect(() => {
+        refreshUser();
+    }, []);
 
     // Edit Mode State
     const [isEditing, setIsEditing] = useState(false);
@@ -64,9 +68,13 @@ const Profile = () => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSave = () => {
-        updateProfile(formData);
-        setIsEditing(false);
+    const handleSave = async () => {
+        const result = await updateProfile(formData);
+        if (result.success) {
+            setIsEditing(false);
+        } else {
+            alert(result.message);
+        }
     };
 
     const handleCancel = () => {
@@ -100,7 +108,7 @@ const Profile = () => {
         setShowPassword(prev => ({ ...prev, [field]: !prev[field] }));
     };
 
-    const submitPasswordChange = (e) => {
+    const submitPasswordChange = async (e) => {
         e.preventDefault();
         setPasswordStatus("loading");
 
@@ -123,8 +131,9 @@ const Profile = () => {
             return;
         }
 
-        // Simulate API Call
-        setTimeout(() => {
+        const result = await changePassword(passwordData.current, passwordData.new);
+
+        if (result.success) {
             setPasswordStatus("success");
             // Reset after success
             setTimeout(() => {
@@ -133,7 +142,10 @@ const Profile = () => {
                 setPasswordData({ current: "", new: "", confirm: "" });
                 setShowPassword({ current: false, new: false, confirm: false });
             }, 1500);
-        }, 1500);
+        } else {
+            setPasswordStatus("idle");
+            setPasswordError(result.message);
+        }
     };
 
     // Handle Location Auto-Detect
@@ -325,13 +337,13 @@ const Profile = () => {
                                     {isEditing ? (
                                         <input
                                             type="tel"
-                                            name="phone"
-                                            value={formData.phone}
+                                            name="phoneNumber"
+                                            value={formData.phoneNumber}
                                             onChange={handleInputChange}
                                             className="w-full bg-transparent border-b border-violet-500/50 outline-none text-wayanad-text font-medium pt-1"
                                         />
                                     ) : (
-                                        <p className="text-wayanad-text font-medium">{user.phone}</p>
+                                        <p className="text-wayanad-text font-medium">{user.phoneNumber}</p>
                                     )}
                                 </div>
                             </div>
@@ -423,7 +435,7 @@ const Profile = () => {
                                                 <FileText size={20} />
                                             </div>
                                             <div>
-                                                <p className="text-wayanad-text font-bold text-lg">{user.stats.total}</p>
+                                                <p className="text-wayanad-text font-bold text-lg">{user.stats?.total || 0}</p>
                                                 <p className="text-xs text-emerald-600 font-medium uppercase">Total Reports</p>
                                             </div>
                                         </div>
@@ -436,7 +448,7 @@ const Profile = () => {
                                                 <CheckCircle size={24} />
                                             </div>
                                             <div>
-                                                <p className="text-2xl font-bold text-wayanad-text">{user.stats.resolved}</p>
+                                                <p className="text-2xl font-bold text-wayanad-text">{user.stats?.resolved || 0}</p>
                                                 <p className="text-xs text-wayanad-muted">Resolved</p>
                                             </div>
                                         </div>
@@ -447,7 +459,7 @@ const Profile = () => {
                                                 <Clock size={24} />
                                             </div>
                                             <div>
-                                                <p className="text-2xl font-bold text-wayanad-text">{user.stats.pending}</p>
+                                                <p className="text-2xl font-bold text-wayanad-text">{user.stats?.pending || 0}</p>
                                                 <p className="text-xs text-wayanad-muted">Pending</p>
                                             </div>
                                         </div>

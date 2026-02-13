@@ -38,9 +38,7 @@ const Signup = () => {
         name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
         password: formData.password,
-        // phone is not in our backend User model yet, but we can send it or ignore it
-        // If we want to save phone, we need to update backend model. 
-        // For now, we just register with required fields.
+        phoneNumber: formData.phone,
       });
 
       login(data);
