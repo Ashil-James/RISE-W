@@ -56,10 +56,10 @@ const AdminUsers = () => {
             <button
               key={role}
               onClick={() => setFilterRole(role)}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
                 filterRole === role 
-                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" 
-                  : "bg-white/5 text-gray-400 border border-transparent hover:bg-white/10"
+                  ? "bg-emerald-500 text-white shadow-[0_0_15px_rgba(16,185,129,0.5)]" 
+                  : "bg-white/5 text-gray-500 border border-transparent hover:bg-white/10 hover:text-gray-300"
               }`}
             >
               {role}
@@ -87,22 +87,22 @@ const AdminUsers = () => {
                   <tr key={user.id} className="hover:bg-white/5 transition-colors group">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center text-white font-bold text-sm">
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center text-white font-black text-sm shadow-lg shadow-emerald-500/20">
                           {user.name.charAt(0)}
                         </div>
                         <div>
-                          <div className="text-white font-bold">{user.name}</div>
-                          <div className="text-xs text-gray-500">{user.email}</div>
+                          <div className="text-white font-bold tracking-tight">{user.name}</div>
+                          <div className="text-[10px] text-gray-500 font-mono uppercase tracking-widest">{user.email}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${
-                        user.role === 'Admin' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' :
-                        user.role === 'Authority' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                        'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+                        user.role === 'Admin' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20 shadow-[0_0_10px_rgba(168,85,247,0.1)]' :
+                        user.role === 'Authority' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20 shadow-[0_0_10px_rgba(59,130,246,0.1)]' :
+                        'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.1)]'
                       }`}>
-                        {user.role === 'Admin' && <Shield size={12} />}
+                        {user.role === 'Admin' && <Shield size={10} />}
                         {user.role}
                       </span>
                     </td>

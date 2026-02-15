@@ -26,7 +26,7 @@ const AdminLayout = () => {
             relative flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-300 group overflow-hidden
             ${
               isActive
-                ? "bg-gradient-to-r from-emerald-600/20 to-teal-600/10 text-emerald-400 font-bold border border-emerald-500/10 shadow-[0_0_20px_-5px_rgba(16,185,129,0.3)]"
+                ? "bg-gradient-to-r from-emerald-600/20 to-cyan-600/10 text-emerald-300 font-bold border border-emerald-500/20 shadow-[0_0_25px_-5px_rgba(16,185,129,0.4)]"
                 : "text-gray-400 hover:bg-white/5 hover:text-white border border-transparent"
             }
           `}
@@ -34,10 +34,10 @@ const AdminLayout = () => {
           {isActive && (
             <motion.div
               layoutId="active-pill"
-              className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 rounded-full"
+              className="absolute left-0 top-2 bottom-2 w-1.5 bg-gradient-to-b from-emerald-400 to-cyan-400 rounded-full shadow-[0_0_10px_rgba(52,211,153,0.8)]"
             />
           )}
-          <Icon size={22} className={`z-10 transition-colors ${isActive ? "text-emerald-400" : "group-hover:text-emerald-300"}`} />
+          <Icon size={22} className={`z-10 transition-all duration-300 ${isActive ? "text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]" : "group-hover:text-emerald-300"}`} />
           <span className="z-10 text-sm tracking-wide">{label}</span>
         </Link>
       </li>
@@ -49,8 +49,11 @@ const AdminLayout = () => {
       
       {/* BACKGROUND ELEMENTS */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-emerald-900/20 rounded-full blur-[120px] animate-blob"></div>
-        <div className="absolute bottom-[-10%] right-[-5%] w-[500px] h-[500px] bg-teal-900/10 rounded-full blur-[100px] animate-blob delay-200"></div>
+        <div className="absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-emerald-600/10 rounded-full blur-[150px] animate-blob"></div>
+        <div className="absolute bottom-[-10%] right-[-5%] w-[600px] h-[600px] bg-cyan-600/10 rounded-full blur-[130px] animate-blob delay-200"></div>
+        <div className="absolute top-[30%] left-[20%] w-[400px] h-[400px] bg-violet-600/5 rounded-full blur-[100px] animate-pulse"></div>
+        {/* Subtle Grid Overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:100px_100px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,black,transparent)]"></div>
       </div>
 
       {/* MOBILE TOGGLE */}
@@ -73,16 +76,16 @@ const AdminLayout = () => {
             {/* Brand Logo */}
             <div className="flex items-center gap-4 mb-12 px-2 mt-2">
               <div className="relative group cursor-pointer">
-                <div className="absolute -inset-1 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
-                <div className="relative w-12 h-12 rounded-xl bg-neutral-900 flex items-center justify-center text-emerald-500 font-black text-xl border border-white/10 shadow-2xl">
+                <div className="absolute -inset-1 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-xl blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                <div className="relative w-12 h-12 rounded-xl bg-neutral-950 flex items-center justify-center text-emerald-400 font-black text-xl border border-white/10 shadow-2xl">
                   R
                 </div>
               </div>
               <div>
-                <h2 className="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">
-                  RISE<span className="text-emerald-500">.ADMIN</span>
+                <h2 className="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white via-emerald-100 to-cyan-200">
+                  RISE<span className="text-emerald-400">.ADMIN</span>
                 </h2>
-                <p className="text-[10px] text-emerald-500/80 font-bold uppercase tracking-[0.2em]">
+                <p className="text-[10px] text-cyan-400/80 font-bold uppercase tracking-[0.2em] drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]">
                   Control Center
                 </p>
               </div>

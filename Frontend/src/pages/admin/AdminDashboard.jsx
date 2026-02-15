@@ -157,13 +157,13 @@ const AdminDashboard = () => {
         
         {/* LEFT: RECENT ACTIVITY TABLE */}
         <motion.div
-          className="lg:col-span-2 bg-neutral-900/50 backdrop-blur-xl border border-white/5 rounded-3xl overflow-hidden shadow-2xl"
+          className="lg:col-span-2 bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl"
           variants={itemVariants}
         >
-          <div className="p-6 border-b border-white/5 flex justify-between items-center">
-            <h3 className="text-xl font-bold text-white flex items-center gap-2">
-              <Activity size={20} className="text-emerald-500" />
-              Live Feed
+          <div className="p-8 border-b border-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <h3 className="text-xl font-black text-white flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_10px_rgba(16,185,129,1)]"></div>
+              Live Incident Feed
             </h3>
             <div className="relative">
               <Search className="absolute left-3 top-2.5 text-gray-500" size={16} />
@@ -290,24 +290,24 @@ const AdminDashboard = () => {
 
 const StatsCard = ({ title, value, trend, icon: Icon, color, isAlert }) => {
   const colors = {
-    blue: "from-blue-600 to-cyan-600 text-blue-100",
-    amber: "from-amber-500 to-orange-600 text-amber-100",
-    emerald: "from-emerald-500 to-teal-600 text-emerald-100",
-    purple: "from-purple-600 to-pink-600 text-purple-100",
+    blue: "from-blue-600 to-cyan-500 text-blue-100 shadow-blue-500/20",
+    amber: "from-amber-500 to-orange-500 text-amber-100 shadow-amber-500/20",
+    emerald: "from-emerald-500 to-cyan-500 text-emerald-100 shadow-emerald-500/20",
+    purple: "from-purple-600 to-violet-500 text-purple-100 shadow-purple-500/20",
   };
 
   const bgStyles = colors[color] || colors.blue;
 
   return (
-    <div className={`relative overflow-hidden rounded-3xl p-6 bg-neutral-900/50 border border-white/5 hover:border-white/10 transition-all group`}>
-      <div className={`absolute -right-4 -top-4 w-24 h-24 rounded-full bg-gradient-to-br ${bgStyles} opacity-10 blur-xl group-hover:opacity-20 transition-opacity`}></div>
+    <div className={`relative overflow-hidden rounded-[2rem] p-6 bg-neutral-900/40 border border-white/5 hover:border-emerald-500/30 transition-all duration-500 group`}>
+      <div className={`absolute -right-4 -top-4 w-24 h-24 rounded-full bg-gradient-to-br ${bgStyles} opacity-5 blur-2xl group-hover:opacity-20 transition-opacity`}></div>
       
-      <div className="flex justify-between items-start mb-4">
-        <div className={`p-3 rounded-2xl bg-gradient-to-br ${bgStyles} shadow-lg shadow-${color}-500/20`}>
-          <Icon size={22} className="text-white" />
+      <div className="flex justify-between items-start mb-5">
+        <div className={`p-3.5 rounded-2xl bg-gradient-to-br ${bgStyles} shadow-2xl group-hover:scale-110 transition-transform duration-500`}>
+          <Icon size={22} className="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
         </div>
         {trend && (
-          <span className={`text-xs font-bold px-2 py-1 rounded-lg bg-white/5 ${isAlert ? 'text-red-400' : 'text-emerald-400'}`}>
+          <span className={`text-xs font-black px-2.5 py-1 rounded-full bg-black/40 border border-white/5 ${isAlert ? 'text-red-400' : 'text-emerald-400'}`}>
             {trend}
           </span>
         )}

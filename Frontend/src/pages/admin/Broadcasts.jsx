@@ -10,7 +10,6 @@ const Broadcasts = () => {
     message: "",
   });
 
-  const [showPreview, setShowPreview] = useState(false);
   const [sent, setSent] = useState(false);
 
   const handleSubmit = (e) => {
@@ -22,17 +21,11 @@ const Broadcasts = () => {
     }, 3000);
   };
 
-  const severityColors = {
-    High: "bg-red-500 text-white shadow-red-500/50",
-    Medium: "bg-orange-500 text-white shadow-orange-500/50",
-    Low: "bg-blue-500 text-white shadow-blue-500/50",
-  };
-
   return (
-    <div className="max-w-6xl mx-auto pb-20">
+    <div className="max-w-4xl mx-auto pb-20">
         
       {/* HEADER */}
-      <div className="mb-12 flex items-end justify-between">
+      <div className="mb-12 flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
         <div>
             <h1 className="text-4xl font-black text-white mb-2 tracking-tight">Broadcast Center</h1>
             <p className="text-gray-400 max-w-xl text-lg">
@@ -45,28 +38,29 @@ const Broadcasts = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+      <div className="w-full">
         
-        {/* LEFT: COMPOSER */}
+        {/* COMPOSER */}
         <motion.div 
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="bg-neutral-900/50 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-[2.5rem] p-8 md:p-12 shadow-2xl relative overflow-hidden"
         >
             {/* Decoration */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+            <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-[80px] translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
 
             <form onSubmit={handleSubmit} className="space-y-8 relative z-10">
             
             {/* Type & Severity */}
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-3">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">
+                <label className="text-xs font-black text-gray-500 uppercase tracking-[0.2em] ml-1">
                     Alert Category
                 </label>
                 <div className="relative group">
                     <select
-                    className="w-full bg-black/40 border border-white/10 text-white rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 appearance-none font-medium transition-all group-hover:border-emerald-500/30"
+                    className="w-full bg-black/40 border border-white/10 text-white rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 appearance-none font-bold transition-all group-hover:border-emerald-500/30"
                     value={formData.type}
                     onChange={(e) =>
                         setFormData({ ...formData, type: e.target.value })
@@ -78,19 +72,19 @@ const Broadcasts = () => {
                     <option>Water Supply</option>
                     <option>Public Safety</option>
                     </select>
-                    <div className="absolute right-4 top-4 pointer-events-none text-emerald-500">
-                    <Radio size={20} />
+                    <div className="absolute right-5 top-4.5 pointer-events-none text-emerald-500">
+                    <Radio size={20} className="drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
                     </div>
                 </div>
                 </div>
 
                 <div className="space-y-3">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">
+                <label className="text-xs font-black text-gray-500 uppercase tracking-[0.2em] ml-1">
                     Severity Level
                 </label>
                 <div className="relative">
                     <select
-                    className={`w-full bg-black/40 border border-white/10 text-white rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-${formData.severity === 'High' ? 'red' : formData.severity === 'Medium' ? 'orange' : 'blue'}-500 appearance-none font-bold`}
+                    className={`w-full bg-black/40 border border-white/10 text-white rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-${formData.severity === 'High' ? 'red' : formData.severity === 'Medium' ? 'orange' : 'blue'}-500/50 appearance-none font-black tracking-wide`}
                     value={formData.severity}
                     onChange={(e) =>
                         setFormData({ ...formData, severity: e.target.value })
@@ -106,18 +100,18 @@ const Broadcasts = () => {
 
             {/* Location */}
             <div className="space-y-3">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">
+                <label className="text-xs font-black text-gray-500 uppercase tracking-[0.2em] ml-1">
                 Target Sector / Location
                 </label>
                 <div className="relative group">
                 <MapPin
-                    className="absolute left-4 top-4 text-gray-500 group-focus-within:text-emerald-500 transition-colors"
+                    className="absolute left-5 top-4.5 text-gray-500 group-focus-within:text-emerald-500 transition-colors"
                     size={20}
                 />
                 <input
                     type="text"
                     required
-                    className="w-full bg-black/40 border border-white/10 text-white rounded-2xl pl-12 pr-5 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder-gray-600 transition-all font-medium group-hover:border-white/20"
+                    className="w-full bg-black/40 border border-white/10 text-white rounded-2xl pl-14 pr-6 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 placeholder-gray-600 transition-all font-bold group-hover:border-white/20"
                     placeholder="e.g. Sector B, Main Market Area"
                     value={formData.location}
                     onChange={(e) =>
@@ -129,13 +123,13 @@ const Broadcasts = () => {
 
             {/* Message */}
             <div className="space-y-3">
-                <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">
+                <label className="text-xs font-black text-gray-500 uppercase tracking-[0.2em] ml-1">
                 Alert Message
                 </label>
                 <textarea
                 required
-                rows="5"
-                className="w-full bg-black/40 border border-white/10 text-white rounded-2xl px-5 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 placeholder-gray-600 transition-all resize-none font-medium leading-relaxed group-hover:border-white/20"
+                rows="6"
+                className="w-full bg-black/40 border border-white/10 text-white rounded-2xl px-6 py-4 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 placeholder-gray-600 transition-all resize-none font-bold leading-relaxed group-hover:border-white/20"
                 placeholder="Describe the incident details clearly..."
                 value={formData.message}
                 onChange={(e) =>
@@ -145,81 +139,16 @@ const Broadcasts = () => {
             </div>
 
             {/* Actions */}
-            <div className="pt-4 flex items-center gap-4">
+            <div className="pt-6">
                 <button
                     type="submit"
-                    className="flex-1 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-bold py-4 rounded-2xl shadow-lg shadow-red-600/20 flex items-center justify-center gap-3 transition-all transform hover:-translate-y-1 active:scale-95"
+                    className="w-full bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white font-black py-5 rounded-2xl shadow-2xl shadow-red-600/30 flex items-center justify-center gap-4 transition-all transform hover:-translate-y-1 active:scale-95 tracking-widest uppercase text-sm"
                 >
-                    <Send size={20} />
-                    Broadcast Alert
+                    <Send size={22} className="drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]" />
+                    Dispatch Broadcast
                 </button>
             </div>
             </form>
-        </motion.div>
-
-        {/* RIGHT: LIVE PREVIEW */}
-        <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="space-y-8"
-        >
-             <div className="bg-neutral-900/30 border border-dashed border-white/10 rounded-[2.5rem] p-8 flex flex-col items-center justify-center text-center h-full relative">
-                <div className="absolute top-6 left-8 text-xs font-bold text-gray-500 uppercase tracking-widest">
-                    Device Preview
-                </div>
-                
-                {/* Mobile Mockup */}
-                <div className="w-[300px] bg-black border-[8px] border-neutral-800 rounded-[3rem] p-4 shadow-2xl relative overflow-hidden">
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-neutral-800 rounded-b-xl z-20"></div>
-                    
-                    {/* Screen Content */}
-                    <div className="bg-wayanad-bg h-[550px] w-full rounded-[2rem] overflow-hidden relative pt-12 px-4">
-                        <div className="flex justify-between items-center mb-6 opacity-50">
-                            <span className="text-[10px] text-white font-bold">9:41</span>
-                            <div className="flex gap-1">
-                                <div className="w-3 h-3 bg-white rounded-full"></div>
-                                <div className="w-3 h-3 bg-white rounded-full"></div>
-                            </div>
-                        </div>
-
-                        {/* The Notification Card */}
-                        <AnimatePresence>
-                            {(formData.location || formData.message) && (
-                                <motion.div 
-                                    initial={{ y: -50, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    exit={{ y: -50, opacity: 0 }}
-                                    className="bg-white/10 backdrop-blur-md border border-white/20 p-4 rounded-2xl shadow-lg mb-4"
-                                >
-                                    <div className="flex gap-3 mb-2">
-                                        <div className={`p-2 rounded-lg ${formData.severity === 'High' ? 'bg-red-500' : formData.severity === 'Medium' ? 'bg-orange-500' : 'bg-blue-500'}`}>
-                                            <AlertTriangle size={16} className="text-white" />
-                                        </div>
-                                        <div>
-                                            <h4 className="text-white font-bold text-sm">{formData.type}</h4>
-                                            <p className="text-[10px] text-gray-300 uppercase font-bold tracking-wider">{formData.severity} Severity</p>
-                                        </div>
-                                    </div>
-                                    <p className="text-gray-200 text-xs mb-2 leading-relaxed">
-                                        {formData.message || "Alert description will appear here..."}
-                                    </p>
-                                    <div className="flex items-center gap-1 text-[10px] text-gray-400 font-mono">
-                                        <MapPin size={10} /> {formData.location || "Location..."}
-                                    </div>
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
-                        
-                        {!formData.location && !formData.message && (
-                            <div className="text-center mt-20 opacity-30">
-                                <Radio size={48} className="mx-auto text-white mb-4" />
-                                <p className="text-xs text-white">Waiting for input...</p>
-                            </div>
-                        )}
-
-                    </div>
-                </div>
-             </div>
         </motion.div>
 
       </div>
@@ -231,25 +160,25 @@ const Broadcasts = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4"
             >
                 <motion.div 
                     initial={{ scale: 0.8, y: 20 }}
                     animate={{ scale: 1, y: 0 }}
                     exit={{ scale: 0.8, y: 20 }}
-                    className="bg-neutral-900 border border-emerald-500/30 p-8 rounded-3xl text-center max-w-sm w-full shadow-[0_0_50px_-10px_rgba(16,185,129,0.3)]"
+                    className="bg-neutral-900 border border-emerald-500/30 p-10 rounded-[3rem] text-center max-w-sm w-full shadow-[0_0_80px_-10px_rgba(16,185,129,0.4)]"
                 >
-                    <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-500">
-                        <CheckCircle size={40} />
+                    <div className="w-24 h-24 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-8 text-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
+                        <CheckCircle size={48} />
                     </div>
-                    <h2 className="text-2xl font-bold text-white mb-2">Broadcast Sent!</h2>
-                    <p className="text-gray-400 mb-6">The alert has been dispatched to all residents in the target sector.</p>
-                    <div className="w-full h-1 bg-neutral-800 rounded-full overflow-hidden">
+                    <h2 className="text-3xl font-black text-white mb-3 tracking-tight">Broadcast Sent!</h2>
+                    <p className="text-gray-400 mb-8 font-medium">The alert has been dispatched to all residents in the target sector.</p>
+                    <div className="w-full h-1.5 bg-neutral-800 rounded-full overflow-hidden">
                         <motion.div 
                             initial={{ width: "0%" }}
                             animate={{ width: "100%" }}
                             transition={{ duration: 3 }}
-                            className="h-full bg-emerald-500"
+                            className="h-full bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,1)]"
                         />
                     </div>
                 </motion.div>
