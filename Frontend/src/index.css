@@ -20,12 +20,15 @@
     0% {
       transform: translate(0px, 0px) scale(1);
     }
+
     33% {
       transform: translate(30px, -50px) scale(1.1);
     }
+
     66% {
       transform: translate(-20px, 20px) scale(0.9);
     }
+
     100% {
       transform: translate(0px, 0px) scale(1);
     }
@@ -36,6 +39,7 @@
       opacity: 0;
       transform: translateY(20px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -45,7 +49,8 @@
 
 :root {
   --bg-primary: #f0fdf4;
-  --bg-panel: rgba(255, 255, 255, 0.7); /* Translucent in light mode */
+  --bg-panel: rgba(255, 255, 255, 0.7);
+  /* Translucent in light mode */
   --text-primary: #064e3b;
   --text-secondary: #64748b;
   --border-color: #e2e8f0;
@@ -53,7 +58,8 @@
 
 .dark {
   --bg-primary: #02120f;
-  --bg-panel: rgba(7, 34, 29, 0.7); /* Translucent in dark mode */
+  --bg-panel: rgba(7, 34, 29, 0.7);
+  /* Translucent in dark mode */
   --text-primary: #ecfdf5;
   --text-secondary: #6ee7b7;
   --border-color: rgba(255, 255, 255, 0.08);
@@ -78,6 +84,7 @@ body {
 @utility scrollbar-hide {
   scrollbar-width: none;
   -ms-overflow-style: none;
+
   &::-webkit-scrollbar {
     display: none;
   }
@@ -87,9 +94,22 @@ body {
 @utility delay-100 {
   animation-delay: 100ms;
 }
+
 @utility delay-200 {
   animation-delay: 200ms;
 }
+
 @utility delay-300 {
   animation-delay: 300ms;
+}
+
+@utility glass-card {
+  @apply bg-wayanad-panel/60 backdrop-blur-xl border border-wayanad-border shadow-lg transition-all duration-300;
+}
+
+@layer base {
+  body {
+    @apply bg-wayanad-bg text-wayanad-text antialiased selection:bg-emerald-500/30;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
 }

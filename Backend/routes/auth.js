@@ -39,6 +39,7 @@ router.post('/register', async (req, res) => {
                 name: user.name,
                 email: user.email,
                 phoneNumber: user.phoneNumber,
+                role: user.role,
                 token: generateToken(user._id),
             });
         } else {
@@ -69,6 +70,7 @@ router.post('/login', async (req, res) => {
                 name: user.name,
                 email: user.email,
                 phoneNumber: user.phoneNumber,
+                role: user.role,
                 token: generateToken(user._id),
                 stats: {
                     total,
@@ -137,6 +139,7 @@ router.put('/profile', protect, async (req, res) => {
                 email: updatedUser.email,
                 phoneNumber: updatedUser.phoneNumber,
                 location: updatedUser.location,
+                role: updatedUser.role,
                 token: generateToken(updatedUser._id),
                 stats: {
                     total,

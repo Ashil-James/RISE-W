@@ -1,136 +1,139 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
-import { AlertTriangle, Bell, History, ChevronRight, Zap, Info, CloudRain } from "lucide-react";
-import { useAlerts } from "../context/AlertContext";
+import { Link } from "react-router-dom";
+import { Bell, Clock, ChevronRight, Zap } from "lucide-react";
+import { useUser } from "../context/UserContext";
+import { motion } from "framer-motion";
 
 const Home = () => {
-  const navigate = useNavigate();
-  const { alerts } = useAlerts();
+  const { user } = useUser();
 
-  // Get latest alert
-  const latestAlert = alerts.length > 0 ? alerts[0] : null;
-
-  const getAlertStyles = (type) => {
-    switch (type) {
-      case "critical":
-        return "bg-red-500/5 border-red-500/10 text-red-500";
-      case "warning":
-        return "bg-yellow-500/5 border-yellow-500/10 text-yellow-500";
-      case "info":
-        return "bg-blue-500/5 border-blue-500/10 text-blue-500";
-      default:
-        return "bg-gray-500/5 border-gray-500/10 text-gray-500";
-    }
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.15,
+        delayChildren: 0.2,
+      },
+    },
   };
 
-  const getIcon = (type) => {
-    switch (type) {
-      case "critical": return AlertTriangle;
-      case "warning": return Zap;
-      case "info": return Info; // or CloudRain for specific
-      default: return Info;
-    }
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 100, damping: 20 },
+    },
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[70vh] space-y-12 max-w-3xl mx-auto text-center">
-      {/* 1. Hero Section (Fade Up) */}
-      <div className="space-y-4 opacity-0 animate-fade-up">
-        <h1 className="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-600 drop-shadow-sm">
+    <motion.div
+      className="flex flex-col items-center justify-center min-h-[80vh] relative z-10"
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      {/* 1. HERO TEXT */}
+      <motion.div className="text-center mb-12 space-y-4" variants={itemVariants}>
+        <h1 className="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500 tracking-tight drop-shadow-sm">
           Township Portal
         </h1>
-        <p className="text-wayanad-muted text-lg md:text-xl max-w-xl mx-auto font-medium">
+        <p className="text-wayanad-muted text-lg md:text-xl font-medium max-w-2xl mx-auto">
           Report and track critical issues in your sector instantly.
         </p>
-      </div>
+      </motion.div>
 
-      {/* 2. Main Action (Fade Up + Delay) */}
-      <div className="w-full max-w-sm space-y-4 opacity-0 animate-fade-up delay-100">
-        <button
-          onClick={() => navigate("/report")}
-          className="group relative w-full py-5 px-8 bg-gradient-to-r from-rose-500 to-red-600 rounded-2xl shadow-xl shadow-red-500/20 hover:shadow-red-500/40 hover:-translate-y-1 active:scale-95 transition-all duration-300 overflow-hidden"
-        >
-          {/* Shine Effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+      {/* 2. BIG RED REPORT BUTTON */}
+      <motion.div variants={itemVariants} className="w-full max-w-md">
+        <Link to="/report">
+          <motion.button
+            whileHover={{ scale: 1.02, translateY: -2 }}
+            whileTap={{ scale: 0.98 }}
+            className="group relative w-full bg-gradient-to-r from-[#ff0f39] to-[#ff4b6e] hover:from-[#ff224a] hover:to-[#ff5c7c] text-white h-20 rounded-2xl font-bold text-xl shadow-[0_10px_40px_-10px_rgba(255,15,57,0.5)] hover:shadow-[0_20px_60px_-15px_rgba(255,15,57,0.6)] transition-all duration-300 flex items-center justify-center gap-3 overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out skew-y-12"></div>
+            <span className="relative z-10">Report Incident</span>
+            <ChevronRight className="group-hover:translate-x-1 transition-transform relative z-10" />
+          </motion.button>
+        </Link>
+      </motion.div>
 
-          <span className="text-xl font-bold text-white tracking-wide flex items-center justify-center gap-2">
-            Report Incident{" "}
-            <ChevronRight className="group-hover:translate-x-1 transition-transform" />
-          </span>
-        </button>
-        <p className="text-wayanad-muted text-xs font-semibold tracking-widest uppercase opacity-70">
+      {/* 3. SUBTEXT */}
+      <motion.div className="mt-8 mb-12" variants={itemVariants}>
+        <p className="text-[10px] font-bold tracking-[0.3em] text-emerald-500/80 uppercase">
           Maintenance • Utilities • Safety
         </p>
-      </div>
+      </motion.div>
 
-      {/* 3. Secondary Actions (Fade Up + Delay 2) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-lg opacity-0 animate-fade-up delay-200">
-        <button
-          onClick={() => navigate("/alerts")}
-          className="flex items-center justify-between p-5 bg-wayanad-panel border border-wayanad-border rounded-2xl hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-1 transition-all group backdrop-blur-md"
-        >
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-yellow-500/10 rounded-xl text-yellow-500 group-hover:bg-yellow-500 group-hover:text-white transition-colors">
-              <Bell size={22} />
-            </div>
-            <span className="font-semibold text-lg text-wayanad-text">
-              Alerts
-            </span>
-          </div>
-          <ChevronRight
-            size={18}
-            className="text-wayanad-muted group-hover:text-emerald-500 transition-colors"
-          />
-        </button>
-
-        <button
-          onClick={() => navigate("/my-reports")}
-          className="flex items-center justify-between p-5 bg-wayanad-panel border border-wayanad-border rounded-2xl hover:border-emerald-500/30 hover:shadow-lg hover:shadow-emerald-500/10 hover:-translate-y-1 transition-all group backdrop-blur-md"
-        >
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-blue-500/10 rounded-xl text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-              <History size={22} />
-            </div>
-            <span className="font-semibold text-lg text-wayanad-text">
-              History
-            </span>
-          </div>
-          <ChevronRight
-            size={18}
-            className="text-wayanad-muted group-hover:text-emerald-500 transition-colors"
-          />
-        </button>
-      </div>
-
-      {/* 4. Ticker (Fade Up + Delay 3) */}
-      {latestAlert && (
-        <div className="w-full max-w-2xl opacity-0 animate-fade-up delay-300">
-          <div
-            onClick={() => navigate("/alerts")}
-            className={`border p-4 rounded-xl flex items-center gap-4 backdrop-blur-sm cursor-pointer transition-colors ${getAlertStyles(latestAlert.type)} hover:bg-opacity-20`}
+      {/* 4. NAVIGATION CARDS (Alerts & History) */}
+      <motion.div
+        className="grid grid-cols-2 gap-4 w-full max-w-2xl mb-12"
+        variants={itemVariants}
+      >
+        <Link to="/alerts" className="block">
+          <motion.div
+            className="glass-card p-6 rounded-3xl group cursor-pointer h-full"
+            whileHover={{ scale: 1.03, y: -5 }}
+            whileTap={{ scale: 0.98 }}
           >
-            <div className="shrink-0 animate-pulse-slow">
-              {(() => {
-                const Icon = getIcon(latestAlert.type);
-                return <Icon size={20} />;
-              })()}
-            </div>
-            <div className="text-left flex-1">
-              <div className="flex justify-between items-center">
-                <h4 className="font-bold text-xs tracking-wider uppercase">
-                  {latestAlert.title}
-                </h4>
-                <span className="text-[10px] opacity-70">{latestAlert.time}</span>
+            <div className="flex justify-between items-center mb-4">
+              <div className="w-12 h-12 rounded-2xl bg-yellow-500/10 flex items-center justify-center text-yellow-500 group-hover:bg-yellow-500 group-hover:text-white transition-colors duration-300">
+                <Bell size={24} />
               </div>
-              <p className="text-sm opacity-90 mt-0.5 line-clamp-1">
-                {latestAlert.message}
-              </p>
+              <ChevronRight
+                size={16}
+                className="text-wayanad-muted group-hover:text-emerald-500 transition-colors"
+              />
             </div>
-            <ChevronRight size={16} className="opacity-50" />
-          </div>
+            <h3 className="text-wayanad-text font-bold text-xl">Alerts</h3>
+            <p className="text-sm text-wayanad-muted mt-1">View active alerts</p>
+          </motion.div>
+        </Link>
+
+        <Link to="/my-reports" className="block">
+          <motion.div
+            className="glass-card p-6 rounded-3xl group cursor-pointer h-full"
+            whileHover={{ scale: 1.03, y: -5 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center text-cyan-500 group-hover:bg-cyan-500 group-hover:text-white transition-colors duration-300">
+                <Clock size={24} />
+              </div>
+              <ChevronRight
+                size={16}
+                className="text-wayanad-muted group-hover:text-cyan-500 transition-colors"
+              />
+            </div>
+            <h3 className="text-wayanad-text font-bold text-xl">History</h3>
+            <p className="text-sm text-wayanad-muted mt-1">Check report status</p>
+          </motion.div>
+        </Link>
+      </motion.div>
+
+      {/* 5. BOTTOM ALERT TICKER */}
+      <motion.div
+        className="w-full max-w-3xl glass-card rounded-xl p-4 flex items-center gap-4 hover:bg-wayanad-panel/80 transition-colors cursor-pointer"
+        variants={itemVariants}
+        whileHover={{ scale: 1.01 }}
+      >
+        <div className="p-2 bg-yellow-500/10 rounded-lg text-yellow-500">
+          <Zap size={18} />
         </div>
-      )}
-    </div>
+        <div className="flex-1">
+          <h4 className="text-yellow-500 text-xs font-bold uppercase tracking-wider mb-0.5">
+            Test Alert
+          </h4>
+          <p className="text-wayanad-muted text-sm">
+            Just a test alert for the system.
+          </p>
+        </div>
+        <span className="text-wayanad-muted text-xs font-medium">Just now</span>
+        <ChevronRight size={14} className="text-wayanad-muted" />
+      </motion.div>
+    </motion.div>
   );
 };
 

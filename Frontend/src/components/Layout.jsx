@@ -1,52 +1,53 @@
 import React from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, Link, useLocation } from "react-router-dom";
+import { User } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
-import Avatar from "./Avatar";
 import { useUser } from "../context/UserContext";
 
 const Layout = () => {
-  const navigate = useNavigate();
   const { user } = useUser();
 
-  return (
-    <div className="min-h-screen w-full flex flex-col font-sans selection:bg-emerald-500/30">
-      {/* HEADER */}
-      <header className="sticky top-0 z-50 w-full border-b border-wayanad-border bg-wayanad-bg/80 backdrop-blur-md">
-        <div className="w-full px-6 md:px-12 py-4 flex justify-between items-center">
-          {/* Logo: Added onClick handler */}
-          <h1
-            onClick={() => navigate("/")} // 3. Redirect to Home on click
-            className="text-xl md:text-2xl font-black tracking-tight flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity"
-          >
-            <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_10px_#10B981]" />{" "}
-            {/* Status Indicator */}
-            <span className="text-wayanad-text">WAYANAD</span>
-            <span className="text-emerald-500">CONNECT</span>
-          </h1>
+  // Safety check
+  if (!user) return <div className="min-h-screen bg-wayanad-bg flex items-center justify-center text-wayanad-text">Loading session...</div>;
 
-          {/* Controls */}
-          <div className="flex items-center gap-4">
+  return (
+    <div className="min-h-screen bg-wayanad-bg text-wayanad-text font-sans transition-colors duration-300 relative overflow-hidden">
+      {/* Background Mesh Gradients */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/10 rounded-full blur-[120px] animate-blob"></div>
+        <div className="absolute top-[20%] right-[-10%] w-[30%] h-[30%] bg-cyan-500/10 rounded-full blur-[100px] animate-blob delay-200"></div>
+        <div className="absolute bottom-[-10%] left-[20%] w-[35%] h-[35%] bg-teal-500/10 rounded-full blur-[110px] animate-blob delay-400"></div>
+      </div>
+
+      {/* NAVBAR */}
+      <nav className="fixed top-0 w-full z-50 bg-wayanad-panel/70 backdrop-blur-xl border-b border-wayanad-border transition-all duration-300">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+          {/* LOGO: WAYANAD CONNECT */}
+          <Link to="/" className="flex items-center gap-2 group">
+            <div className="w-2 h-2 rounded-full bg-emerald-400 group-hover:animate-pulse"></div>
+            <span className="text-xl font-bold tracking-wide text-gray-200 group-hover:text-white transition-colors">
+              WAYANAD <span className="text-emerald-400">CONNECT</span>
+            </span>
+          </Link>
+
+          {/* RIGHT SIDE ICONS */}
+          <div className="flex items-center gap-6">
             <ThemeToggle />
-            <div
-              onClick={() => navigate("/profile")}
-              className="cursor-pointer hover:ring-2 ring-emerald-500/50 rounded-full transition-all"
-            >
-              <Avatar
-                src={user.avatar}
-                name={user.name}
-                size="sm"
-              />
-            </div>
+
+            {/* AVATAR - Matches screenshot (Green Circle with Initial) */}
+            <Link to="/profile">
+              <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold text-lg hover:bg-emerald-400 transition-colors shadow-lg shadow-emerald-500/20">
+                {user.name ? user.name.charAt(0).toUpperCase() : "D"}
+              </div>
+            </Link>
           </div>
         </div>
-      </header>
+      </nav>
 
-      {/* CONTENT */}
-      <div className="flex-1 w-full max-w-5xl mx-auto relative z-10">
-        <main className="p-6 md:p-10 pb-24">
-          <Outlet />
-        </main>
-      </div>
+      {/* MAIN CONTENT */}
+      <main className="pt-24 pb-12 px-6 max-w-7xl mx-auto">
+        <Outlet />
+      </main>
     </div>
   );
 };

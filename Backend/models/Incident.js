@@ -20,8 +20,20 @@ const incidentSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'resolved'],
-        default: 'pending'
+        enum: ['Open', 'Resolved', 'In Progress'],
+        default: 'Open'
+    },
+    category: {
+        type: String,
+        required: true
+    },
+    location: {
+        type: String,
+        required: false
+    },
+    image: {
+        type: String, // Base64 for simplicity as requested/used in profile
+        required: false
     }
 });
 

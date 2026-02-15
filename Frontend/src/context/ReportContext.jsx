@@ -28,6 +28,13 @@ export const ReportProvider = ({ children }) => {
           }
         });
 
+        if (response.status === 401) {
+          console.error("Authentication failed (401). Token might be invalid.");
+          // Optionally logout here, but for now let's stop loading to prevent loop
+          setLoading(false);
+          return;
+        }
+
         if (!response.ok) {
           throw new Error('Failed to fetch reports');
         }
@@ -41,10 +48,11 @@ export const ReportProvider = ({ children }) => {
           issue: item.title,
           description: item.description,
           date: item.date,
-          category: "General", // Default as backend doesn't save this yet
-          location: "Unknown", // Default
-          status: item.status || "Open", // Map backend status
-          statusColor: item.status === 'resolved' ? "text-blue-500 bg-blue-500/10" : "text-orange-500 bg-orange-500/10",
+          category: item.category || "General",
+          location: item.location || "Unknown",
+          status: item.status || "Open",
+          image: item.image,
+          statusColor: item.status === 'Resolved' ? "text-blue-500 bg-blue-500/10" : "text-orange-500 bg-orange-500/10",
         }));
         setReports(mappedReports);
       } catch (err) {
@@ -77,6 +85,9 @@ export const ReportProvider = ({ children }) => {
         body: JSON.stringify({
           title: newReport.issue, // Mapping 'issue' to 'title'
           description: newReport.description,
+          category: newReport.category,
+          location: newReport.location,
+          image: newReport.userImage, // Base64 image
         }),
       });
 

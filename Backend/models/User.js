@@ -24,6 +24,12 @@ const userSchema = new mongoose.Schema({
         required: false,
         default: "Wayanad",
     },
+    role: {
+        type: String,
+        required: true,
+        default: 'user',
+        enum: ['user', 'admin', 'authority']
+    },
 }, {
     timestamps: true,
 });

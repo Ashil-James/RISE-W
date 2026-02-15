@@ -32,8 +32,11 @@ router.post('/', protect, async (req, res) => {
     const incident = new Incident({
         title: req.body.title,
         description: req.body.description,
+        category: req.body.category,
+        location: req.body.location,
+        image: req.body.image,
         user: req.user._id,
-        status: 'pending' // Default status
+        status: 'Open' // Default status
     });
     try {
         const newIncident = await incident.save();

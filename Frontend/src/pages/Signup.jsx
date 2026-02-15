@@ -4,10 +4,12 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import ThemeToggle from "../components/ThemeToggle";
 import { useUser } from "../context/UserContext";
+import { useAuth } from "../context/AuthContext";
 
 const Signup = () => {
   const navigate = useNavigate();
-  const { user, login } = useUser();
+  const { login: userLogin } = useUser();
+  const { user, login: authLogin } = useAuth();
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     firstName: "",
@@ -41,7 +43,8 @@ const Signup = () => {
         phoneNumber: formData.phone,
       });
 
-      login(data);
+      userLogin(data);
+      authLogin(data);
       navigate("/");
     } catch (err) {
       setError(

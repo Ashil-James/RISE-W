@@ -97,16 +97,16 @@ const ReportDetails = () => {
                     </div>
 
                     {/* User Uploaded Image */}
-                    {report.userImage && (
+                    {report.image && (
                         <div className="mb-8">
                             <p className="text-xs font-bold text-wayanad-muted uppercase mb-2 flex items-center gap-2">
                                 <User size={12} /> Your Upload
                             </p>
                             <div className="relative rounded-lg overflow-hidden border border-wayanad-border cursor-pointer group"
-                                onClick={() => window.open(report.userImage, "_blank")}
+                                onClick={() => window.open(report.image, "_blank")}
                             >
                                 <img
-                                    src={report.userImage}
+                                    src={report.image}
                                     alt="Reported Issue"
                                     className="w-full h-64 object-cover hover:scale-105 transition-transform duration-500"
                                 />

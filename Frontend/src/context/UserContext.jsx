@@ -16,15 +16,28 @@ export const UserProvider = ({ children }) => {
   // Load from localStorage
   // Load from localStorage
   const [user, setUser] = useState(() => {
+    // 1. Try "wayanad_user" (UserContext specific)
     const savedUser = localStorage.getItem("wayanad_user");
     if (savedUser) {
       const parsed = JSON.parse(savedUser);
-      // Ensure stats exist (backwards compatibility for buggy saves)
       if (!parsed.stats) {
         return { ...parsed, stats: defaultStats };
       }
       return parsed;
     }
+
+    // 2. Fallback: Try "user" (AuthContext / Old Logic)
+    const authUser = localStorage.getItem("user");
+    if (authUser) {
+      const parsed = JSON.parse(authUser);
+      return {
+        ...parsed,
+        stats: defaultStats,
+        location: parsed.location || "Wayanad",
+        avatar: parsed.avatar || null
+      };
+    }
+
     return null;
   });
 
@@ -38,14 +51,22 @@ export const UserProvider = ({ children }) => {
   }, [user]);
 
   const login = (userData) => {
-    // Merge with default structure if needed, or just use userData
-    // We'll ensure userData includes the token from backend
-    setUser({
-      ...userData,
-      stats: userData.stats || defaultStats, // Add default stats if missing from backend
-      location: "Wayanad", // Default location
-      avatar: null,
-    });
+    // Check if userData has a 'user' property (common in some backends)
+    const userDetails = userData.user || userData;
+    // Token usually at top level
+    const token = userData.token || userDetails.token;
+
+    const dataToSave = {
+      ...userDetails,
+      token: token, // Ensure token is accessible
+      name: userDetails.name || (userDetails.firstName ? `${userDetails.firstName} ${userDetails.lastName}` : "User"),
+      phoneNumber: userDetails.phoneNumber || userDetails.phone || "",
+      stats: userDetails.stats || defaultStats,
+      location: userDetails.location || "Wayanad",
+      avatar: userDetails.avatar || null,
+    };
+
+    setUser(dataToSave);
   };
 
   const logout = () => {
@@ -60,7 +81,15 @@ export const UserProvider = ({ children }) => {
           Authorization: `Bearer ${user.token}`,
         },
       };
-      const { data } = await axios.put("http://localhost:5000/api/auth/profile", updates, config);
+
+      // Map 'phone' to 'phoneNumber' if present in updates for backend compatibility
+      const dataToSend = { ...updates };
+      if (dataToSend.phone) {
+        dataToSend.phoneNumber = dataToSend.phone;
+        delete dataToSend.phone;
+      }
+
+      const { data } = await axios.put("http://localhost:5000/api/auth/profile", dataToSend, config);
       setUser(prev => {
         const updatedUser = { ...prev, ...data };
         localStorage.setItem("wayanad_user", JSON.stringify(updatedUser));
