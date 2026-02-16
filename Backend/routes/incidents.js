@@ -1,8 +1,7 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const Incident = require('../models/Incident');
-
-const { protect } = require('../middleware/authMiddleware');
+import Incident from '../models/Incident.js';
+import { protect } from '../middleware/authMiddleware.js';
 
 // Get all incidents for the logged-in user
 router.get('/', protect, async (req, res) => {
@@ -82,4 +81,4 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

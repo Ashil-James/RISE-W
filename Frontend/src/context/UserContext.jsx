@@ -13,10 +13,7 @@ export const UserProvider = ({ children }) => {
     pending: 0,
   };
 
-  // Load from localStorage
-  // Load from localStorage
   const [user, setUser] = useState(() => {
-    // 1. Try "wayanad_user" (UserContext specific)
     const savedUser = localStorage.getItem("wayanad_user");
     if (savedUser) {
       const parsed = JSON.parse(savedUser);
@@ -26,7 +23,6 @@ export const UserProvider = ({ children }) => {
       return parsed;
     }
 
-    // 2. Fallback: Try "user" (AuthContext / Old Logic)
     const authUser = localStorage.getItem("user");
     if (authUser) {
       const parsed = JSON.parse(authUser);
@@ -41,7 +37,6 @@ export const UserProvider = ({ children }) => {
     return null;
   });
 
-  // Save to localStorage whenever user changes
   useEffect(() => {
     if (user) {
       localStorage.setItem("wayanad_user", JSON.stringify(user));
@@ -51,14 +46,12 @@ export const UserProvider = ({ children }) => {
   }, [user]);
 
   const login = (userData) => {
-    // Check if userData has a 'user' property (common in some backends)
     const userDetails = userData.user || userData;
-    // Token usually at top level
     const token = userData.token || userDetails.token;
 
     const dataToSave = {
       ...userDetails,
-      token: token, // Ensure token is accessible
+      token: token,
       name: userDetails.name || (userDetails.firstName ? `${userDetails.firstName} ${userDetails.lastName}` : "User"),
       phoneNumber: userDetails.phoneNumber || userDetails.phone || "",
       stats: userDetails.stats || defaultStats,
@@ -82,14 +75,13 @@ export const UserProvider = ({ children }) => {
         },
       };
 
-      // Map 'phone' to 'phoneNumber' if present in updates for backend compatibility
       const dataToSend = { ...updates };
       if (dataToSend.phone) {
         dataToSend.phoneNumber = dataToSend.phone;
         delete dataToSend.phone;
       }
 
-      const { data } = await axios.put("http://localhost:5000/api/auth/profile", dataToSend, config);
+      const { data } = await axios.put("/api/v1/auth/profile", dataToSend, config);
       setUser(prev => {
         const updatedUser = { ...prev, ...data };
         localStorage.setItem("wayanad_user", JSON.stringify(updatedUser));
@@ -112,7 +104,7 @@ export const UserProvider = ({ children }) => {
         },
       };
       await axios.put(
-        "http://localhost:5000/api/auth/update-password",
+        "/api/v1/auth/update-password",
         { currentPassword, newPassword },
         config
       );
@@ -135,10 +127,9 @@ export const UserProvider = ({ children }) => {
         },
       };
 
-      const { data } = await axios.get("http://localhost:5000/api/auth/me", config);
+      const { data } = await axios.get("/api/v1/auth/me", config);
 
       setUser(prev => {
-        // config.stats will come from backend now
         const updatedUser = { ...prev, ...data };
         localStorage.setItem("wayanad_user", JSON.stringify(updatedUser));
         return updatedUser;

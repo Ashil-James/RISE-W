@@ -1,4 +1,4 @@
-$baseUrl = "http://localhost:5000/api/auth"
+$baseUrl = "http://localhost:5000/api/v1/auth"
 $email = "testuser_$(Get-Date -Format 'yyyyMMddHHmmss')@example.com"
 $password = "password123"
 $newPassword = "newpassword123"

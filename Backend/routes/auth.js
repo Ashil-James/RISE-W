@@ -1,10 +1,10 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const User = require('../models/User');
-const Incident = require('../models/Incident');
-const { protect } = require('../middleware/authMiddleware');
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import User from '../models/User.js';
+import Incident from '../models/Incident.js';
+import { protect } from '../middleware/authMiddleware.js';
 
 // Generate JWT
 const generateToken = (id) => {
@@ -14,7 +14,7 @@ const generateToken = (id) => {
 };
 
 // @desc    Register a new user
-// @route   POST /api/auth/register
+// @route   POST /api/v1/auth/register
 // @access  Public
 router.post('/register', async (req, res) => {
     const { name, email, password, phoneNumber } = req.body;
@@ -51,7 +51,7 @@ router.post('/register', async (req, res) => {
 });
 
 // @desc    Authenticate a user
-// @route   POST /api/auth/login
+// @route   POST /api/v1/auth/login
 // @access  Public
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
@@ -87,7 +87,7 @@ router.post('/login', async (req, res) => {
 });
 
 // @desc    Get user data
-// @route   GET /api/auth/me
+// @route   GET /api/v1/auth/me
 // @access  Private
 router.get('/me', protect, async (req, res) => {
     try {
@@ -110,7 +110,7 @@ router.get('/me', protect, async (req, res) => {
 });
 
 // @desc    Update user profile
-// @route   PUT /api/auth/profile
+// @route   PUT /api/v1/auth/profile
 // @access  Private
 router.put('/profile', protect, async (req, res) => {
     try {
@@ -156,7 +156,7 @@ router.put('/profile', protect, async (req, res) => {
 });
 
 // @desc    Update password
-// @route   PUT /api/auth/update-password
+// @route   PUT /api/v1/auth/update-password
 // @access  Private
 router.put('/update-password', protect, async (req, res) => {
     const { currentPassword, newPassword } = req.body;
@@ -176,4 +176,4 @@ router.put('/update-password', protect, async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

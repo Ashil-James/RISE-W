@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-const User = require('./models/User');
-const Incident = require('./models/Incident');
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import User from './models/User.js';
+import Incident from './models/Incident.js';
 
 dotenv.config();
 

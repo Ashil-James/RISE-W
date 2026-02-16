@@ -22,7 +22,8 @@ export const ReportProvider = ({ children }) => {
           return;
         }
 
-        const response = await fetch('http://localhost:5000/incidents', {
+        // Using proxy /api/v1/incidents
+        const response = await fetch('/api/v1/incidents', {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -30,7 +31,6 @@ export const ReportProvider = ({ children }) => {
 
         if (response.status === 401) {
           console.error("Authentication failed (401). Token might be invalid.");
-          // Optionally logout here, but for now let's stop loading to prevent loop
           setLoading(false);
           return;
         }
@@ -39,10 +39,7 @@ export const ReportProvider = ({ children }) => {
           throw new Error('Failed to fetch reports');
         }
         const data = await response.json();
-        // Map backend data to frontend structure if necessary
-        // Backend: { _id, title, description, date }
-        // Frontend expects: { id, issue, description, date, status, category, etc... }
-        // For now, we'll map what we have and provide defaults for others
+        
         const mappedReports = data.map(item => ({
           id: item._id,
           issue: item.title,
@@ -76,7 +73,8 @@ export const ReportProvider = ({ children }) => {
         throw new Error("User not authenticated");
       }
 
-      const response = await fetch('http://localhost:5000/incidents', {
+      // Using proxy /api/v1/incidents
+      const response = await fetch('/api/v1/incidents', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -103,6 +101,7 @@ export const ReportProvider = ({ children }) => {
       );
 
     } catch (err) {
+      console.error(err);
       alert("Failed to save report to server. It may not persist on reload.");
     } finally {
       if (refreshUser) refreshUser();
@@ -110,8 +109,6 @@ export const ReportProvider = ({ children }) => {
   };
 
   const updateReportStatus = (id, newStatus) => {
-    // Note: Backend implementation for status update is pending.
-    // This currently only updates local state.
     setReports((prev) =>
       prev.map((r) => {
         if (r.id === id) {

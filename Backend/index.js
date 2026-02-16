@@ -1,7 +1,9 @@
-const express = require('express');
-const dotenv = require('dotenv');
-const cors = require('cors');
-const connectDB = require('./config/db');
+import express from 'express';
+import dotenv from 'dotenv';
+import cors from 'cors';
+import connectDB from './config/db.js';
+import authRoutes from './routes/auth.js';
+import incidentRoutes from './routes/incidents.js';
 
 dotenv.config();
 
@@ -19,9 +21,8 @@ app.get('/', (req, res) => {
     res.send('Backend is running!');
 });
 
-app.use('/api/auth', require('./routes/auth'));
-const incidentsRouter = require('./routes/incidents');
-app.use('/incidents', incidentsRouter);
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/incidents', incidentRoutes);
 
 app.listen(port, () => {
     console.log(`Server is running on port: ${port}`);

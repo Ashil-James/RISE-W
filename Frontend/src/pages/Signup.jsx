@@ -35,8 +35,8 @@ const Signup = () => {
 
     try {
       // Backend expects: name, email, password
-      // We combine firstName and lastName for name
-      const { data } = await axios.post("http://localhost:5000/api/auth/register", {
+      // Using proxy /api/v1
+      const { data } = await axios.post("/api/v1/auth/register", {
         name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
         password: formData.password,

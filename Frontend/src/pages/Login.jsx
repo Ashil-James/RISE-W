@@ -38,9 +38,9 @@ const Login = () => {
     setError("");
 
     try {
-      // REAL BACKEND CALL
+      // REAL BACKEND CALL - Using proxy /api/v1
       const { data } = await axios.post(
-        "http://localhost:5000/api/auth/login",
+        "/api/v1/auth/login",
         { email: formData.email, password: formData.password }
       );
 
@@ -53,8 +53,6 @@ const Login = () => {
       authLogin(data);
       userLogin(data);
 
-      // Navigate based on role (handled by useEffect, but we can double check)
-      // navigate("/"); 
       setLoading(false);
     } catch (err) {
       console.error(err);

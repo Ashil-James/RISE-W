@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const incidentSchema = new mongoose.Schema({
     title: {
@@ -37,4 +37,6 @@ const incidentSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model('Incident', incidentSchema);
+const Incident = mongoose.model('Incident', incidentSchema);
+
+export default Incident;

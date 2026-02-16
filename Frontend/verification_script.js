@@ -5,7 +5,7 @@ async function test() {
     const email = `testuser_${Date.now()}@example.com`;
     const password = 'password123';
     const newPassword = 'newpassword123';
-    const baseUrl = 'http://localhost:5000/api/auth';
+    const baseUrl = 'http://localhost:5000/api/v1/auth';
 
     try {
         // 1. Register
