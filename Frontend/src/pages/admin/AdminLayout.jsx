@@ -1,6 +1,15 @@
 import React from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { LogOut, LayoutDashboard, Radio, Shield, Settings, Menu, X, Users } from "lucide-react";
+import {
+  LogOut,
+  LayoutDashboard,
+  Radio,
+  Shield,
+  Settings,
+  Menu,
+  X,
+  Users,
+} from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
@@ -37,7 +46,10 @@ const AdminLayout = () => {
               className="absolute left-0 top-2 bottom-2 w-1.5 bg-gradient-to-b from-emerald-400 to-cyan-400 rounded-full shadow-[0_0_10px_rgba(52,211,153,0.8)]"
             />
           )}
-          <Icon size={22} className={`z-10 transition-all duration-300 ${isActive ? "text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]" : "group-hover:text-emerald-300"}`} />
+          <Icon
+            size={22}
+            className={`z-10 transition-all duration-300 ${isActive ? "text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]" : "group-hover:text-emerald-300"}`}
+          />
           <span className="z-10 text-sm tracking-wide">{label}</span>
         </Link>
       </li>
@@ -46,7 +58,6 @@ const AdminLayout = () => {
 
   return (
     <div className="flex min-h-screen bg-black text-white font-sans selection:bg-emerald-500/30 overflow-hidden relative">
-      
       {/* BACKGROUND ELEMENTS */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-emerald-600/10 rounded-full blur-[150px] animate-blob"></div>
@@ -57,7 +68,7 @@ const AdminLayout = () => {
       </div>
 
       {/* MOBILE TOGGLE */}
-      <button 
+      <button
         className="lg:hidden fixed top-6 right-6 z-50 p-3 bg-neutral-900/80 backdrop-blur-md rounded-xl border border-white/10"
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
       >
@@ -94,21 +105,29 @@ const AdminLayout = () => {
             {/* Navigation */}
             <nav className="flex-1 space-y-8">
               <div>
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 px-4">Menu</p>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 px-4">
+                  Menu
+                </p>
                 <ul className="space-y-3">
                   <NavItem
                     to="/admin/dashboard"
                     icon={LayoutDashboard}
                     label="Dashboard"
                   />
-                  <NavItem to="/admin/broadcasts" icon={Radio} label="Broadcasts" />
+                  <NavItem
+                    to="/admin/broadcasts"
+                    icon={Radio}
+                    label="Broadcasts"
+                  />
                   <NavItem to="/admin/users" icon={Users} label="Users" />
                 </ul>
               </div>
-              
+
               <div>
-                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 px-4">System</p>
-                 <ul className="space-y-3">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-4 px-4">
+                  System
+                </p>
+                <ul className="space-y-3">
                   {/* Placeholder for future features */}
                   <NavItem to="#" icon={Shield} label="Security Logs" />
                   <NavItem to="#" icon={Settings} label="Settings" />
@@ -134,7 +153,9 @@ const AdminLayout = () => {
       </AnimatePresence>
 
       {/* MAIN CONTENT WRAPPER */}
-      <main className={`flex-1 p-6 lg:p-10 overflow-y-auto relative z-10 transition-all duration-300 ${isSidebarOpen ? '' : 'lg:ml-0'}`}>
+      <main
+        className={`flex-1 p-6 lg:p-10 overflow-y-auto relative z-10 transition-all duration-300 ${isSidebarOpen ? "" : "lg:ml-0"}`}
+      >
         <div className="max-w-7xl mx-auto">
           <Outlet />
         </div>
