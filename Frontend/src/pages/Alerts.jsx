@@ -40,6 +40,18 @@ const Alerts = () => {
     }
   };
 
+  const getTimeAgo = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now - date) / 60000);
+    
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    return date.toLocaleDateString();
+  };
+
   return (
     <div className="w-full max-w-2xl mx-auto animate-fade-in relative pb-24">
       {/* Header */}
@@ -96,11 +108,20 @@ const Alerts = () => {
                   {/* Content */}
                   <div className="flex-1">
                     <div className="flex justify-between items-start">
-                      <h3 className="text-lg font-bold text-wayanad-text">
-                        {alert.title}
-                      </h3>
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-lg font-bold text-wayanad-text">
+                            {alert.title}
+                          </h3>
+                          {alert.isAuthority ? (
+                            <span className="bg-emerald-500/20 text-emerald-500 text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-tight">Official</span>
+                          ) : (
+                            <span className="bg-blue-500/20 text-blue-500 text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-tight">Community</span>
+                          )}
+                        </div>
+                      </div>
                       <span className="text-xs font-mono text-wayanad-muted bg-wayanad-bg px-2 py-1 rounded">
-                        {alert.time}
+                        {getTimeAgo(alert.time)}
                       </span>
                     </div>
                     <p className="text-wayanad-text/80 mt-1 text-sm leading-relaxed">

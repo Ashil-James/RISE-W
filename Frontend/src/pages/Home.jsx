@@ -1,11 +1,42 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Bell, Clock, ChevronRight, Zap } from "lucide-react";
+import { Bell, Clock, ChevronRight, Zap, AlertTriangle, Info } from "lucide-react";
 import { useUser } from "../context/UserContext";
+import { useAlerts } from "../context/AlertContext";
 import { motion } from "framer-motion";
 
 const Home = () => {
   const { user } = useUser();
+  const { alerts } = useAlerts();
+  const latestAlert = alerts.length > 0 ? alerts[0] : null;
+
+  const getAlertIcon = (type) => {
+    switch (type) {
+      case 'critical': return <AlertTriangle size={18} />;
+      case 'warning': return <Zap size={18} />;
+      default: return <Info size={18} />;
+    }
+  };
+
+  const getAlertColor = (type) => {
+    switch (type) {
+      case 'critical': return 'text-red-500 bg-red-500/10';
+      case 'warning': return 'text-yellow-500 bg-yellow-500/10';
+      default: return 'text-blue-500 bg-blue-500/10';
+    }
+  };
+
+  const getTimeAgo = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now - date) / 60000);
+    
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    return date.toLocaleDateString();
+  };
 
   // Animation variants
   const containerVariants = {
@@ -114,25 +145,36 @@ const Home = () => {
       </motion.div>
 
       {/* 5. BOTTOM ALERT TICKER */}
-      <motion.div
-        className="w-full max-w-3xl glass-card rounded-xl p-4 flex items-center gap-4 hover:bg-wayanad-panel/80 transition-colors cursor-pointer"
-        variants={itemVariants}
-        whileHover={{ scale: 1.01 }}
-      >
-        <div className="p-2 bg-yellow-500/10 rounded-lg text-yellow-500">
-          <Zap size={18} />
-        </div>
-        <div className="flex-1">
-          <h4 className="text-yellow-500 text-xs font-bold uppercase tracking-wider mb-0.5">
-            Test Alert
-          </h4>
-          <p className="text-wayanad-muted text-sm">
-            Just a test alert for the system.
-          </p>
-        </div>
-        <span className="text-wayanad-muted text-xs font-medium">Just now</span>
-        <ChevronRight size={14} className="text-wayanad-muted" />
-      </motion.div>
+      {latestAlert && (
+        <Link to="/alerts" className="w-full max-w-3xl">
+          <motion.div
+            className="w-full glass-card rounded-xl p-4 flex items-center gap-4 hover:bg-wayanad-panel/80 transition-colors cursor-pointer"
+            variants={itemVariants}
+            whileHover={{ scale: 1.01 }}
+          >
+            <div className={`p-2 rounded-lg ${getAlertColor(latestAlert.type).split(' ')[1]} ${getAlertColor(latestAlert.type).split(' ')[0]}`}>
+              {getAlertIcon(latestAlert.type)}
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-0.5">
+                <h4 className={`${getAlertColor(latestAlert.type).split(' ')[0]} text-xs font-bold uppercase tracking-wider`}>
+                  {latestAlert.title}
+                </h4>
+                {latestAlert.isAuthority ? (
+                  <span className="bg-emerald-500/20 text-emerald-500 text-[8px] px-1.5 py-0.5 rounded-full font-black uppercase tracking-tighter">Official</span>
+                ) : (
+                  <span className="bg-blue-500/20 text-blue-500 text-[8px] px-1.5 py-0.5 rounded-full font-black uppercase tracking-tighter">Community</span>
+                )}
+              </div>
+              <p className="text-wayanad-muted text-sm line-clamp-1">
+                {latestAlert.message}
+              </p>
+            </div>
+            <span className="text-wayanad-muted text-xs font-medium">{getTimeAgo(latestAlert.time)}</span>
+            <ChevronRight size={14} className="text-wayanad-muted" />
+          </motion.div>
+        </Link>
+      )}
     </motion.div>
   );
 };
