@@ -129,8 +129,10 @@ const AdminLayout = () => {
                 </p>
                 <ul className="space-y-3">
                   {/* Placeholder for future features */}
+                  {/*
                   <NavItem to="#" icon={Shield} label="Security Logs" />
-                  <NavItem to="#" icon={Settings} label="Settings" />
+                  */}
+                  {/*<NavItem to="#" icon={Settings} label="Settings" />*/}
                 </ul>
               </div>
             </nav>
