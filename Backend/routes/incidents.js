@@ -1,11 +1,12 @@
-const express = require('express');
+import express from 'express';
 const router = express.Router();
-const Incident = require('../models/Incident');
+import Incident from '../models/Incident.js';
+import { protect } from '../middleware/authMiddleware.js';
 
-// Get all incidents
-router.get('/', async (req, res) => {
+// Get all incidents for the logged-in user
+router.get('/', protect, async (req, res) => {
     try {
-        const incidents = await Incident.find();
+        const incidents = await Incident.find({ user: req.user._id });
         res.json(incidents);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -26,10 +27,15 @@ router.get('/:id', async (req, res) => {
 });
 
 // Create one incident
-router.post('/', async (req, res) => {
+router.post('/', protect, async (req, res) => {
     const incident = new Incident({
         title: req.body.title,
-        description: req.body.description
+        description: req.body.description,
+        category: req.body.category,
+        location: req.body.location,
+        image: req.body.image,
+        user: req.user._id,
+        status: 'Open' // Default status
     });
     try {
         const newIncident = await incident.save();
@@ -75,4 +81,4 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-module.exports = router;
+export default router;

@@ -21,25 +21,20 @@ const CreateAlert = () => {
         { id: "critical", label: "Critical Danger", color: "bg-red-500", icon: AlertTriangle },
     ];
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.title || !formData.message) return;
 
         setLoading(true);
 
-        // Simulate network delay
-        setTimeout(() => {
-            const newAlert = {
-                id: Date.now(),
-                ...formData,
-                time: "Just now",
-                // Icon logic handled in context or simplistic mapping here
-                icon: formData.type === 'critical' ? 'AlertTriangle' : formData.type === 'warning' ? 'Zap' : 'Info'
-            };
-
-            addAlert(newAlert);
+        try {
+            await addAlert(formData);
             navigate("/alerts");
-        }, 1000);
+        } catch (error) {
+            alert("Failed to broadcast alert. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (

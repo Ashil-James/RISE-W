@@ -4,10 +4,12 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import ThemeToggle from "../components/ThemeToggle";
 import { useUser } from "../context/UserContext";
+import { useAuth } from "../context/AuthContext";
 
 const Signup = () => {
   const navigate = useNavigate();
-  const { user, login } = useUser();
+  const { login: userLogin } = useUser();
+  const { user, login: authLogin } = useAuth();
   const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     firstName: "",
@@ -33,17 +35,16 @@ const Signup = () => {
 
     try {
       // Backend expects: name, email, password
-      // We combine firstName and lastName for name
-      const { data } = await axios.post("http://localhost:5000/api/auth/register", {
+      // Using proxy /api/v1
+      const { data } = await axios.post("/api/v1/auth/register", {
         name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
         password: formData.password,
-        // phone is not in our backend User model yet, but we can send it or ignore it
-        // If we want to save phone, we need to update backend model. 
-        // For now, we just register with required fields.
+        phoneNumber: formData.phone,
       });
 
-      login(data);
+      userLogin(data);
+      authLogin(data);
       navigate("/");
     } catch (err) {
       setError(

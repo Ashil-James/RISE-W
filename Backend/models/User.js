@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -15,6 +15,21 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    phoneNumber: {
+        type: String,
+        required: false,
+    },
+    location: {
+        type: String,
+        required: false,
+        default: "Wayanad",
+    },
+    role: {
+        type: String,
+        required: true,
+        default: 'user',
+        enum: ['user', 'admin', 'authority']
+    },
 }, {
     timestamps: true,
 });
@@ -25,9 +40,9 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
 };
 
 // Encrypt password using bcrypt
-userSchema.pre('save', async function (next) {
+userSchema.pre('save', async function () {
     if (!this.isModified('password')) {
-        next();
+        return;
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -36,4 +51,4 @@ userSchema.pre('save', async function (next) {
 
 const User = mongoose.model('User', userSchema);
 
-module.exports = User;
+export default User;

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const incidentSchema = new mongoose.Schema({
     title: {
@@ -12,7 +12,31 @@ const incidentSchema = new mongoose.Schema({
     date: {
         type: Date,
         default: Date.now
+    },
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    status: {
+        type: String,
+        enum: ['Open', 'Resolved', 'In Progress'],
+        default: 'Open'
+    },
+    category: {
+        type: String,
+        required: true
+    },
+    location: {
+        type: String,
+        required: false
+    },
+    image: {
+        type: String, // Base64 for simplicity as requested/used in profile
+        required: false
     }
 });
 
-module.exports = mongoose.model('Incident', incidentSchema);
+const Incident = mongoose.model('Incident', incidentSchema);
+
+export default Incident;

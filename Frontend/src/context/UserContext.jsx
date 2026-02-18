@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import axios from "axios";
 
 const UserContext = createContext();
 
@@ -12,13 +13,30 @@ export const UserProvider = ({ children }) => {
     pending: 0,
   };
 
-  // Load from localStorage
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem("wayanad_user");
-    return savedUser ? JSON.parse(savedUser) : null;
+    if (savedUser) {
+      const parsed = JSON.parse(savedUser);
+      if (!parsed.stats) {
+        return { ...parsed, stats: defaultStats };
+      }
+      return parsed;
+    }
+
+    const authUser = localStorage.getItem("user");
+    if (authUser) {
+      const parsed = JSON.parse(authUser);
+      return {
+        ...parsed,
+        stats: defaultStats,
+        location: parsed.location || "Wayanad",
+        avatar: parsed.avatar || null
+      };
+    }
+
+    return null;
   });
 
-  // Save to localStorage whenever user changes
   useEffect(() => {
     if (user) {
       localStorage.setItem("wayanad_user", JSON.stringify(user));
@@ -28,14 +46,20 @@ export const UserProvider = ({ children }) => {
   }, [user]);
 
   const login = (userData) => {
-    // Merge with default structure if needed, or just use userData
-    // We'll ensure userData includes the token from backend
-    setUser({
-      ...userData,
-      stats: defaultStats, // Add default stats if missing from backend
-      location: "Wayanad", // Default location
-      avatar: null,
-    });
+    const userDetails = userData.user || userData;
+    const token = userData.token || userDetails.token;
+
+    const dataToSave = {
+      ...userDetails,
+      token: token,
+      name: userDetails.name || (userDetails.firstName ? `${userDetails.firstName} ${userDetails.lastName}` : "User"),
+      phoneNumber: userDetails.phoneNumber || userDetails.phone || "",
+      stats: userDetails.stats || defaultStats,
+      location: userDetails.location || "Wayanad",
+      avatar: userDetails.avatar || null,
+    };
+
+    setUser(dataToSave);
   };
 
   const logout = () => {
@@ -43,12 +67,82 @@ export const UserProvider = ({ children }) => {
     localStorage.removeItem("wayanad_user");
   };
 
-  const updateProfile = (updates) => {
-    setUser((prev) => ({ ...prev, ...updates }));
+  const updateProfile = async (updates) => {
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+
+      const dataToSend = { ...updates };
+      if (dataToSend.phone) {
+        dataToSend.phoneNumber = dataToSend.phone;
+        delete dataToSend.phone;
+      }
+
+      const { data } = await axios.put("/api/v1/auth/profile", dataToSend, config);
+      setUser(prev => {
+        const updatedUser = { ...prev, ...data };
+        localStorage.setItem("wayanad_user", JSON.stringify(updatedUser));
+        return updatedUser;
+      });
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Profile update failed"
+      };
+    }
+  };
+
+  const changePassword = async (currentPassword, newPassword) => {
+    try {
+      const config = {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+      await axios.put(
+        "/api/v1/auth/update-password",
+        { currentPassword, newPassword },
+        config
+      );
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || "Password update failed"
+      };
+    }
+  };
+
+  const refreshUser = async () => {
+    try {
+      if (!user?.token) return { success: false };
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      };
+
+      const { data } = await axios.get("/api/v1/auth/me", config);
+
+      setUser(prev => {
+        const updatedUser = { ...prev, ...data };
+        localStorage.setItem("wayanad_user", JSON.stringify(updatedUser));
+        return updatedUser;
+      });
+      return { success: true };
+    } catch (error) {
+      console.error("Failed to refresh user stats:", error);
+      return { success: false };
+    }
   };
 
   return (
-    <UserContext.Provider value={{ user, login, logout, updateProfile }}>
+    <UserContext.Provider value={{ user, login, logout, updateProfile, changePassword, refreshUser }}>
       {children}
     </UserContext.Provider>
   );
