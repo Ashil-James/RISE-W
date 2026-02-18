@@ -25,19 +25,19 @@ const verifyStats = async () => {
       title: "Issue 1",
       description: "Desc 1",
       user: user._id,
-      status: "pending",
+      status: "Open",
     });
     await Incident.create({
       title: "Issue 2",
       description: "Desc 2",
       user: user._id,
-      status: "resolved",
+      status: "Resolved",
     });
     await Incident.create({
       title: "Issue 3",
       description: "Desc 3",
       user: user._id,
-      status: "pending",
+      status: "In Progress",
     });
     console.log("Incidents created");
 
@@ -45,11 +45,11 @@ const verifyStats = async () => {
     const total = await Incident.countDocuments({ user: user._id });
     const resolved = await Incident.countDocuments({
       user: user._id,
-      status: "resolved",
+      status: "Resolved",
     });
     const pending = await Incident.countDocuments({
       user: user._id,
-      status: "pending",
+      status: { $in: ["Open", "In Progress"] },
     });
 
     console.log("--- Stats Verification ---");
