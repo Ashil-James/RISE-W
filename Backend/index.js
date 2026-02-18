@@ -10,7 +10,7 @@ dotenv.config();
 
 // Connect to database
 connectDB();
-
+// test comment
 const app = express();
 const port = process.env.PORT || 5001;
 
@@ -19,7 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.get("/", (req, res) => {
-  res.send("Backend is running!");
+    res.send("Backend is running!");
 });
 
 app.use("/api/v1/auth", authRoutes);
@@ -27,5 +27,5 @@ app.use("/api/v1/incidents", incidentRoutes);
 app.use("/api/v1/broadcasts", broadcastRoutes);
 
 app.listen(port, () => {
-  console.log(`Server is running on port: ${port}`);
+    console.log(`Server is running on port: ${port}`);
 });
