@@ -116,7 +116,34 @@ const ReportIncident = () => {
     );
   };
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleSubmit = async () => {
+    setIsSubmitting(true);
+    let uploadedImageUrl = null;
+
+    if (imageFile) {
+      const formData = new FormData();
+      formData.append("image", imageFile);
+
+      try {
+        const response = await fetch("http://localhost:5000/api/v1/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to upload image");
+        }
+
+        const data = await response.json();
+        uploadedImageUrl = data.url; // Use Cloudinary secure URL
+      } catch (error) {
+        console.error("Image upload failed:", error);
+        alert("Failed to upload image. Submitting without it.");
+      }
+    }
+
     // Prepare Data
     const newReport = {
       id: "#" + Math.floor(10000 + Math.random() * 90000),
@@ -127,7 +154,7 @@ const ReportIncident = () => {
       location: formData.address || (coords
         ? `GPS: ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`
         : "Manual Location Entry"),
-      userImage: selectedImage, // Include the image
+      userImage: uploadedImageUrl || selectedImage, // Fallback to local preview if URL fetch fails but still submitted
       date: "Just now",
       status: "Open",
       statusColor: "text-orange-500 bg-orange-500/10",
@@ -136,6 +163,7 @@ const ReportIncident = () => {
     };
 
     addReport(newReport); // Save to context
+    setIsSubmitting(false);
     setTimeout(() => setStep(3), 800);
   };
 
@@ -315,9 +343,14 @@ const ReportIncident = () => {
 
           <button
             onClick={handleSubmit}
-            className="w-full py-4 rounded-xl bg-emerald-600 font-bold text-white shadow-lg hover:bg-emerald-500 hover:scale-[1.01] active:scale-[0.99] transition-all"
+            disabled={isSubmitting}
+            className={`w-full py-4 rounded-xl font-bold text-white shadow-lg transition-all flex items-center justify-center gap-2 ${isSubmitting ? 'bg-emerald-400 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500 hover:scale-[1.01] active:scale-[0.99]'}`}
           >
-            Submit Report
+            {isSubmitting ? (
+              <>
+                <Loader2 size={20} className="animate-spin" /> Uploading...
+              </>
+            ) : "Submit Report"}
           </button>
         </div>
       </div>

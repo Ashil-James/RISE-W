@@ -5,6 +5,7 @@ import connectDB from "./config/db.js";
 import authRoutes from "./routes/auth.js";
 import incidentRoutes from "./routes/incidents.js";
 import broadcastRoutes from "./routes/broadcasts.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.get("/", (req, res) => {
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/incidents", incidentRoutes);
 app.use("/api/v1/broadcasts", broadcastRoutes);
+app.use("/api/v1/upload", uploadRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
