@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.js";
 import incidentRoutes from "./routes/incidents.js";
 import broadcastRoutes from "./routes/broadcasts.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import { errorHandler } from "./middleware/errorHandler.js";
 
 dotenv.config();
 
@@ -27,6 +28,9 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/incidents", incidentRoutes);
 app.use("/api/v1/broadcasts", broadcastRoutes);
 app.use("/api/v1/upload", uploadRoutes);
+
+// Global error handler — must be after all routes
+app.use(errorHandler);
 
 app.listen(port, () => {
   console.log(`Server is running on port: ${port}`);
