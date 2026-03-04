@@ -137,7 +137,7 @@ const ReportIncident = () => {
         }
 
         const data = await response.json();
-        uploadedImageUrl = data.url;
+        uploadedImageUrl = data.data.url;
       } catch (error) {
         console.error("Image upload failed:", error);
         alert("Failed to upload image. Submitting without it.");

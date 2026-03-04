@@ -38,9 +38,10 @@ export const ReportProvider = ({ children }) => {
         if (!response.ok) {
           throw new Error('Failed to fetch reports');
         }
-        const data = await response.json();
+        const result = await response.json();
+        const incidents = result.data;
 
-        const mappedReports = data.map(item => ({
+        const mappedReports = incidents.map(item => ({
           id: item._id,
           issue: item.title,
           description: item.description,
@@ -95,7 +96,8 @@ export const ReportProvider = ({ children }) => {
         throw new Error('Failed to save report');
       }
 
-      const savedReport = await response.json();
+      const result = await response.json();
+      const savedReport = result.data;
 
       // Update the local state with the real ID from backend
       setReports((prev) =>

@@ -36,15 +36,16 @@ const Signup = () => {
     try {
       // Backend expects: name, email, password
       // Using proxy /api/v1
-      const { data } = await axios.post("/api/v1/auth/register", {
+      const { data: response } = await axios.post("/api/v1/auth/register", {
         name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
         password: formData.password,
         phoneNumber: formData.phone,
       });
 
-      userLogin(data);
-      authLogin(data);
+      const userData = response.data;
+      userLogin(userData);
+      authLogin(userData);
       navigate("/");
     } catch (err) {
       setError(

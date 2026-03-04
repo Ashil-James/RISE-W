@@ -40,7 +40,9 @@ const Profile = () => {
     name: user?.name || "",
     email: user?.email || "",
     phone: user?.phoneNumber || "",
-    location: user?.location || "",
+    location: (user?.location && typeof user?.location === 'object') ?
+      (user.location.coordinates ? user.location.coordinates.join(', ') : "Location Set")
+      : (user?.location || ""),
   });
 
   // Password State
@@ -67,7 +69,9 @@ const Profile = () => {
     setMessage({ type: "", text: "" });
 
     // Call updateProfile from UserContext
-    // We pass only changed fields or all fields
+    // If location is provided, we need to send it back as GeoJSON if it's coordinates,
+    // but the backend update route currently expects whatever we send.
+    // For now, we will send the string (or coords) as is.
     const result = await updateProfile({
       name: formData.name,
       email: formData.email,
@@ -220,8 +224,8 @@ const Profile = () => {
               <button
                 onClick={() => setIsEditing(!isEditing)}
                 className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-all border ${isEditing
-                    ? "bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20"
-                    : "bg-white/5 text-white border-white/10 hover:bg-white/10"
+                  ? "bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20"
+                  : "bg-white/5 text-white border-white/10 hover:bg-white/10"
                   }`}
               >
                 {isEditing ? <X size={18} /> : <Edit2 size={18} />}
@@ -336,7 +340,12 @@ const Profile = () => {
                     placeholder="e.g. Wayanad, Kerala"
                   />
                 ) : (
-                  <p className="text-wayanad-text font-medium text-lg">{user.location || "Wayanad"}</p>
+                  <p className="text-wayanad-text font-medium text-lg">
+                    {user.location && typeof user.location === 'object'
+                      ? (user.location.coordinates ? `Coordinates: ${user.location.coordinates.join(', ')}` : "Location Set")
+                      : (user.location || "Wayanad")
+                    }
+                  </p>
                 )}
               </div>
             </div>

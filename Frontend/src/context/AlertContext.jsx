@@ -11,9 +11,10 @@ export const AlertProvider = ({ children }) => {
 
     const fetchAlerts = async () => {
         try {
-            const { data } = await axios.get('/api/v1/broadcasts');
+            const { data: response } = await axios.get('/api/v1/broadcasts');
+            const broadcasts = response.data;
             // Map backend broadcasts to frontend alerts structure
-            const mappedAlerts = data.map(b => ({
+            const mappedAlerts = broadcasts.map(b => ({
                 id: b._id,
                 type: b.severity === 'High' ? 'critical' : b.severity === 'Medium' ? 'warning' : 'info',
                 title: b.type,

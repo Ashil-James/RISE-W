@@ -81,9 +81,10 @@ export const UserProvider = ({ children }) => {
         delete dataToSend.phone;
       }
 
-      const { data } = await axios.put("/api/v1/auth/profile", dataToSend, config);
+      const { data: response } = await axios.put("/api/v1/auth/profile", dataToSend, config);
+      const updatedData = response.data;
       setUser(prev => {
-        const updatedUser = { ...prev, ...data };
+        const updatedUser = { ...prev, ...updatedData };
         localStorage.setItem("wayanad_user", JSON.stringify(updatedUser));
         return updatedUser;
       });
@@ -127,10 +128,11 @@ export const UserProvider = ({ children }) => {
         },
       };
 
-      const { data } = await axios.get("/api/v1/auth/me", config);
+      const { data: response } = await axios.get("/api/v1/auth/me", config);
+      const meData = response.data;
 
       setUser(prev => {
-        const updatedUser = { ...prev, ...data };
+        const updatedUser = { ...prev, ...meData };
         localStorage.setItem("wayanad_user", JSON.stringify(updatedUser));
         return updatedUser;
       });

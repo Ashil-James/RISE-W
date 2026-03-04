@@ -39,19 +39,21 @@ const Login = () => {
 
     try {
       // REAL BACKEND CALL - Using proxy /api/v1
-      const { data } = await axios.post(
+      const { data: response } = await axios.post(
         "/api/v1/auth/login",
         { email: formData.email, password: formData.password }
       );
 
+      const userData = response.data;
+
       // Check for token
-      if (!data.token) {
+      if (!userData.token) {
         throw new Error("No token received from server");
       }
 
       // Update Contexts
-      authLogin(data);
-      userLogin(data);
+      authLogin(userData);
+      userLogin(userData);
 
       setLoading(false);
     } catch (err) {
