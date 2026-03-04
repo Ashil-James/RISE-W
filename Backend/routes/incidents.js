@@ -6,7 +6,7 @@ import { protect } from '../middleware/authMiddleware.js';
 // Get all incidents for the logged-in user
 router.get('/', protect, async (req, res) => {
     try {
-        const incidents = await Incident.find({ user: req.user._id });
+        const incidents = await Incident.find({ reportedBy: req.user._id });
         res.json(incidents);
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -28,19 +28,31 @@ router.get('/:id', async (req, res) => {
 
 // Create one incident
 router.post('/', protect, async (req, res) => {
-    const incident = new Incident({
-        title: req.body.title,
-        description: req.body.description,
-        category: req.body.category,
-        location: req.body.location,
-        image: req.body.image,
-        user: req.user._id,
-        status: 'Open' // Default status
-    });
     try {
+        // Build location - accept coordinates or address string
+        let locationData = undefined;
+        if (req.body.latitude && req.body.longitude) {
+            locationData = {
+                type: 'Point',
+                coordinates: [parseFloat(req.body.longitude), parseFloat(req.body.latitude)],
+            };
+        }
+
+        const incident = new Incident({
+            title: req.body.title,
+            description: req.body.description,
+            category: req.body.category,
+            location: locationData,
+            address: req.body.address,
+            image: req.body.image,
+            reportedBy: req.user._id,  // Correct field name matching the model
+            status: 'OPEN',            // Matches the model's enum values
+        });
+
         const newIncident = await incident.save();
         res.status(201).json(newIncident);
     } catch (err) {
+        console.error('Incident creation error:', err);
         res.status(400).json({ message: err.message });
     }
 });

@@ -61,9 +61,9 @@ router.post('/login', async (req, res) => {
 
         if (user && (await user.matchPassword(password))) {
             // Get stats for login response too
-            const total = await Incident.countDocuments({ user: user._id });
-            const resolved = await Incident.countDocuments({ user: user._id, status: 'Resolved' });
-            const pending = await Incident.countDocuments({ user: user._id, status: { $in: ['Open', 'In Progress'] } });
+            const total = await Incident.countDocuments({ reportedBy: user._id });
+            const resolved = await Incident.countDocuments({ reportedBy: user._id, status: 'RESOLVED' });
+            const pending = await Incident.countDocuments({ reportedBy: user._id, status: { $in: ['OPEN', 'IN_PROGRESS', 'ACCEPTED'] } });
 
             res.json({
                 _id: user._id,
@@ -92,9 +92,9 @@ router.post('/login', async (req, res) => {
 router.get('/me', protect, async (req, res) => {
     try {
         const user = req.user;
-        const total = await Incident.countDocuments({ user: user._id });
-        const resolved = await Incident.countDocuments({ user: user._id, status: 'Resolved' });
-        const pending = await Incident.countDocuments({ user: user._id, status: { $in: ['Open', 'In Progress'] } });
+        const total = await Incident.countDocuments({ reportedBy: user._id });
+        const resolved = await Incident.countDocuments({ reportedBy: user._id, status: 'RESOLVED' });
+        const pending = await Incident.countDocuments({ reportedBy: user._id, status: { $in: ['OPEN', 'IN_PROGRESS', 'ACCEPTED'] } });
 
         res.json({
             ...user._doc,
@@ -129,9 +129,9 @@ router.put('/profile', protect, async (req, res) => {
 
             const updatedUser = await user.save();
 
-            const total = await Incident.countDocuments({ user: updatedUser._id });
-            const resolved = await Incident.countDocuments({ user: updatedUser._id, status: 'Resolved' });
-            const pending = await Incident.countDocuments({ user: updatedUser._id, status: { $in: ['Open', 'In Progress'] } });
+            const total = await Incident.countDocuments({ reportedBy: updatedUser._id });
+            const resolved = await Incident.countDocuments({ reportedBy: updatedUser._id, status: 'RESOLVED' });
+            const pending = await Incident.countDocuments({ reportedBy: updatedUser._id, status: { $in: ['OPEN', 'IN_PROGRESS', 'ACCEPTED'] } });
 
             res.json({
                 _id: updatedUser._id,

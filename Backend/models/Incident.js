@@ -62,6 +62,10 @@ const incidentSchema = new mongoose.Schema(
       },
     },
 
+    address: {
+      type: String,
+    },
+
     image: {
       type: String,
     },

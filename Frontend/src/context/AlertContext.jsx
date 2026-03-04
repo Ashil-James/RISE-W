@@ -45,11 +45,13 @@ export const AlertProvider = ({ children }) => {
             };
 
             // Map frontend Alert fields to Backend Broadcast fields
+            // The broadcast model's `type` requires specific enum values
+            // The user's title goes into the message since `type` is an enum
             const dataToPost = {
-                type: alertData.title,
+                type: 'SAFETY_ALERT', // Default enum value; can be extended with a selector
                 severity: alertData.type === 'critical' ? 'High' : alertData.type === 'warning' ? 'Medium' : 'Low',
-                location: alertData.location,
-                message: alertData.message
+                location: alertData.location || 'Unknown',
+                message: alertData.title + (alertData.message ? ': ' + alertData.message : ''),
             };
 
             await axios.post('/api/v1/broadcasts', dataToPost, config);

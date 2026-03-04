@@ -154,6 +154,9 @@ const ReportIncident = () => {
       location: formData.address || (coords
         ? `GPS: ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`
         : "Manual Location Entry"),
+      address: formData.address || "",
+      latitude: coords?.lat || null,
+      longitude: coords?.lng || null,
       userImage: uploadedImageUrl || selectedImage, // Fallback to local preview if URL fetch fails but still submitted
       date: "Just now",
       status: "Open",

@@ -39,17 +39,17 @@ export const ReportProvider = ({ children }) => {
           throw new Error('Failed to fetch reports');
         }
         const data = await response.json();
-        
+
         const mappedReports = data.map(item => ({
           id: item._id,
           issue: item.title,
           description: item.description,
-          date: item.date,
+          date: item.createdAt || item.date,
           category: item.category || "General",
-          location: item.location || "Unknown",
-          status: item.status || "Open",
+          location: item.address || "Unknown",
+          status: item.status === 'RESOLVED' ? 'Resolved' : item.status === 'CLOSED' ? 'Closed' : 'Open',
           image: item.image,
-          statusColor: item.status === 'Resolved' ? "text-blue-500 bg-blue-500/10" : "text-orange-500 bg-orange-500/10",
+          statusColor: (item.status === 'RESOLVED' || item.status === 'VERIFIED') ? "text-blue-500 bg-blue-500/10" : item.status === 'CLOSED' ? "text-emerald-500 bg-emerald-500/10" : "text-orange-500 bg-orange-500/10",
         }));
         setReports(mappedReports);
       } catch (err) {
@@ -81,11 +81,13 @@ export const ReportProvider = ({ children }) => {
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          title: newReport.issue, // Mapping 'issue' to 'title'
+          title: newReport.issue,
           description: newReport.description,
           category: newReport.category,
-          location: newReport.location,
-          image: newReport.userImage, // Base64 image
+          latitude: newReport.latitude,
+          longitude: newReport.longitude,
+          address: newReport.address,
+          image: newReport.userImage,
         }),
       });
 
