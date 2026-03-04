@@ -127,7 +127,7 @@ const ReportIncident = () => {
       formData.append("image", imageFile);
 
       try {
-        const response = await fetch("http://localhost:5000/api/v1/upload", {
+        const response = await fetch("/api/v1/upload", {
           method: "POST",
           body: formData,
         });
@@ -137,7 +137,7 @@ const ReportIncident = () => {
         }
 
         const data = await response.json();
-        uploadedImageUrl = data.url; // Use Cloudinary secure URL
+        uploadedImageUrl = data.url;
       } catch (error) {
         console.error("Image upload failed:", error);
         alert("Failed to upload image. Submitting without it.");
@@ -332,7 +332,7 @@ const ReportIncident = () => {
                   className="w-full h-full object-cover"
                 />
                 <button
-                  onClick={() => setSelectedImage(null)}
+                  onClick={() => { setSelectedImage(null); setImageFile(null); }}
                   className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full"
                 >
                   <X size={16} />
