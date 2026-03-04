@@ -1,31 +1,45 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const broadcastSchema = new mongoose.Schema({
+const broadcastSchema = new mongoose.Schema(
+  {
     type: {
-        type: String,
-        required: true,
+      type: String,
+      enum: ["WILDLIFE_ALERT", "ROAD_BLOCK", "UTILITY_WARNING", "SAFETY_ALERT"],
+      required: true,
     },
-    severity: {
-        type: String,
-        required: true,
-        enum: ['High', 'Medium', 'Low'],
-    },
-    location: {
-        type: String,
-        required: true,
-    },
-    message: {
-        type: String,
-        required: true,
-    },
-    isAuthority: {
-        type: Boolean,
-        default: false,
-    },
-}, {
-    timestamps: true,
-});
 
-const Broadcast = mongoose.model('Broadcast', broadcastSchema);
+    severity: {
+      type: String,
+      enum: ["High", "Medium", "Low"],
+      required: true,
+    },
+
+    location: {
+      type: String,
+      required: true,
+    },
+
+    message: {
+      type: String,
+      required: true,
+    },
+
+    isAuthority: {
+      type: Boolean,
+      default: false,
+    },
+
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
+
+const Broadcast = mongoose.model("Broadcast", broadcastSchema);
 
 export default Broadcast;
