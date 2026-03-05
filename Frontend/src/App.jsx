@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 
 // --- COMPONENTS ---
 import Layout from "./components/Layout"; // User Layout (Navbar, Footer)
@@ -26,6 +26,24 @@ import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import Broadcasts from "./pages/admin/Broadcasts";
 import AdminUsers from "./pages/admin/AdminUsers";
+
+// --- AUTHORITY PAGES ---
+import AuthorityLayout from "./pages/authority/AuthorityLayout";
+import AuthorityWaterDashboard from "./pages/authority/AuthorityWaterDashboard";
+import AuthorityWaterMatrix from "./pages/authority/AuthorityWaterMatrix";
+import AuthorityWaterCase from "./pages/authority/AuthorityWaterCase";
+import AuthorityPowerDashboard from "./pages/authority/AuthorityPowerDashboard";
+import AuthorityPowerMatrix from "./pages/authority/AuthorityPowerMatrix";
+import AuthorityPowerCase from "./pages/authority/AuthorityPowerCase";
+import AuthorityRoadDashboard from "./pages/authority/AuthorityRoadDashboard";
+import AuthorityRoadMatrix from "./pages/authority/AuthorityRoadMatrix";
+import AuthorityRoadCase from "./pages/authority/AuthorityRoadCase";
+import AuthorityProfile from "./pages/authority/AuthorityProfile";
+import AuthoritySettings from "./pages/authority/AuthoritySettings";
+import AuthorityHelp from "./pages/authority/AuthorityHelp";
+import AuthorityReports from "./pages/authority/AuthorityReports";
+import AuthorityBroadcastAlerts from "./pages/authority/AuthorityBroadcastAlerts";
+
 
 function App() {
   return (
@@ -71,6 +89,53 @@ function App() {
                   <Route path="dashboard" element={<AdminDashboard />} />
                   <Route path="broadcasts" element={<Broadcasts />} />
                   <Route path="users" element={<AdminUsers />} />
+                </Route>
+
+                {/* --- AUTHORITY ROUTES (Protected) --- */}
+                {/* Only Water Authority users can access /authority paths */}
+                <Route
+                  path="/authority"
+                  element={
+                    <PrivateRoute allowedRoles={["authority", "water_authority", "power_authority", "road_authority"]}>
+                      <AuthorityLayout />
+                    </PrivateRoute>
+                  }
+                >
+                  <Route index element={<Navigate to="water/dashboard" replace />} />
+                  <Route path="profile" element={<AuthorityProfile />} />
+
+                  {/* Water Authority */}
+                  <Route path="water/dashboard" element={<AuthorityWaterDashboard />} />
+                  <Route path="water/matrix" element={<AuthorityWaterMatrix />} />
+                  <Route path="water/case/:id" element={<AuthorityWaterCase />} />
+                  <Route path="water/profile" element={<AuthorityProfile />} />
+                  <Route path="water/settings" element={<AuthoritySettings />} />
+                  <Route path="water/help" element={<AuthorityHelp />} />
+                  <Route path="water/reports" element={<AuthorityReports />} />
+                  <Route path="water/broadcasts" element={<AuthorityBroadcastAlerts />} />
+
+
+                  {/* Power Authority */}
+                  <Route path="power/dashboard" element={<AuthorityPowerDashboard />} />
+                  <Route path="power/matrix" element={<AuthorityPowerMatrix />} />
+                  <Route path="power/case/:id" element={<AuthorityPowerCase />} />
+                  <Route path="power/profile" element={<AuthorityProfile />} />
+                  <Route path="power/settings" element={<AuthoritySettings />} />
+                  <Route path="power/help" element={<AuthorityHelp />} />
+                  <Route path="power/reports" element={<AuthorityReports />} />
+                  <Route path="power/broadcasts" element={<AuthorityBroadcastAlerts />} />
+
+
+                  {/* Road Infrastructure Authority */}
+                  <Route path="road/dashboard" element={<AuthorityRoadDashboard />} />
+                  <Route path="road/matrix" element={<AuthorityRoadMatrix />} />
+                  <Route path="road/case/:id" element={<AuthorityRoadCase />} />
+                  <Route path="road/profile" element={<AuthorityProfile />} />
+                  <Route path="road/settings" element={<AuthoritySettings />} />
+                  <Route path="road/help" element={<AuthorityHelp />} />
+                  <Route path="road/reports" element={<AuthorityReports />} />
+                  <Route path="road/broadcasts" element={<AuthorityBroadcastAlerts />} />
+
                 </Route>
 
                 {/* --- CATCH ALL --- */}

@@ -30,7 +30,7 @@ const Home = () => {
     const date = new Date(dateString);
     const now = new Date();
     const diffInMinutes = Math.floor((now - date) / 60000);
-    
+
     if (diffInMinutes < 1) return 'Just now';
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
     const diffInHours = Math.floor(diffInMinutes / 60);
@@ -152,14 +152,17 @@ const Home = () => {
             variants={itemVariants}
             whileHover={{ scale: 1.01 }}
           >
-            <div className={`p-2 rounded-lg ${getAlertColor(latestAlert.type).split(' ')[1]} ${getAlertColor(latestAlert.type).split(' ')[0]}`}>
+            <div className={`p-2 rounded-lg ${latestAlert.type === 'critical' ? 'text-white bg-red-600 animate-pulse' :
+                getAlertColor(latestAlert.type).split(' ')[1] + ' ' + getAlertColor(latestAlert.type).split(' ')[0]
+              }`}>
               {getAlertIcon(latestAlert.type)}
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-0.5">
-                <h4 className={`${getAlertColor(latestAlert.type).split(' ')[0]} text-xs font-bold uppercase tracking-wider`}>
+                <h4 className={`${latestAlert.type === 'critical' ? 'text-red-500' : getAlertColor(latestAlert.type).split(' ')[0]} text-xs font-bold uppercase tracking-wider`}>
                   {latestAlert.title}
                 </h4>
+
                 {latestAlert.isAuthority ? (
                   <span className="bg-emerald-500/20 text-emerald-500 text-[8px] px-1.5 py-0.5 rounded-full font-black uppercase tracking-tighter">Official</span>
                 ) : (

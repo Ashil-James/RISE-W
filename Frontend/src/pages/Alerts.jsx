@@ -17,7 +17,7 @@ const Alerts = () => {
   const getStyles = (type) => {
     switch (type) {
       case "critical":
-        return "border-l-4 border-l-red-500 bg-red-500/5";
+        return "border-2 border-red-500 bg-red-500/10 shadow-[0_0_15px_rgba(239,68,68,0.2)] animate-pulse-subtle";
       case "warning":
         return "border-l-4 border-l-yellow-500 bg-yellow-500/5";
       case "info":
@@ -26,6 +26,7 @@ const Alerts = () => {
         return "border-l-4 border-l-gray-500 bg-gray-500/5";
     }
   };
+
 
   const getIconColor = (type) => {
     switch (type) {
@@ -44,7 +45,7 @@ const Alerts = () => {
     const date = new Date(dateString);
     const now = new Date();
     const diffInMinutes = Math.floor((now - date) / 60000);
-    
+
     if (diffInMinutes < 1) return 'Just now';
     if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
     const diffInHours = Math.floor(diffInMinutes / 60);
