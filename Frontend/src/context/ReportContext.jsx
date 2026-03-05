@@ -88,7 +88,7 @@ export const ReportProvider = ({ children }) => {
           latitude: newReport.latitude,
           longitude: newReport.longitude,
           address: newReport.address,
-          image: newReport.userImage,
+          image: newReport.image, // Updated from userImage to image
         }),
       });
 

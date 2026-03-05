@@ -1,12 +1,15 @@
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import User from './models/User.js';
+import { User } from '../models/user.model.js';
+import { DB_NAME } from '../constants.js';
 
-dotenv.config();
+dotenv.config({
+    path: "./.env"
+});
 
 const createAdmin = async () => {
     try {
-        await mongoose.connect(process.env.MONGODB_URI);
+        await mongoose.connect(`${process.env.MONGODB_URI}/${DB_NAME}`);
         console.log('MongoDB Connected');
 
         const adminEmail = 'admin@rise.com';

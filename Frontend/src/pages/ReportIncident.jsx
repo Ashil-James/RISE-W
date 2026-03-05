@@ -157,7 +157,7 @@ const ReportIncident = () => {
       address: formData.address || "",
       latitude: coords?.lat || null,
       longitude: coords?.lng || null,
-      userImage: uploadedImageUrl || selectedImage, // Fallback to local preview if URL fetch fails but still submitted
+      image: uploadedImageUrl || null, // Ensure 'image' is used instead of 'userImage' and prevent blob URL fallback
       date: "Just now",
       status: "Open",
       statusColor: "text-orange-500 bg-orange-500/10",
