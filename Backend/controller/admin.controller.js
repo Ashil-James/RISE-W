@@ -97,21 +97,17 @@ export const updateUserRole = asyncHandler(async (req, res) => {
   const { role } = req.body;
 
   if (!["user", "admin", "authority"].includes(role)) {
-    return res
-      .status(400)
-      .json(new ApiResponse(400, null, "Invalid role"));
+    return res.status(400).json(new ApiResponse(400, null, "Invalid role"));
   }
 
   const user = await User.findByIdAndUpdate(
     userId,
     { role },
-    { new: true }
+    { new: true },
   ).select("-password");
 
   if (!user) {
-    return res
-      .status(404)
-      .json(new ApiResponse(404, null, "User not found"));
+    return res.status(404).json(new ApiResponse(404, null, "User not found"));
   }
 
   return res

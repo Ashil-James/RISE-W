@@ -53,6 +53,7 @@ router.post('/register', asyncHandler(async (req, res) => {
             email: user.email,
             phoneNumber: user.phoneNumber,
             role: user.role,
+            department: user.department,
             token: generateToken(user._id),
         }, 'User registered successfully')
     );
@@ -79,6 +80,7 @@ router.post('/login', asyncHandler(async (req, res) => {
             email: user.email,
             phoneNumber: user.phoneNumber,
             role: user.role,
+            department: user.department,
             token: generateToken(user._id),
             stats,
         }, 'Login successful')
@@ -134,6 +136,7 @@ router.put('/profile', protect, asyncHandler(async (req, res) => {
             phoneNumber: updatedUser.phoneNumber,
             location: updatedUser.location,
             role: updatedUser.role,
+            department: updatedUser.department,
             token: generateToken(updatedUser._id),
             stats,
         }, 'Profile updated successfully')

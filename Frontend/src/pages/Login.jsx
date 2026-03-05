@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Mail, Lock, ArrowRight, Leaf } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Mail, Lock, ArrowRight, Leaf, Droplets, Zap, Construction } from "lucide-react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import ThemeToggle from "../components/ThemeToggle";
 
@@ -10,6 +10,7 @@ import { useUser } from "../context/UserContext";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { authorityType } = useParams();
 
   // CHANGE 2: Destructure from useAuth() and useUser()
   const { user, login: authLogin } = useAuth();
@@ -22,13 +23,78 @@ const Login = () => {
     password: "",
   });
 
+  // Dynamic Theme Configuration
+  const getTheme = () => {
+    switch (authorityType?.toLowerCase()) {
+      case "water":
+        return {
+          name: "Water Authority",
+          icon: Droplets,
+          gradient: "from-sky-500 to-blue-600",
+          bgBlob1: "bg-sky-400/30",
+          bgBlob2: "bg-blue-400/30",
+          bgBlob3: "bg-cyan-400/30",
+          btnColor: "from-sky-600 to-blue-600",
+          btnHover: "hover:from-sky-700 hover:to-blue-700",
+          accentText: "text-sky-600",
+        };
+      case "power":
+        return {
+          name: "Power Authority",
+          icon: Zap,
+          gradient: "from-amber-500 to-orange-600",
+          bgBlob1: "bg-amber-400/30",
+          bgBlob2: "bg-orange-400/30",
+          bgBlob3: "bg-yellow-400/30",
+          btnColor: "from-amber-600 to-orange-600",
+          btnHover: "hover:from-amber-700 hover:to-orange-700",
+          accentText: "text-amber-600",
+        };
+      case "road":
+        return {
+          name: "Road Authority",
+          icon: Construction,
+          gradient: "from-orange-500 to-red-600",
+          bgBlob1: "bg-orange-400/30",
+          bgBlob2: "bg-red-400/30",
+          bgBlob3: "bg-amber-400/30",
+          btnColor: "from-orange-600 to-red-600",
+          btnHover: "hover:from-orange-700 hover:to-red-700",
+          accentText: "text-orange-600",
+        };
+      default:
+        return {
+          name: "Wayanad Township",
+          icon: Leaf,
+          gradient: "from-emerald-500 to-teal-500",
+          bgBlob1: "bg-emerald-400/30",
+          bgBlob2: "bg-teal-400/30",
+          bgBlob3: "bg-green-400/30",
+          btnColor: "from-emerald-600 to-teal-600",
+          btnHover: "hover:from-emerald-700 hover:to-teal-700",
+          accentText: "text-emerald-600",
+        };
+    }
+  };
+
+  const theme = getTheme();
+
   useEffect(() => {
-    // CHANGE 3: Redirect based on Role
+    // CHANGE 3: Redirect based on Role and Department
     if (user) {
       const userRole = user.role || "user";
-      if (userRole === "admin") navigate("/admin/dashboard");
-      else if (userRole === "authority") navigate("/authority/dashboard");
-      else navigate("/");
+      const department = user.department?.toUpperCase();
+
+      if (userRole === "admin") {
+        navigate("/admin/dashboard");
+      } else if (userRole === "authority" || userRole.includes("authority")) {
+        if (department === "WATER") navigate("/authority/water/dashboard");
+        else if (department === "ELECTRICITY" || userRole === "power_authority") navigate("/authority/power/dashboard");
+        else if (department === "STREETLIGHT" || department === "CIVIL" || userRole === "road_authority") navigate("/authority/road/dashboard");
+        else navigate("/authority/water/dashboard"); // Default authority redirect
+      } else {
+        navigate("/");
+      }
     }
   }, [user, navigate]);
 
@@ -71,9 +137,9 @@ const Login = () => {
     <div className="relative min-h-screen w-full overflow-hidden flex items-center justify-center p-4">
       {/* BACKGROUND BLOBS */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
-        <div className="absolute top-0 left-1/4 w-72 h-72 bg-emerald-400/30 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div className="absolute top-0 right-1/4 w-72 h-72 bg-teal-400/30 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob delay-200"></div>
-        <div className="absolute -bottom-8 left-1/3 w-72 h-72 bg-green-400/30 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob delay-300"></div>
+        <div className={`absolute top-0 left-1/4 w-72 h-72 ${theme.bgBlob1} rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob`}></div>
+        <div className={`absolute top-0 right-1/4 w-72 h-72 ${theme.bgBlob2} rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob delay-200`}></div>
+        <div className={`absolute -bottom-8 left-1/3 w-72 h-72 ${theme.bgBlob3} rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob delay-300`}></div>
       </div>
 
       <div className="absolute top-6 right-6 z-20">
@@ -83,14 +149,16 @@ const Login = () => {
       <div className="w-full max-w-md animate-fade-up">
         <div className="bg-white/30 dark:bg-black/40 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-8 md:p-10">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-500 shadow-lg text-white mb-4">
-              <Leaf className="w-7 h-7" />
+            <div className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr ${theme.gradient} shadow-lg text-white mb-4`}>
+              <theme.icon className="w-7 h-7" />
             </div>
             <h2 className="text-3xl font-bold text-gray-800 dark:text-white tracking-tight">
-              Welcome Back
+              {theme.name === "Wayanad Township" ? "Welcome Back" : `Sign In`}
             </h2>
             <p className="text-gray-500 dark:text-gray-300 mt-2">
-              Sign in to manage Wayanad Township
+              {theme.name === "Wayanad Township" 
+                ? "Sign in to manage Wayanad Township" 
+                : `Login to ${theme.name} Dashboard`}
             </p>
             {error && (
               <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -142,7 +210,7 @@ const Login = () => {
 
             <button
               type="submit"
-              className="w-full flex items-center justify-center py-3.5 px-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold rounded-xl shadow-lg transform hover:-translate-y-0.5 transition-all duration-200"
+              className={`w-full flex items-center justify-center py-3.5 px-4 bg-gradient-to-r ${theme.btnColor} ${theme.btnHover} text-white font-semibold rounded-xl shadow-lg transform hover:-translate-y-0.5 transition-all duration-200`}
             >
               {loading ? "Signing in..." : "Sign In"}
               {!loading && <ArrowRight className="ml-2 h-5 w-5" />}
@@ -154,7 +222,7 @@ const Login = () => {
               Don't have an account?{" "}
               <Link
                 to="/signup"
-                className="font-semibold text-emerald-600 hover:underline"
+                className={`font-semibold ${theme.accentText} hover:underline`}
               >
                 Create Account
               </Link>

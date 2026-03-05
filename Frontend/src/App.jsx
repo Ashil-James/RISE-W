@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom
 // --- COMPONENTS ---
 import Layout from "./components/Layout"; // User Layout (Navbar, Footer)
 import PrivateRoute from "./components/PrivateRoute"; // Route Guard
+import AuthorityRedirect from "./components/AuthorityRedirect"; // [NEW] Handles Authority Redirection
 
 // --- CONTEXTS ---
 import { AuthProvider } from "./context/AuthContext"; // [NEW] Handles Login Roles
@@ -57,6 +58,7 @@ function App() {
               <Routes>
                 {/* --- PUBLIC ROUTES --- */}
                 <Route path="/login" element={<Login />} />
+                <Route path="/login/:authorityType" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
 
                 {/* --- USER ROUTES (Protected) --- */}
@@ -101,7 +103,7 @@ function App() {
                     </PrivateRoute>
                   }
                 >
-                  <Route index element={<Navigate to="water/dashboard" replace />} />
+                  <Route index element={<AuthorityRedirect />} />
                   <Route path="profile" element={<AuthorityProfile />} />
 
                   {/* Water Authority */}

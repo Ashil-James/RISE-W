@@ -21,7 +21,7 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { user } = useUser();
   const [loading, setLoading] = useState(true);
-  
+
   // Stats state
   const [stats, setStats] = useState({
     total: 0,
@@ -49,6 +49,8 @@ const AdminDashboard = () => {
           axios.get("/api/v1/admin/incident", config),
         ]);
 
+        console.log(incidentsRes.data.data);
+
         if (statsRes.data.success) {
           const s = statsRes.data.data;
           setStats({
@@ -61,12 +63,15 @@ const AdminDashboard = () => {
 
         if (incidentsRes.data.success) {
           // Take only the first 5 for the dashboard feed
-          const allIncidents = incidentsRes.data.data.map(inc => ({
+          const allIncidents = incidentsRes.data.data.map((inc) => ({
             id: inc.reportId || `#${inc._id.substring(0, 8)}`,
-            type: inc.type,
-            loc: inc.location?.address || "Unknown Location",
+            type: inc.title,
+            reporter: inc.reportedBy?.name || "Anonymous",
+            loc: inc.address || "Unknown Location",
             date: new Date(inc.createdAt).toLocaleDateString(),
-            status: inc.status.charAt(0).toUpperCase() + inc.status.slice(1).toLowerCase(),
+            status:
+              inc.status.charAt(0).toUpperCase() +
+              inc.status.slice(1).toLowerCase(),
             priority: inc.priority || "Medium",
           }));
           setReports(allIncidents.slice(0, 5));
@@ -127,8 +132,8 @@ const AdminDashboard = () => {
           </p>
         </div>
         <div className="flex gap-3">
-          <button 
-            onClick={() => navigate('/admin/broadcasts')}
+          <button
+            onClick={() => navigate("/admin/broadcasts")}
             className="px-5 py-2.5 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-xl font-medium transition-all flex items-center gap-2"
           >
             <AlertTriangle size={18} /> Broadcast Alert
@@ -177,7 +182,6 @@ const AdminDashboard = () => {
 
       {/* --- MAIN CONTENT SPLIT --- */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
         {/* LEFT: RECENT ACTIVITY TABLE */}
         <motion.div
           className="lg:col-span-2 bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-[2.5rem] overflow-hidden shadow-2xl"
@@ -189,10 +193,13 @@ const AdminDashboard = () => {
               Live Incident Feed
             </h3>
             <div className="relative">
-              <Search className="absolute left-3 top-2.5 text-gray-500" size={16} />
-              <input 
-                type="text" 
-                placeholder="Search ID or Type..." 
+              <Search
+                className="absolute left-3 top-2.5 text-gray-500"
+                size={16}
+              />
+              <input
+                type="text"
+                placeholder="Search ID or Type..."
                 className="bg-black/40 border border-white/10 text-white text-sm rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:border-emerald-500 w-48 transition-all"
               />
             </div>
@@ -202,10 +209,18 @@ const AdminDashboard = () => {
             <table className="w-full">
               <thead className="bg-white/5">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Issue Details</th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Location</th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">Action</th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                    Issue Details
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                    Location
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">
+                    Action
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -217,8 +232,12 @@ const AdminDashboard = () => {
                     >
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
-                          <span className="text-white font-bold text-sm">{report.type}</span>
-                          <span className="text-xs text-gray-500 font-mono">{report.id} • {report.date}</span>
+                          <span className="text-white font-bold text-sm">
+                            {report.type}
+                          </span>
+                          <span className="text-xs text-gray-500 font-mono">
+                            {report.reporter} • {report.date} • {report.id}
+                          </span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -239,7 +258,10 @@ const AdminDashboard = () => {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan="4" className="px-6 py-12 text-center text-gray-500 italic">
+                    <td
+                      colSpan="4"
+                      className="px-6 py-12 text-center text-gray-500 italic"
+                    >
                       No incidents found.
                     </td>
                   </tr>
@@ -256,7 +278,6 @@ const AdminDashboard = () => {
 
         {/* RIGHT: QUICK ALERTS & INSIGHTS */}
         <motion.div className="space-y-6" variants={itemVariants}>
-          
           {/* Active Alerts Card */}
           <div className="bg-gradient-to-br from-red-900/40 to-neutral-900/80 backdrop-blur-xl border border-red-500/20 rounded-3xl p-6 relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-40 transition-opacity">
@@ -264,20 +285,24 @@ const AdminDashboard = () => {
             </div>
             <h3 className="text-lg font-bold text-white mb-1">Active Alerts</h3>
             <p className="text-red-400 text-sm mb-6">System Broadcasts</p>
-            
+
             <div className="space-y-3">
               <div className="bg-black/40 rounded-xl p-3 border-l-4 border-red-500 flex justify-between items-center">
                 <div>
-                  <h4 className="text-white font-bold text-sm">Emergency Protocols</h4>
-                  <p className="text-xs text-gray-400">Manage all system wide alerts</p>
+                  <h4 className="text-white font-bold text-sm">
+                    Emergency Protocols
+                  </h4>
+                  <p className="text-xs text-gray-400">
+                    Manage all system wide alerts
+                  </p>
                 </div>
                 <div className="h-2 w-2 rounded-full bg-red-500 animate-ping"></div>
               </div>
             </div>
 
-            <button 
-               onClick={() => navigate('/admin/broadcasts')}
-               className="w-full mt-6 bg-red-600/20 border border-red-500/30 hover:bg-red-600 hover:text-white text-red-400 py-3 rounded-xl font-bold text-sm transition-all"
+            <button
+              onClick={() => navigate("/admin/broadcasts")}
+              className="w-full mt-6 bg-red-600/20 border border-red-500/30 hover:bg-red-600 hover:text-white text-red-400 py-3 rounded-xl font-bold text-sm transition-all"
             >
               Manage Broadcasts
             </button>
@@ -294,13 +319,18 @@ const AdminDashboard = () => {
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400">Resolution Rate</span>
                   <span className="text-white font-bold">
-                    {stats.total > 0 ? Math.round((stats.resolved / stats.total) * 100) : 0}%
+                    {stats.total > 0
+                      ? Math.round((stats.resolved / stats.total) * 100)
+                      : 0}
+                    %
                   </span>
                 </div>
                 <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-emerald-500 rounded-full transition-all duration-1000" 
-                    style={{ width: `${stats.total > 0 ? (stats.resolved / stats.total) * 100 : 0}%` }}
+                  <div
+                    className="h-full bg-emerald-500 rounded-full transition-all duration-1000"
+                    style={{
+                      width: `${stats.total > 0 ? (stats.resolved / stats.total) * 100 : 0}%`,
+                    }}
                   ></div>
                 </div>
               </div>
@@ -308,19 +338,23 @@ const AdminDashboard = () => {
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400">Pending Rate</span>
                   <span className="text-white font-bold">
-                    {stats.total > 0 ? Math.round((stats.pending / stats.total) * 100) : 0}%
+                    {stats.total > 0
+                      ? Math.round((stats.pending / stats.total) * 100)
+                      : 0}
+                    %
                   </span>
                 </div>
                 <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-amber-500 rounded-full transition-all duration-1000" 
-                    style={{ width: `${stats.total > 0 ? (stats.pending / stats.total) * 100 : 0}%` }}
+                  <div
+                    className="h-full bg-amber-500 rounded-full transition-all duration-1000"
+                    style={{
+                      width: `${stats.total > 0 ? (stats.pending / stats.total) * 100 : 0}%`,
+                    }}
                   ></div>
                 </div>
               </div>
             </div>
           </div>
-
         </motion.div>
       </div>
     </motion.div>
@@ -333,27 +367,40 @@ const StatsCard = ({ title, value, trend, icon: Icon, color, isAlert }) => {
   const colors = {
     blue: "from-blue-600 to-cyan-500 text-blue-100 shadow-blue-500/20",
     amber: "from-amber-500 to-orange-500 text-amber-100 shadow-amber-500/20",
-    emerald: "from-emerald-500 to-cyan-500 text-emerald-100 shadow-emerald-500/20",
-    purple: "from-purple-600 to-violet-500 text-purple-100 shadow-purple-500/20",
+    emerald:
+      "from-emerald-500 to-cyan-500 text-emerald-100 shadow-emerald-500/20",
+    purple:
+      "from-purple-600 to-violet-500 text-purple-100 shadow-purple-500/20",
   };
 
   const bgStyles = colors[color] || colors.blue;
 
   return (
-    <div className={`relative overflow-hidden rounded-[2rem] p-6 bg-neutral-900/40 border border-white/5 hover:border-emerald-500/30 transition-all duration-500 group`}>
-      <div className={`absolute -right-4 -top-4 w-24 h-24 rounded-full bg-gradient-to-br ${bgStyles} opacity-5 blur-2xl group-hover:opacity-20 transition-opacity`}></div>
-      
+    <div
+      className={`relative overflow-hidden rounded-[2rem] p-6 bg-neutral-900/40 border border-white/5 hover:border-emerald-500/30 transition-all duration-500 group`}
+    >
+      <div
+        className={`absolute -right-4 -top-4 w-24 h-24 rounded-full bg-gradient-to-br ${bgStyles} opacity-5 blur-2xl group-hover:opacity-20 transition-opacity`}
+      ></div>
+
       <div className="flex justify-between items-start mb-5">
-        <div className={`p-3.5 rounded-2xl bg-gradient-to-br ${bgStyles} shadow-2xl group-hover:scale-110 transition-transform duration-500`}>
-          <Icon size={22} className="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
+        <div
+          className={`p-3.5 rounded-2xl bg-gradient-to-br ${bgStyles} shadow-2xl group-hover:scale-110 transition-transform duration-500`}
+        >
+          <Icon
+            size={22}
+            className="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"
+          />
         </div>
         {trend && (
-          <span className={`text-xs font-black px-2.5 py-1 rounded-full bg-black/40 border border-white/5 ${isAlert ? 'text-red-400' : 'text-emerald-400'}`}>
+          <span
+            className={`text-xs font-black px-2.5 py-1 rounded-full bg-black/40 border border-white/5 ${isAlert ? "text-red-400" : "text-emerald-400"}`}
+          >
             {trend}
           </span>
         )}
       </div>
-      
+
       <div>
         <h3 className="text-3xl font-bold text-white mb-1">{value}</h3>
         <p className="text-gray-400 text-sm font-medium">{title}</p>
@@ -373,7 +420,9 @@ const StatusBadge = ({ status }) => {
     <span
       className={`px-3 py-1 rounded-full text-xs font-bold border ${styles[status] || "bg-gray-800 text-gray-400"} flex items-center gap-1.5 w-fit`}
     >
-      <span className={`w-1.5 h-1.5 rounded-full ${status === 'Pending' ? 'bg-amber-500' : status === 'Resolved' ? 'bg-emerald-500' : 'bg-blue-500'}`}></span>
+      <span
+        className={`w-1.5 h-1.5 rounded-full ${status === "Pending" ? "bg-amber-500" : status === "Resolved" ? "bg-emerald-500" : "bg-blue-500"}`}
+      ></span>
       {status}
     </span>
   );
