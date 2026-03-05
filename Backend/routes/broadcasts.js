@@ -26,6 +26,11 @@ router.post('/', protect, asyncHandler(async (req, res) => {
         'ROAD_BLOCK': 'ROAD_BLOCK',
         'UTILITY_WARNING': 'UTILITY_WARNING',
         'SAFETY_ALERT': 'SAFETY_ALERT',
+        'Wildlife Alert': 'WILDLIFE_ALERT',
+        'Road Blockage': 'ROAD_BLOCK',
+        'Power Outage': 'UTILITY_WARNING',
+        'Water Supply': 'UTILITY_WARNING',
+        'Public Safety': 'SAFETY_ALERT',
     };
     const mappedType = typeMap[type] || 'SAFETY_ALERT';
 

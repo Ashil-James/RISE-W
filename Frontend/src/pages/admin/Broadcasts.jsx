@@ -11,8 +11,10 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { useAlerts } from "../../context/AlertContext";
+import { useUser } from "../../context/UserContext";
 
 const Broadcasts = () => {
+  const { user } = useUser();
   const { refreshAlerts } = useAlerts();
   const [formData, setFormData] = useState({
     type: "Wildlife Alert",
@@ -28,7 +30,8 @@ const Broadcasts = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
+      if (!user?.token) throw new Error("Authentication required");
+
       const config = {
         headers: {
           Authorization: `Bearer ${user.token}`,
@@ -46,7 +49,7 @@ const Broadcasts = () => {
       }, 3000);
     } catch (error) {
       console.error("Failed to send broadcast:", error);
-      alert(error.response?.data?.message || "Failed to send broadcast");
+      alert(error.response?.data?.message || error.message || "Failed to send broadcast");
     } finally {
       setLoading(false);
     }

@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.js";
 import incidentRoutes from "./routes/incidents.js";
 import broadcastRoutes from "./routes/broadcasts.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 import { ApiError } from "./utils/ApiError.js";
 
 // Connect to database
@@ -26,6 +27,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/incidents", incidentRoutes);
 app.use("/api/v1/broadcasts", broadcastRoutes);
 app.use("/api/v1/upload", uploadRoutes);
+app.use("/api/v1/admin", adminRoutes);
 
 // Global error handler
 app.use((err, req, res, next) => {

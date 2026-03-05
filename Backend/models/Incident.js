@@ -5,6 +5,7 @@ const incidentSchema = new mongoose.Schema(
     reportId: {
       type: String,
       unique: true,
+      default: () => `REP-${Math.random().toString(36).substring(2, 8).toUpperCase()}-${Date.now().toString().slice(-4)}`,
     },
 
     title: {
@@ -55,7 +56,6 @@ const incidentSchema = new mongoose.Schema(
       type: {
         type: String,
         enum: ["Point"],
-        default: "Point",
       },
       coordinates: {
         type: [Number], // [longitude, latitude]

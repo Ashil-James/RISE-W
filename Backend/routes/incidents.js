@@ -40,16 +40,21 @@ router.post('/', protect, asyncHandler(async (req, res) => {
         };
     }
 
-    const incident = new Incident({
+    const incidentData = {
         title: req.body.title,
         description: req.body.description,
         category: req.body.category,
-        location: locationData,
         address: req.body.address,
         image: req.body.image,
         reportedBy: req.user._id,
         status: 'OPEN',
-    });
+    };
+
+    if (locationData) {
+        incidentData.location = locationData;
+    }
+
+    const incident = new Incident(incidentData);
 
     const newIncident = await incident.save();
     res.status(201).json(new ApiResponse(201, newIncident, 'Incident reported successfully'));

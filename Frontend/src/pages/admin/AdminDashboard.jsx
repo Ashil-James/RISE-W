@@ -14,59 +14,74 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useUser } from "../../context/UserContext";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  // Mock Data - In a real app, fetch this from an API
+  const { user } = useUser();
+  const [loading, setLoading] = useState(true);
+  
+  // Stats state
   const [stats, setStats] = useState({
-    total: 124,
-    pending: 14,
-    resolved: 98,
-    active_alerts: 2,
+    total: 0,
+    pending: 0,
+    resolved: 0,
+    users: 0,
   });
 
-  const reports = [
-    {
-      id: "#2024-001",
-      type: "Street Light Failure",
-      loc: "Sector 4, Main Road",
-      date: "2 mins ago",
-      status: "Pending",
-      priority: "Medium",
-    },
-    {
-      id: "#2024-002",
-      type: "Water Pipe Burst",
-      loc: "Green Valley Apts",
-      date: "15 mins ago",
-      status: "In Progress",
-      priority: "High",
-    },
-    {
-      id: "#2024-003",
-      type: "Illegal Dumping",
-      loc: "Market Area, North",
-      date: "1 hour ago",
-      status: "Resolved",
-      priority: "Low",
-    },
-    {
-      id: "#2024-004",
-      type: "Pothole Repair",
-      loc: "Highway 66 Exit",
-      date: "3 hours ago",
-      status: "Pending",
-      priority: "Medium",
-    },
-    {
-      id: "#2024-005",
-      type: "Wild Animal Sighting",
-      loc: "Forest Edge Road",
-      date: "5 hours ago",
-      status: "Resolved",
-      priority: "High",
-    },
-  ];
+  // Reports state
+  const [reports, setReports] = useState([]);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        const config = {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+          },
+        };
+
+        // Fetch Stats and Incidents in parallel
+        const [statsRes, incidentsRes] = await Promise.all([
+          axios.get("/api/v1/admin/stats", config),
+          axios.get("/api/v1/admin/incident", config),
+        ]);
+
+        if (statsRes.data.success) {
+          const s = statsRes.data.data;
+          setStats({
+            total: s.totalIncidents,
+            pending: s.openIncidents,
+            resolved: s.resolvedIncidents,
+            users: s.totalUsers,
+          });
+        }
+
+        if (incidentsRes.data.success) {
+          // Take only the first 5 for the dashboard feed
+          const allIncidents = incidentsRes.data.data.map(inc => ({
+            id: inc.reportId || `#${inc._id.substring(0, 8)}`,
+            type: inc.type,
+            loc: inc.location?.address || "Unknown Location",
+            date: new Date(inc.createdAt).toLocaleDateString(),
+            status: inc.status.charAt(0).toUpperCase() + inc.status.slice(1).toLowerCase(),
+            priority: inc.priority || "Medium",
+          }));
+          setReports(allIncidents.slice(0, 5));
+        }
+      } catch (error) {
+        console.error("Error fetching admin dashboard data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user?.token) {
+      fetchDashboardData();
+    }
+  }, [user?.token]);
 
   // Animation Variants
   const containerVariants = {
@@ -81,6 +96,14 @@ const AdminDashboard = () => {
     hidden: { y: 20, opacity: 0 },
     visible: { y: 0, opacity: 1 },
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -145,7 +168,7 @@ const AdminDashboard = () => {
         />
         <StatsCard
           title="Active Users"
-          value="1.2k"
+          value={stats.users}
           trend="+24"
           icon={Users}
           color="purple"
@@ -186,33 +209,41 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {reports.map((report) => (
-                  <tr
-                    key={report.id}
-                    className="hover:bg-white/5 transition-colors group cursor-pointer"
-                  >
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="text-white font-bold text-sm">{report.type}</span>
-                        <span className="text-xs text-gray-500 font-mono">{report.id} • {report.date}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 text-gray-300 text-sm">
-                        <MapPin size={14} className="text-gray-500" />
-                        {report.loc}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <StatusBadge status={report.status} />
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button className="p-2 bg-white/5 hover:bg-emerald-500 hover:text-white text-gray-400 rounded-lg transition-all">
-                        <ArrowUpRight size={16} />
-                      </button>
+                {reports.length > 0 ? (
+                  reports.map((report) => (
+                    <tr
+                      key={report.id}
+                      className="hover:bg-white/5 transition-colors group cursor-pointer"
+                    >
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col">
+                          <span className="text-white font-bold text-sm">{report.type}</span>
+                          <span className="text-xs text-gray-500 font-mono">{report.id} • {report.date}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2 text-gray-300 text-sm">
+                          <MapPin size={14} className="text-gray-500" />
+                          {report.loc}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <StatusBadge status={report.status} />
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <button className="p-2 bg-white/5 hover:bg-emerald-500 hover:text-white text-gray-400 rounded-lg transition-all">
+                          <ArrowUpRight size={16} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="4" className="px-6 py-12 text-center text-gray-500 italic">
+                      No incidents found.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
@@ -232,13 +263,13 @@ const AdminDashboard = () => {
               <AlertTriangle size={100} className="text-red-500 rotate-12" />
             </div>
             <h3 className="text-lg font-bold text-white mb-1">Active Alerts</h3>
-            <p className="text-red-400 text-sm mb-6">2 Critical Broadcasts Live</p>
+            <p className="text-red-400 text-sm mb-6">System Broadcasts</p>
             
             <div className="space-y-3">
               <div className="bg-black/40 rounded-xl p-3 border-l-4 border-red-500 flex justify-between items-center">
                 <div>
-                  <h4 className="text-white font-bold text-sm">Heavy Rain Warning</h4>
-                  <p className="text-xs text-gray-400">Sent 2h ago • All Sectors</p>
+                  <h4 className="text-white font-bold text-sm">Emergency Protocols</h4>
+                  <p className="text-xs text-gray-400">Manage all system wide alerts</p>
                 </div>
                 <div className="h-2 w-2 rounded-full bg-red-500 animate-ping"></div>
               </div>
@@ -261,20 +292,30 @@ const AdminDashboard = () => {
             <div className="space-y-4">
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Response Time</span>
-                  <span className="text-white font-bold">1h 45m</span>
+                  <span className="text-gray-400">Resolution Rate</span>
+                  <span className="text-white font-bold">
+                    {stats.total > 0 ? Math.round((stats.resolved / stats.total) * 100) : 0}%
+                  </span>
                 </div>
                 <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                  <div className="h-full w-[70%] bg-blue-500 rounded-full"></div>
+                  <div 
+                    className="h-full bg-emerald-500 rounded-full transition-all duration-1000" 
+                    style={{ width: `${stats.total > 0 ? (stats.resolved / stats.total) * 100 : 0}%` }}
+                  ></div>
                 </div>
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Resolution Rate</span>
-                  <span className="text-white font-bold">92%</span>
+                  <span className="text-gray-400">Pending Rate</span>
+                  <span className="text-white font-bold">
+                    {stats.total > 0 ? Math.round((stats.pending / stats.total) * 100) : 0}%
+                  </span>
                 </div>
                 <div className="h-2 bg-white/10 rounded-full overflow-hidden">
-                  <div className="h-full w-[92%] bg-emerald-500 rounded-full"></div>
+                  <div 
+                    className="h-full bg-amber-500 rounded-full transition-all duration-1000" 
+                    style={{ width: `${stats.total > 0 ? (stats.pending / stats.total) * 100 : 0}%` }}
+                  ></div>
                 </div>
               </div>
             </div>
