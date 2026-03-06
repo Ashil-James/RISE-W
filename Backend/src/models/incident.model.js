@@ -29,7 +29,7 @@ const incidentSchema = new mongoose.Schema(
         },
         assignedAuthority: {
             type: String,
-            enum: ["WATER", "ELECTRICITY", "STREET_LIGHT", "CIVIL"],
+            enum: ["WATER", "ELECTRICITY", "CIVIL"],
         },
         status: {
             type: String,

@@ -16,7 +16,7 @@ const AuthorityRedirect = () => {
           navigate("/authority/water/dashboard", { replace: true });
         } else if (department === "ELECTRICITY" || userRole === "power_authority") {
           navigate("/authority/power/dashboard", { replace: true });
-        } else if (department === "STREETLIGHT" || department === "CIVIL" || userRole === "road_authority") {
+        } else if (department === "CIVIL" || userRole === "road_authority") {
           navigate("/authority/road/dashboard", { replace: true });
         } else {
           navigate("/authority/water/dashboard", { replace: true });

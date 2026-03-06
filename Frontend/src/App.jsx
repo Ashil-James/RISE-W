@@ -27,6 +27,7 @@ import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import Broadcasts from "./pages/admin/Broadcasts";
 import AdminUsers from "./pages/admin/AdminUsers";
+import AdminAuthorities from "./pages/admin/AdminAuthorities";
 
 // --- AUTHORITY PAGES ---
 import AuthorityLayout from "./pages/authority/AuthorityLayout";
@@ -91,6 +92,7 @@ function App() {
                   <Route path="dashboard" element={<AdminDashboard />} />
                   <Route path="broadcasts" element={<Broadcasts />} />
                   <Route path="users" element={<AdminUsers />} />
+                  <Route path="authorities" element={<AdminAuthorities />} />
                 </Route>
 
                 {/* --- AUTHORITY ROUTES (Protected) --- */}
