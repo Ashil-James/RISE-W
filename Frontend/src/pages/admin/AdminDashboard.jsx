@@ -32,6 +32,7 @@ const AdminDashboard = () => {
 
   // Reports state
   const [reports, setReports] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -87,6 +88,45 @@ const AdminDashboard = () => {
       fetchDashboardData();
     }
   }, [user?.token]);
+
+  const getRelevantReports = () => {
+    const search = searchTerm.toLowerCase().trim();
+    if (!search) return reports;
+
+    const scoredReports = reports
+      .map((report) => {
+        const idLower = report.id.toLowerCase();
+        const typeLower = report.type.toLowerCase();
+        const reporterLower = report.reporter.toLowerCase();
+
+        let relevance = 0;
+
+        // 1. Exact match (Highest Priority)
+        if (idLower === search || typeLower === search || reporterLower === search) {
+          relevance = 100;
+        }
+        // 2. Starts with (High Priority)
+        else if (idLower.startsWith(search) || typeLower.startsWith(search) || reporterLower.startsWith(search)) {
+          relevance = 50;
+        }
+        // 3. Includes (Medium Priority)
+        else if (idLower.includes(search) || typeLower.includes(search) || reporterLower.includes(search)) {
+          relevance = 10;
+        }
+
+        return { ...report, relevance };
+      })
+      .filter((report) => report.relevance > 0)
+      .sort((a, b) => b.relevance - a.relevance);
+
+    if (scoredReports.length === 0) return [];
+
+    // Only return the "most nearest" (closest matching) results
+    const highestRelevance = scoredReports[0].relevance;
+    return scoredReports.filter((report) => report.relevance === highestRelevance);
+  };
+
+  const filteredReports = getRelevantReports();
 
   // Animation Variants
   const containerVariants = {
@@ -201,6 +241,8 @@ const AdminDashboard = () => {
                 type="text"
                 placeholder="Search ID or Type..."
                 className="bg-black/40 border border-white/10 text-white text-sm rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:border-emerald-500 w-48 transition-all"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
@@ -224,8 +266,8 @@ const AdminDashboard = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {reports.length > 0 ? (
-                  reports.map((report) => (
+                {filteredReports.length > 0 ? (
+                  filteredReports.map((report) => (
                     <tr
                       key={report.id}
                       className="hover:bg-white/5 transition-colors group cursor-pointer"
