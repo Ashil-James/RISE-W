@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import { ApiError } from "./utils/ApiError.js";
 
 const app = express();
 
@@ -30,5 +31,22 @@ app.use("/api/v1/admin", adminRouter);
 
 // backward compatibility for /auth if needed, or just use /users
 app.use("/api/v1/auth", userRouter);
+
+// common error handler
+app.use((err, req, res, next) => {
+    if (err instanceof ApiError) {
+        return res.status(err.statusCode).json({
+            success: err.success,
+            message: err.message,
+            errors: err.errors,
+            stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+        });
+    }
+
+    return res.status(500).json({
+        success: false,
+        message: err.message || "Internal Server Error",
+    });
+});
 
 export { app };

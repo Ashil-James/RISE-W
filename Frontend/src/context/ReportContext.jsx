@@ -9,7 +9,7 @@ export const ReportProvider = ({ children }) => {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { user, refreshUser } = useUser();
+  const { user, refreshUser, logout } = useUser();
 
   // Fetch reports from backend on mount
   React.useEffect(() => {
@@ -31,6 +31,7 @@ export const ReportProvider = ({ children }) => {
 
         if (response.status === 401) {
           console.error("Authentication failed (401). Token might be invalid.");
+          if (logout) logout();
           setLoading(false);
           return;
         }

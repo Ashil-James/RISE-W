@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
+import { useAuth } from "./AuthContext";
 
 const UserContext = createContext();
 
 export const useUser = () => useContext(UserContext);
 
 export const UserProvider = ({ children }) => {
+  const { logout: authLogout } = useAuth();
   // Initial Mock Data Structure (for UI compatibility)
   const defaultStats = {
     total: 0,
@@ -42,6 +44,7 @@ export const UserProvider = ({ children }) => {
       localStorage.setItem("wayanad_user", JSON.stringify(user));
     } else {
       localStorage.removeItem("wayanad_user");
+      localStorage.removeItem("user");
     }
   }, [user]);
 
@@ -65,6 +68,8 @@ export const UserProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem("wayanad_user");
+    localStorage.removeItem("user");
+    if (authLogout) authLogout();
   };
 
   const updateProfile = async (updates) => {
@@ -90,6 +95,9 @@ export const UserProvider = ({ children }) => {
       });
       return { success: true };
     } catch (error) {
+      if (error.response?.status === 401) {
+        logout();
+      }
       return {
         success: false,
         message: error.response?.data?.message || "Profile update failed"
@@ -111,6 +119,9 @@ export const UserProvider = ({ children }) => {
       );
       return { success: true };
     } catch (error) {
+      if (error.response?.status === 401) {
+        logout();
+      }
       return {
         success: false,
         message: error.response?.data?.message || "Password update failed"
@@ -139,6 +150,9 @@ export const UserProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       console.error("Failed to refresh user stats:", error);
+      if (error.response?.status === 401) {
+        logout();
+      }
       return { success: false };
     }
   };

@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import axios from "axios";
+import { useUser } from "./UserContext";
 
 const AlertContext = createContext();
 
@@ -8,6 +9,7 @@ export const useAlerts = () => useContext(AlertContext);
 export const AlertProvider = ({ children }) => {
     const [alerts, setAlerts] = useState([]);
     const [loading, setLoading] = useState(true);
+    const { user, logout } = useUser();
 
     const fetchAlerts = async () => {
         try {
@@ -38,7 +40,9 @@ export const AlertProvider = ({ children }) => {
 
     const addAlert = async (alertData) => {
         try {
-            const user = JSON.parse(localStorage.getItem('user'));
+            if (!user?.token) {
+                throw new Error("User not authenticated");
+            }
             const config = {
                 headers: {
                     Authorization: `Bearer ${user.token}`,
@@ -59,6 +63,9 @@ export const AlertProvider = ({ children }) => {
             await fetchAlerts();
         } catch (error) {
             console.error("Failed to post alert:", error);
+            if (error.response?.status === 401 && logout) {
+                logout();
+            }
             throw error;
         }
     };
