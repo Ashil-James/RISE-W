@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import { Search, ChevronDown, ListFilter, ArrowRight, CheckCircle, AlertTriangle } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, ChevronDown, ListFilter, ArrowRight, CheckCircle, AlertTriangle, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const TABS = [
     "Registry",
@@ -14,16 +15,6 @@ const TABS = [
 ];
 
 const URGENCY_LEVELS = ["Any Urgency", "Critical (75+)", "High (50-74)", "Low (0-49)"];
-
-const MOCK_REGISTRY = [
-    { ref: "#REP-9042", category: "Water Supply", subtype: "Main Line Burst", loc: "Sector B", urg: 42, lifecycle: "New", duration: "1 Days", protocol: "View Case" },
-    { ref: "#REP-5590", category: "Water Supply", subtype: "Leakage", loc: "Block C", urg: 12, lifecycle: "Work Completed", duration: "5 Days", protocol: "View Case" },
-    { ref: "#REP-8821", category: "Water Supply", subtype: "Contamination", loc: "Sector A", urg: 95, lifecycle: "Accepted", duration: "2 Hrs", protocol: "View Case" },
-    { ref: "#REP-3304", category: "Infrastructure", subtype: "Pump Failure", loc: "Sector D", urg: 65, lifecycle: "Active Ops", duration: "3 Days", protocol: "View Case" },
-    { ref: "#REP-1992", category: "Water Supply", subtype: "Low Pressure", loc: "Sector F", urg: 28, lifecycle: "Assessment", duration: "4 Days", protocol: "View Case" },
-    { ref: "#REP-4040", category: "Maintenance", subtype: "Valve Replacement", loc: "Sector B", urg: 50, lifecycle: "Resolved", duration: "7 Days", protocol: "View Case" },
-    { ref: "#REP-7761", category: "Water Supply", subtype: "Muddy Water", loc: "Block E", urg: 82, lifecycle: "Reopened", duration: "12 Hrs", protocol: "View Case" },
-];
 
 const lifecycleColor = (status) => {
     const map = {
@@ -38,15 +29,86 @@ const lifecycleColor = (status) => {
     return map[status] || "text-gray-400 bg-white/5 border-white/10";
 };
 
+const mapStatusToLifecycle = (backendStatus) => {
+    switch (backendStatus) {
+        case "OPEN": return "New";
+        case "ACCEPTED": return "Accepted";
+        case "IN_PROGRESS": return "Active Ops";
+        case "VERIFIED": return "Assessment";
+        case "RESOLVED": return "Resolved";
+        case "CLOSED": return "Work Completed";
+        case "REOPENED": return "Reopened";
+        default: return "New";
+    }
+};
+
+const getDuration = (dateString) => {
+    if (!dateString) return "Just now";
+    const start = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now - start);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays > 0) return `${diffDays} Days`;
+    const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+    if (diffHours > 0) return `${diffHours} Hrs`;
+    const diffMins = Math.floor(diffTime / (1000 * 60));
+    return `${diffMins} Mins`;
+};
+
 const AuthorityWaterMatrix = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [activeTab, setActiveTab] = useState("Registry");
     const [search, setSearch] = useState("");
     const [urgencyFilter, setUrgencyFilter] = useState("Any Urgency");
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+    // API Data
+    const [incidents, setIncidents] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchIncidents = async () => {
+            try {
+                const token = user?.token || localStorage.getItem("token") || (user && user.accessToken ? user.accessToken : null);
+                const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+
+                // Use the new API
+                const res = await fetch("/api/v1/authority/water/incidents", {
+                    headers: authHeader,
+                });
+
+                if (!res.ok) throw new Error("Failed to fetch registry data");
+                const result = await res.json();
+
+                if (result.success) {
+                    const formatted = result.data.map(item => ({
+                        id: item._id,
+                        ref: item.reportId || `#REQ-${item._id.substring(item._id.length - 4).toUpperCase()}`,
+                        category: item.category || "Water Supply",
+                        subtype: item.title || "Undisclosed Issue",
+                        loc: item.address || "Location Unavailable",
+                        urg: item.urgencyScore || 10,
+                        lifecycle: mapStatusToLifecycle(item.status),
+                        duration: getDuration(item.createdAt),
+                        protocol: "View Case"
+                    }));
+                    setIncidents(formatted);
+                }
+            } catch (err) {
+                console.error("Error fetching authority incidents:", err);
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchIncidents();
+    }, [user]);
+
     // Filtering
-    const filteredData = MOCK_REGISTRY.filter((row) => {
+    const filteredData = incidents.filter((row) => {
         // Tab
         if (activeTab !== "Registry" && row.lifecycle !== activeTab && !(activeTab === "Resolved" && row.lifecycle === "Work Completed")) {
             return false;
@@ -145,63 +207,75 @@ const AuthorityWaterMatrix = () => {
 
                 {/* ── MATRIX TABLE ── */}
                 <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden shadow-2xl backdrop-blur-xl">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-black/40 text-xs uppercase tracking-wider text-gray-500 font-bold border-b border-white/5">
-                                    <th className="px-5 py-4">Ref ID</th>
-                                    <th className="px-5 py-4">Operational Sector</th>
-                                    <th className="px-5 py-4">Sub-Type</th>
-                                    <th className="px-5 py-4">Location Registry</th>
-                                    <th className="px-5 py-4">Urgency</th>
-                                    <th className="px-5 py-4">Lifecycle</th>
-                                    <th className="px-5 py-4">Duration</th>
-                                    <th className="px-5 py-4 text-right">Protocol</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5">
-                                {filteredData.length > 0 ? (
-                                    filteredData.map((row) => (
-                                        <tr key={row.ref} className="hover:bg-white/5 transition-colors group cursor-default">
-                                            <td className="px-5 py-4 font-mono text-sm text-sky-400 font-bold">{row.ref}</td>
-                                            <td className="px-5 py-4 text-sm text-gray-300">{row.category}</td>
-                                            <td className="px-5 py-4 text-sm text-white font-medium">{row.subtype}</td>
-                                            <td className="px-5 py-4 text-sm text-gray-400">{row.loc}</td>
-                                            <td className="px-5 py-4 text-sm font-black text-white">Urgency {row.urg}</td>
-                                            <td className="px-5 py-4">
-                                                {row.urg >= 75 && row.lifecycle !== "Resolved" ? (
-                                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border border-red-500/20 text-red-400 bg-red-500/10 animate-ping">
-                                                        <AlertTriangle size={12} />
-                                                        HIGH URGENCY
-                                                    </span>
-                                                ) : (
-                                                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${lifecycleColor(row.lifecycle)}`}>
-                                                        {row.lifecycle === "Resolved" && <CheckCircle size={12} />}
-                                                        {row.lifecycle}
-                                                    </span>
-                                                )}
-                                            </td>
-                                            <td className="px-5 py-4 text-sm font-bold text-gray-400">{row.duration}</td>
-                                            <td className="px-5 py-4 text-right">
-                                                <button
-                                                    onClick={() => navigate(`/authority/water/case/${row.ref.replace('#', '')}`)}
-                                                    className="inline-flex items-center gap-1.5 px-4 py-2 bg-sky-500/10 hover:bg-sky-500 text-sky-400 hover:text-white border border-sky-500/30 rounded-lg text-xs font-bold transition-all shadow-lg hover:shadow-sky-500/25 group/btn"
-                                                >
-                                                    {row.protocol}
-                                                    <ArrowRight size={14} className="group-hover/btn:translate-x-0.5 transition-transform" />
-                                                </button>
+                    <div className="overflow-x-auto min-h-[300px]">
+                        {loading ? (
+                            <div className="flex flex-col items-center justify-center h-64 text-sky-400">
+                                <Loader2 size={32} className="animate-spin mb-4" />
+                                <span className="text-sm font-bold tracking-widest uppercase">Syncing Registry...</span>
+                            </div>
+                        ) : error ? (
+                            <div className="flex flex-col items-center justify-center h-64 text-red-400">
+                                <AlertTriangle size={32} className="mb-4" />
+                                <span className="text-sm font-bold uppercase">Failed to synchronize: {error}</span>
+                            </div>
+                        ) : (
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-black/40 text-xs uppercase tracking-wider text-gray-500 font-bold border-b border-white/5">
+                                        <th className="px-5 py-4">Ref ID</th>
+                                        <th className="px-5 py-4">Operational Sector</th>
+                                        <th className="px-5 py-4">Sub-Type</th>
+                                        <th className="px-5 py-4">Location Registry</th>
+                                        <th className="px-5 py-4">Urgency</th>
+                                        <th className="px-5 py-4">Lifecycle</th>
+                                        <th className="px-5 py-4">Duration</th>
+                                        <th className="px-5 py-4 text-right">Protocol</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-white/5">
+                                    {filteredData.length > 0 ? (
+                                        filteredData.map((row) => (
+                                            <tr key={row.ref} className="hover:bg-white/5 transition-colors group cursor-default">
+                                                <td className="px-5 py-4 font-mono text-sm text-sky-400 font-bold">{row.ref}</td>
+                                                <td className="px-5 py-4 text-sm text-gray-300">{row.category}</td>
+                                                <td className="px-5 py-4 text-sm text-white font-medium">{row.subtype}</td>
+                                                <td className="px-5 py-4 text-sm text-gray-400">{row.loc}</td>
+                                                <td className="px-5 py-4 text-sm font-black text-white">Urgency {row.urg}</td>
+                                                <td className="px-5 py-4">
+                                                    {row.urg >= 75 && row.lifecycle !== "Resolved" && row.lifecycle !== "Work Completed" ? (
+                                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border border-red-500/20 text-red-400 bg-red-500/10 animate-ping">
+                                                            <AlertTriangle size={12} />
+                                                            HIGH URGENCY
+                                                        </span>
+                                                    ) : (
+                                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${lifecycleColor(row.lifecycle)}`}>
+                                                            {(row.lifecycle === "Resolved" || row.lifecycle === "Work Completed") && <CheckCircle size={12} />}
+                                                            {row.lifecycle}
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="px-5 py-4 text-sm font-bold text-gray-400">{row.duration}</td>
+                                                <td className="px-5 py-4 text-right">
+                                                    <button
+                                                        onClick={() => navigate(`/authority/water/case/${row.id}`)}
+                                                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-sky-500/10 hover:bg-sky-500 text-sky-400 hover:text-white border border-sky-500/30 rounded-lg text-xs font-bold transition-all shadow-lg hover:shadow-sky-500/25 group/btn"
+                                                    >
+                                                        {row.protocol}
+                                                        <ArrowRight size={14} className="group-hover/btn:translate-x-0.5 transition-transform" />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    ) : (
+                                        <tr>
+                                            <td colSpan={8} className="py-20 text-center text-gray-500 font-medium tracking-wide">
+                                                No records found in registry matching criteria.
                                             </td>
                                         </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan={8} className="py-20 text-center text-gray-500 font-medium">
-                                            No records found in registry matching criteria.
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
+                                    )}
+                                </tbody>
+                            </table>
+                        )}
                     </div>
                 </div>
 

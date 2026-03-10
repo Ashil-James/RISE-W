@@ -29,40 +29,61 @@ const AuthorityLayout = () => {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
-    const [notifications, setNotifications] = useState([
-        {
-            id: 1,
-            title: "New Complaint Received",
-            message: "Main Line Burst reported in Sector B",
-            time: "2 minutes ago",
-            type: "new",
-            unread: true
-        },
-        {
-            id: 2,
-            title: "Complaint Accepted",
-            message: "Pothole repair at Junction 4 accepted",
-            time: "15 minutes ago",
-            type: "accepted",
-            unread: true
-        },
-        {
-            id: 3,
-            title: "Complaint Resolved",
-            message: "Street light repair at Block C completed",
-            time: "1 hour ago",
-            type: "resolved",
-            unread: false
-        },
-        {
-            id: 4,
-            title: "User Verified Resolution",
-            message: "Resolution verified for case #AUTH-502",
-            time: "2 hours ago",
-            type: "verified",
-            unread: false
-        }
-    ]);
+    const [notifications, setNotifications] = useState([]);
+
+    React.useEffect(() => {
+        const fetchNotifications = async () => {
+            try {
+                // Fetch water incidents for notifications
+                const token = authUser?.token || localStorage.getItem("token") || (authUser && authUser.accessToken ? authUser.accessToken : null);
+                if (!token) return;
+
+                const res = await fetch("/api/v1/authority/water/incidents", {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                if (res.ok) {
+                    const result = await res.json();
+                    if (result.success && result.data) {
+                        // Take the 5 most recent incidents
+                        const recent = result.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+
+                        const mapped = recent.map(inc => {
+                            const now = new Date();
+                            const then = new Date(inc.createdAt);
+                            const diffMins = Math.floor((now - then) / 60000);
+                            let timeStr = `${diffMins} min ago`;
+                            if (diffMins > 60) {
+                                const hrs = Math.floor(diffMins / 60);
+                                timeStr = `${hrs} hr ago`;
+                                if (hrs > 24) timeStr = `${Math.floor(hrs / 24)} d ago`;
+                            }
+
+                            let title = "Complaint Updated";
+                            if (inc.status === "OPEN") { title = "New Complaint Received"; }
+                            else if (inc.status === "IN_PROGRESS" || inc.status === "ACCEPTED") { title = "Complaint In Progress"; }
+                            else if (inc.status === "RESOLVED" || inc.status === "CLOSED") { title = "Complaint Resolved"; }
+
+                            return {
+                                id: inc._id,
+                                title: title,
+                                message: `${inc.title || inc.category} reported at ${inc.address ? inc.address.split(',')[0] : "Unknown"}`,
+                                time: timeStr,
+                                type: inc.urgencyScore >= 75 ? "urgent" : "new",
+                                unread: inc.status === "OPEN" || inc.urgencyScore >= 75
+                            };
+                        });
+                        setNotifications(mapped);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch notifications:", err);
+            }
+        };
+
+        fetchNotifications();
+    }, [authUser]);
+
 
     const unreadCount = notifications.filter(n => n.unread).length;
 

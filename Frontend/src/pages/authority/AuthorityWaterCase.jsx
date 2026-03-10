@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -12,48 +12,145 @@ import {
     UserCheck,
     Zap,
     ArrowLeft,
-    Info
+    Info,
+    Loader2
 } from "lucide-react";
-
-// No static workers array needed; assignment is automatic/abstracted.
+import { useAuth } from "../../context/AuthContext";
 
 const AuthorityWaterCase = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const caseId = id ? `#${id.toUpperCase()}` : "#REP-9042";
+    const { user } = useAuth();
 
+    const [incident, setIncident] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    // Form states
     const [status, setStatus] = useState("New");
     const [isRejecting, setIsRejecting] = useState(false);
     const [rejectReason, setRejectReason] = useState("");
     const [uploadFile, setUploadFile] = useState(null);
-    const [resolutionProof, setResolutionProof] = useState(null); // to store after upload
+    const [resolutionProof, setResolutionProof] = useState(null);
 
-    // Status mapping
+    // Map backend status to UI label
+    const mapDBStatusToUI = (dbStatus) => {
+        switch (dbStatus) {
+            case "OPEN": return "New";
+            case "ACCEPTED": return "Accepted";
+            case "IN_PROGRESS": return "In Progress";
+            case "VERIFIED": return "Assessment";
+            case "RESOLVED": return "Resolved";
+            case "CLOSED": return "Work Completed";
+            case "REJECTED": return "Rejected";
+            default: return "New";
+        }
+    };
+
+    // Map UI label back to DB status
+    const mapUIToDBStatus = (uiStatus) => {
+        switch (uiStatus) {
+            case "New": return "OPEN";
+            case "Accepted": return "ACCEPTED";
+            case "In Progress": return "IN_PROGRESS";
+            case "Worker Assigned": return "ACCEPTED"; // For legacy UI select match
+            case "Resolved": return "RESOLVED";
+            case "Rejected": return "REJECTED";
+            default: return "OPEN";
+        }
+    };
+
+    useEffect(() => {
+        const fetchIncident = async () => {
+            try {
+                const token = user?.token || localStorage.getItem("token") || (user && user.accessToken ? user.accessToken : null);
+                if (!token) return;
+
+                const res = await fetch(`/api/v1/incidents/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                if (!res.ok) throw new Error("Failed to fetch incident details");
+
+                const result = await res.json();
+                if (result.success && result.data) {
+                    setIncident(result.data);
+                    setStatus(mapDBStatusToUI(result.data.status));
+                }
+            } catch (err) {
+                console.error(err);
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (id) fetchIncident();
+    }, [id, user]);
+
+    // Status mapping for colors
     const STATUS_STYLES = {
         New: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+        Accepted: "bg-blue-500/10 text-blue-400 border-blue-500/20",
         "Worker Assigned": "bg-blue-500/10 text-blue-400 border-blue-500/20",
         "In Progress": "bg-amber-500/10 text-amber-400 border-amber-500/20",
+        Assessment: "bg-amber-500/10 text-amber-400 border-amber-500/20",
         Resolved: "bg-green-500/10 text-green-400 border-green-500/20",
+        "Work Completed": "bg-green-500/10 text-green-400 border-green-500/20",
         Rejected: "bg-red-500/10 text-red-400 border-red-500/20",
     };
 
     const currentStatusStyle = STATUS_STYLES[status] || STATUS_STYLES["New"];
 
+    const updateDBStatus = async (newUiStatus, optionalMessage = "") => {
+        try {
+            const token = user?.token || localStorage.getItem("token") || (user && user.accessToken ? user.accessToken : null);
+            const dbStatus = mapUIToDBStatus(newUiStatus);
+
+            const reqBody = { status: dbStatus };
+            if (optionalMessage) {
+                reqBody.authorityMessage = optionalMessage;
+            }
+
+            const res = await fetch(`/api/v1/authority/water/incidents/${id}/status`, {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(reqBody)
+            });
+
+            if (res.ok) {
+                setStatus(newUiStatus);
+            } else {
+                console.error("Failed to update status");
+            }
+        } catch (err) {
+            console.error("Error updating status:", err);
+        }
+    };
+
     const handleAccept = () => {
-        // Automatically assigns worker
-        setStatus("Worker Assigned");
+        updateDBStatus("Accepted");
     };
 
     const handleReject = () => {
         if (!rejectReason.trim()) return;
-        setStatus("Rejected");
+        updateDBStatus("Rejected", rejectReason);
         setIsRejecting(false);
+    };
+
+    const handleStatusSelectChange = (e) => {
+        const selected = e.target.value;
+        updateDBStatus(selected);
     };
 
     const handleUploadResolution = () => {
         if (!uploadFile) return;
-        // Mock save
+        // Mock save of file
         setResolutionProof(URL.createObjectURL(uploadFile));
+        updateDBStatus("Resolved");
     };
 
     const getGreeting = () => {
@@ -63,6 +160,22 @@ const AuthorityWaterCase = () => {
         if (hour >= 17 && hour < 21) return "Good Evening, Officer";
         return "System Monitoring Active";
     };
+
+    if (loading) {
+        return <div className="min-h-[50vh] flex justify-center items-center text-sky-400">
+            <Loader2 size={40} className="animate-spin" />
+        </div>;
+    }
+
+    if (error || !incident) {
+        return <div className="min-h-[50vh] flex justify-center items-center text-red-400">
+            <AlertTriangle size={40} className="mr-3" /> Failed to load case details.
+        </div>;
+    }
+
+    const caseIdLabel = incident.reportId || `#REQ-${incident._id.substring(incident._id.length - 4).toUpperCase()}`;
+    const formattedDate = new Date(incident.createdAt).toLocaleDateString();
+    const formattedTime = new Date(incident.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     return (
         <div className="space-y-6 pb-12 max-w-5xl mx-auto">
@@ -80,7 +193,6 @@ const AuthorityWaterCase = () => {
                 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
                 className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-white/5 border border-white/10 p-6 sm:p-8 rounded-[2rem] backdrop-blur-xl relative overflow-hidden"
             >
-                {/* Glow */}
                 <div className="absolute right-0 top-0 w-64 h-64 bg-sky-500/10 blur-[100px] rounded-full pointer-events-none" />
 
                 <div className="relative z-10">
@@ -93,17 +205,21 @@ const AuthorityWaterCase = () => {
                         </span>
                     </div>
                     <div className="flex items-center gap-3 mb-3">
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold border ${currentStatusStyle} flex items-center gap-2 w-fit`}>
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold border flex items-center gap-2 w-fit ${currentStatusStyle}`}>
                             <span className="w-1.5 h-1.5 rounded-full bg-current shadow-[0_0_8px_currentColor]"></span>
-                            Status: {status}
+                            Status: {status.toUpperCase()}
                         </span>
                     </div>
                     <h1 className="text-4xl lg:text-5xl font-black text-white tracking-tight mb-4">
-                        Case {caseId}
+                        Case {caseIdLabel}
                     </h1>
                     <div className="flex gap-2">
-                        <span className="px-3 py-1 bg-sky-500/10 text-sky-400 border border-sky-500/20 rounded-lg text-sm font-bold">Water Supply</span>
-                        <span className="px-3 py-1 bg-white/5 text-gray-300 border border-white/10 rounded-lg text-sm font-medium">Main Line Burst</span>
+                        <span className="px-3 py-1 bg-sky-500/10 text-sky-400 border border-sky-500/20 rounded-lg text-sm font-bold">
+                            {incident.category || "Water Supply"}
+                        </span>
+                        <span className="px-3 py-1 bg-white/5 text-gray-300 border border-white/10 rounded-lg text-sm font-medium">
+                            {incident.title || "Undisclosed Issue"}
+                        </span>
                     </div>
                 </div>
             </motion.div>
@@ -121,13 +237,13 @@ const AuthorityWaterCase = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="bg-black/20 rounded-xl p-4 border border-white/5">
                                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Location Registry</p>
-                                <p className="text-white font-medium">Sector B – Highland Road Junction</p>
+                                <p className="text-white font-medium">{incident.address || "Location Unavailable"}</p>
                             </div>
                             <div className="bg-black/20 rounded-xl p-4 border border-white/5">
                                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">Submission Date</p>
                                 <div className="flex items-center gap-2 text-white font-medium">
                                     <Calendar size={14} className="text-gray-400" />
-                                    2024-03-20 <span className="text-gray-500 ml-1">14:30</span>
+                                    {formattedDate} <span className="text-gray-500 ml-1">{formattedTime}</span>
                                 </div>
                             </div>
                         </div>
@@ -139,8 +255,17 @@ const AuthorityWaterCase = () => {
                             <Info className="text-sky-400" size={20} />
                             Incident Narrative
                         </h3>
-                        <div className="bg-sky-500/5 border border-sky-500/10 rounded-xl p-5 text-gray-300 leading-relaxed font-medium">
-                            "Large water main burst causing street flooding and pressure drop in the valley block. The water is reaching residential boundaries and requires immediate cut-off."
+                        <div className="bg-sky-500/5 border border-sky-500/10 rounded-xl p-4">
+                            <p className="text-gray-300 leading-relaxed font-medium mb-4">
+                                "{incident.description || "No detailed narrative provided by the reporter."}"
+                            </p>
+                            {incident.images && incident.images.length > 0 && (
+                                <div className="mt-4 flex gap-4 overflow-x-auto pb-2">
+                                    {incident.images.map((img, i) => (
+                                        <img key={i} src={img} alt="Incident" className="h-32 rounded-lg border border-white/10 object-cover" />
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     </motion.div>
 
@@ -184,10 +309,10 @@ const AuthorityWaterCase = () => {
                                     <label className="block text-xs text-gray-400 mb-2 uppercase tracking-wider font-bold">Authority Status Update</label>
                                     <select
                                         value={status}
-                                        onChange={(e) => setStatus(e.target.value)}
+                                        onChange={handleStatusSelectChange}
                                         className="w-full appearance-none bg-black/40 border border-white/10 text-white text-sm rounded-xl px-4 py-3 pr-8 focus:outline-none focus:border-sky-500 cursor-pointer"
                                     >
-                                        <option value="Worker Assigned" className="bg-neutral-900">Worker Assigned</option>
+                                        <option value="Accepted" className="bg-neutral-900">Accepted</option>
                                         <option value="In Progress" className="bg-neutral-900">In Progress</option>
                                         <option value="Resolved" className="bg-neutral-900">Resolved</option>
                                     </select>
@@ -237,7 +362,7 @@ const AuthorityWaterCase = () => {
 
                         {status === "Rejected" && (
                             <div className="p-5 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-500 font-bold">
-                                <XCircle size={20} /> Case Rejected
+                                <XCircle size={20} /> Case Rejected Operations: {incident.authorityMessage || "N/A"}
                             </div>
                         )}
                     </motion.div>
@@ -251,30 +376,39 @@ const AuthorityWaterCase = () => {
 
                         <div className="space-y-6">
                             <div>
-                                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Impact Radius</p>
+                                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Impact Estimator</p>
                                 <div className="flex items-end gap-2">
                                     <Users size={28} className="text-sky-400" />
-                                    <span className="text-3xl font-black text-white leading-none">156</span>
-                                    <span className="text-gray-400 font-medium mb-1">Users</span>
+                                    <span className="text-3xl font-black text-white leading-none">{incident.urgencyScore > 20 ? (incident.urgencyScore * 5) : 50}</span>
+                                    <span className="text-gray-400 font-medium mb-1">Users Affected</span>
                                 </div>
                             </div>
 
                             <div>
                                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 flex justify-between">
                                     <span>Urgency Score</span>
-                                    <span className="text-sky-400">Moderate</span>
+                                    <span className={`font-bold ${incident.urgencyScore >= 75 ? 'text-red-400' : incident.urgencyScore >= 50 ? 'text-amber-400' : 'text-sky-400'}`}>
+                                        {incident.urgencyScore >= 75 ? "Critical" : incident.urgencyScore >= 50 ? "High" : "Moderate"}
+                                    </span>
                                 </p>
-                                <div className="text-3xl font-black text-white mb-3">42<span className="text-lg text-gray-500">/100</span></div>
+                                <div className="text-3xl font-black text-white mb-3">{incident.urgencyScore || 0}<span className="text-lg text-gray-500">/100</span></div>
                                 <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                                    <motion.div initial={{ width: 0 }} animate={{ width: "42%" }} transition={{ duration: 1, ease: "easeOut" }} className="h-full bg-gradient-to-r from-sky-500 to-sky-300 rounded-full" />
+                                    <motion.div
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${incident.urgencyScore || 0}%` }}
+                                        transition={{ duration: 1, ease: "easeOut" }}
+                                        className={`h-full rounded-full ${incident.urgencyScore >= 75 ? 'bg-red-500' : incident.urgencyScore >= 50 ? 'bg-amber-500' : 'bg-gradient-to-r from-sky-500 to-sky-300'}`}
+                                    />
                                 </div>
                             </div>
 
                             {/* Warning Alert */}
-                            <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex gap-3 text-red-400">
-                                <AlertTriangle size={20} className="shrink-0 mt-0.5" />
-                                <p className="text-sm font-bold leading-tight pt-0.5">Critical Resource Allocation Recommended</p>
-                            </div>
+                            {incident.urgencyScore >= 75 && (
+                                <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex gap-3 text-red-400">
+                                    <AlertTriangle size={20} className="shrink-0 mt-0.5" />
+                                    <p className="text-sm font-bold leading-tight pt-0.5">Critical Resource Allocation Recommended</p>
+                                </div>
+                            )}
                         </div>
                     </motion.div>
                 </div>

@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    PieChart, Pie, Cell, Legend, LineChart, Line
+    PieChart, Pie, Cell, Legend
 } from "recharts";
 import {
     TrendingUp,
@@ -13,18 +13,53 @@ import {
     Filter,
     BarChart3,
     PieChart as PieChartIcon,
-    Activity
+    Activity,
+    Loader2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../../context/AuthContext";
 
 const AuthorityReports = () => {
     const location = useLocation();
+    const { user } = useAuth();
     const [timeRange, setTimeRange] = useState("Last 7 Days");
     const [isFilterOpen, setIsFilterOpen] = useState(false);
 
     const isPower = location.pathname.includes("/power");
     const isRoad = location.pathname.includes("/road");
-    const isWater = !isPower && !isRoad;
+    // defaults to water
+
+    // API Data state
+    const [incidents, setIncidents] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchIncidents = async () => {
+            try {
+                const token = user?.token || localStorage.getItem("token") || (user && user.accessToken ? user.accessToken : null);
+                const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+
+                // Currently fetching water incidents for everyone since that's our backend route
+                // In future, this could be dynamic based on the path
+                const res = await fetch("/api/v1/authority/water/incidents", {
+                    headers: authHeader,
+                });
+
+                if (!res.ok) throw new Error("Failed to fetch reports data");
+                const result = await res.json();
+
+                if (result.success) {
+                    setIncidents(result.data);
+                }
+            } catch (err) {
+                console.error("Error fetching authority reports stats:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchIncidents();
+    }, [user]);
 
     const themeColor = isPower ? "#F59E0B" : isRoad ? "#F97316" : "#0EA5E9";
     const themeAccent = isPower ? "text-amber-400" : isRoad ? "text-orange-400" : "text-sky-400";
@@ -39,49 +74,82 @@ const AuthorityReports = () => {
         return "System Monitoring Active";
     };
 
-    // --- MOCK DATA ---
+    // --- DATA CALCULATION LOGIC ---
+
+    // 1. Weekly Data (Mon - Sun)
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const weeklyCounts = { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0 };
+
+    incidents.forEach(inc => {
+        const d = new Date(inc.createdAt);
+        // Basic filter to roughly account for "last 7 days" (Optional depending on UI logic)
+        weeklyCounts[days[d.getDay()]] += 1;
+    });
+
     const weeklyData = [
-        { name: "Mon", count: 5 },
-        { name: "Tue", count: 7 },
-        { name: "Wed", count: 9 },
-        { name: "Thu", count: 4 },
-        { name: "Fri", count: 6 },
-        { name: "Sat", count: 3 },
-        { name: "Sun", count: 2 },
+        { name: "Mon", count: weeklyCounts["Mon"] },
+        { name: "Tue", count: weeklyCounts["Tue"] },
+        { name: "Wed", count: weeklyCounts["Wed"] },
+        { name: "Thu", count: weeklyCounts["Thu"] },
+        { name: "Fri", count: weeklyCounts["Fri"] },
+        { name: "Sat", count: weeklyCounts["Sat"] },
+        { name: "Sun", count: weeklyCounts["Sun"] },
     ];
 
-    const categoryData = isPower ? [
-        { name: "Grid Failure", value: 12 },
-        { name: "Voltage Fluctuation", value: 8 },
-        { name: "Live Wire Damage", value: 5 },
-        { name: "Transformer Fault", value: 6 },
-    ] : isRoad ? [
-        { name: "Surface Damage", value: 15 },
-        { name: "Traffic Signal", value: 10 },
-        { name: "Road Blockage", value: 7 },
-        { name: "Drainage Issue", value: 9 },
-    ] : [
-        { name: "Main Line Burst", value: 14 },
-        { name: "Leaking Pipe", value: 18 },
-        { name: "Water Quality", value: 6 },
-        { name: "Low Pressure", value: 10 },
-    ];
+    // 2. Category Data
+    const issueMap = {};
+    incidents.forEach(inc => {
+        const subtype = inc.title || "Unknown";
+        issueMap[subtype] = (issueMap[subtype] || 0) + 1;
+    });
+    const categoryData = Object.keys(issueMap).map(key => ({
+        name: key,
+        value: issueMap[key]
+    })).sort((a, b) => b.value - a.value).slice(0, 4); // Top 4 issues
 
-    const sectorData = [
-        { name: "Sector A", count: 6 },
-        { name: "Sector B", count: 12 },
-        { name: "Sector C", count: 4 },
-        { name: "Sector D", count: 9 },
+    // 3. Sector Data
+    const sectorMap = {};
+    incidents.forEach(inc => {
+        // Mock sector based on string analysis or default to 'Unknown'
+        // Let's assume the address is like "Sector A, ..." or we just grab the first word
+        let sec = (inc.address || "Unknown Loc").split(',')[0].trim();
+        if (sec.length > 15) sec = sec.substring(0, 15) + "...";
+        sectorMap[sec] = (sectorMap[sec] || 0) + 1;
+    });
+    const sectorData = Object.keys(sectorMap).map(key => ({
+        name: key,
+        count: sectorMap[key]
+    })).sort((a, b) => b.count - a.count).slice(0, 5); // top 5 locations
+
+    // 4. Stats
+    const totalComplaints = incidents.length;
+    const resolvedComplaints = incidents.filter(i => i.status === 'RESOLVED' || i.status === 'CLOSED').length;
+
+    // Avg resolution time in hours (mock tracking 'updatedAt' - 'createdAt' for resolved)
+    let totalTimeSecs = 0;
+
+    incidents.filter(i => i.status === 'RESOLVED' || i.status === 'CLOSED').forEach(i => {
+        const start = new Date(i.createdAt);
+        const end = new Date(i.updatedAt);
+        totalTimeSecs += Math.abs(end - start) / 1000;
+    });
+
+    const avgResolutionHours = resolvedComplaints > 0
+        ? (totalTimeSecs / resolvedComplaints / 3600).toFixed(1)
+        : 0;
+
+    const resolutionRate = totalComplaints > 0
+        ? Math.round((resolvedComplaints / totalComplaints) * 100)
+        : 0;
+
+    const stats = [
+        { label: "Total Complaints Received", value: loading ? "-" : totalComplaints.toString(), icon: Activity, change: "+0%" },
+        { label: "Complaints Resolved", value: loading ? "-" : resolvedComplaints.toString(), icon: CheckCircle, change: "+0%" },
+        { label: "Avg Resolution Time", value: loading ? "-" : `${avgResolutionHours} hrs`, icon: Clock, change: "-0%" },
+        { label: "Resolution Rate %", value: loading ? "-" : `${resolutionRate}%`, icon: TrendingUp, change: "+0%" },
     ];
 
     const COLORS = [themeColor, "#6366f1", "#8b5cf6", "#ec4899", "#f43f5e"];
-
-    const stats = [
-        { label: "Total Complaints Received", value: "62", icon: Activity, change: "+12%" },
-        { label: "Complaints Resolved", value: "54", icon: CheckCircle, change: "+18%" },
-        { label: "Avg Resolution Time", value: "3.5 hrs", icon: Clock, change: "-15%" },
-        { label: "Resolution Rate %", value: "87%", icon: TrendingUp, change: "+5%" },
-    ];
 
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
@@ -174,7 +242,11 @@ const AuthorityReports = () => {
                         </div>
                         <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">{stat.label}</p>
                         <div className="flex items-end gap-3">
-                            <h3 className="text-3xl font-black text-white tracking-tight">{stat.value}</h3>
+                            {loading ? (
+                                <Loader2 size={24} className="animate-spin text-gray-500 my-1" />
+                            ) : (
+                                <h3 className="text-3xl font-black text-white tracking-tight">{stat.value}</h3>
+                            )}
                             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${stat.change.startsWith("+") ? "text-green-400 bg-green-400/10" : "text-red-400 bg-red-400/10"}`}>
                                 {stat.change}
                             </span>
@@ -199,31 +271,35 @@ const AuthorityReports = () => {
                         <h3 className="text-lg font-bold text-white">Weekly Complaint Trend</h3>
                     </div>
                     <div className="h-80 w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={weeklyData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
-                                <XAxis
-                                    dataKey="name"
-                                    stroke="#94a3b8"
-                                    fontSize={12}
-                                    tickLine={false}
-                                    axisLine={false}
-                                />
-                                <YAxis
-                                    stroke="#94a3b8"
-                                    fontSize={12}
-                                    tickLine={false}
-                                    axisLine={false}
-                                />
-                                <Tooltip content={<CustomTooltip />} cursor={{ fill: '#ffffff05' }} />
-                                <Bar
-                                    dataKey="count"
-                                    fill={themeColor}
-                                    radius={[4, 4, 0, 0]}
-                                    barSize={32}
-                                />
-                            </BarChart>
-                        </ResponsiveContainer>
+                        {loading ? (
+                            <div className="w-full h-full flex justify-center items-center"><Loader2 className="animate-spin text-gray-500" /></div>
+                        ) : (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={weeklyData}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                                    <XAxis
+                                        dataKey="name"
+                                        stroke="#94a3b8"
+                                        fontSize={12}
+                                        tickLine={false}
+                                        axisLine={false}
+                                    />
+                                    <YAxis
+                                        stroke="#94a3b8"
+                                        fontSize={12}
+                                        tickLine={false}
+                                        axisLine={false}
+                                    />
+                                    <Tooltip content={<CustomTooltip />} cursor={{ fill: '#ffffff05' }} />
+                                    <Bar
+                                        dataKey="count"
+                                        fill={themeColor}
+                                        radius={[4, 4, 0, 0]}
+                                        barSize={32}
+                                    />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        )}
                     </div>
                 </motion.div>
 
@@ -241,29 +317,35 @@ const AuthorityReports = () => {
                         <h3 className="text-lg font-bold text-white">Issue Category Breakdown</h3>
                     </div>
                     <div className="h-80 w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
-                                <Pie
-                                    data={categoryData}
-                                    cx="50%"
-                                    cy="50%"
-                                    innerRadius={60}
-                                    outerRadius={100}
-                                    paddingAngle={5}
-                                    dataKey="value"
-                                >
-                                    {categoryData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                    ))}
-                                </Pie>
-                                <Tooltip content={<CustomTooltip />} />
-                                <Legend
-                                    verticalAlign="bottom"
-                                    height={36}
-                                    wrapperStyle={{ fontSize: '12px', color: '#94a3b8' }}
-                                />
-                            </PieChart>
-                        </ResponsiveContainer>
+                        {loading ? (
+                            <div className="w-full h-full flex justify-center items-center"><Loader2 className="animate-spin text-gray-500" /></div>
+                        ) : categoryData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={categoryData}
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={60}
+                                        outerRadius={100}
+                                        paddingAngle={5}
+                                        dataKey="value"
+                                    >
+                                        {categoryData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Legend
+                                        verticalAlign="bottom"
+                                        height={36}
+                                        wrapperStyle={{ fontSize: '12px', color: '#94a3b8' }}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="w-full h-full flex justify-center items-center"><span className="text-gray-500">No Data Available</span></div>
+                        )}
                     </div>
                 </motion.div>
 
@@ -281,28 +363,34 @@ const AuthorityReports = () => {
                         <h3 className="text-lg font-bold text-white">Complaints by Sector</h3>
                     </div>
                     <div className="h-64 w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <BarChart layout="vertical" data={sectorData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" horizontal={false} />
-                                <XAxis type="number" hide />
-                                <YAxis
-                                    dataKey="name"
-                                    type="category"
-                                    stroke="#94a3b8"
-                                    fontSize={12}
-                                    tickLine={false}
-                                    axisLine={false}
-                                    width={80}
-                                />
-                                <Tooltip content={<CustomTooltip />} />
-                                <Bar
-                                    dataKey="count"
-                                    fill={themeColor}
-                                    radius={[0, 4, 4, 0]}
-                                    barSize={20}
-                                />
-                            </BarChart>
-                        </ResponsiveContainer>
+                        {loading ? (
+                            <div className="w-full h-full flex justify-center items-center"><Loader2 className="animate-spin text-gray-500" /></div>
+                        ) : sectorData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart layout="vertical" data={sectorData}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" horizontal={false} />
+                                    <XAxis type="number" hide />
+                                    <YAxis
+                                        dataKey="name"
+                                        type="category"
+                                        stroke="#94a3b8"
+                                        fontSize={12}
+                                        tickLine={false}
+                                        axisLine={false}
+                                        width={120}
+                                    />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Bar
+                                        dataKey="count"
+                                        fill={themeColor}
+                                        radius={[0, 4, 4, 0]}
+                                        barSize={20}
+                                    />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <div className="w-full h-full flex justify-center items-center"><span className="text-gray-500">No Data Available</span></div>
+                        )}
                     </div>
                 </motion.div>
             </div>
