@@ -90,7 +90,7 @@ const Login = () => {
       } else if (userRole === "authority" || userRole.includes("authority")) {
         if (department === "WATER") navigate("/authority/water/dashboard");
         else if (department === "ELECTRICITY" || userRole === "power_authority") navigate("/authority/power/dashboard");
-        else if (department === "STREETLIGHT" || department === "CIVIL" || userRole === "road_authority") navigate("/authority/road/dashboard");
+        else if (department === "CIVIL" || userRole === "road_authority") navigate("/authority/road/dashboard");
         else navigate("/authority/water/dashboard"); // Default authority redirect
       } else {
         navigate("/");
@@ -156,8 +156,8 @@ const Login = () => {
               {theme.name === "Wayanad Township" ? "Welcome Back" : `Sign In`}
             </h2>
             <p className="text-gray-500 dark:text-gray-300 mt-2">
-              {theme.name === "Wayanad Township" 
-                ? "Sign in to manage Wayanad Township" 
+              {theme.name === "Wayanad Township"
+                ? "Sign in to manage Wayanad Township"
                 : `Login to ${theme.name} Dashboard`}
             </p>
             {error && (
