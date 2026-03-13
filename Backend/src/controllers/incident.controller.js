@@ -18,6 +18,14 @@ export const getIncidentById = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, incident, "Incident fetched"));
 });
 
+// Maps user-facing category labels to the authority enum values in the Incident model
+const CATEGORY_TO_AUTHORITY = {
+    "Water & Sanitation": "WATER",
+    "Power Issue": "ELECTRICITY",
+    "Infrastructure": "CIVIL",
+    "Wildlife Intrusion": "CIVIL",
+};
+
 export const createIncident = asyncHandler(async (req, res) => {
     let locationData = undefined;
     if (req.body.latitude && req.body.longitude) {
@@ -35,6 +43,7 @@ export const createIncident = asyncHandler(async (req, res) => {
         image: req.body.image,
         reportedBy: req.user._id,
         status: 'OPEN',
+        assignedAuthority: CATEGORY_TO_AUTHORITY[req.body.category] || "CIVIL",
     };
 
     if (locationData) {
