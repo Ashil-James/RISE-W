@@ -138,7 +138,7 @@ const AdminDashboard = () => {
 
         if (incidentsRes.data.success) {
           const allIncidents = incidentsRes.data.data.map((inc) => ({
-            id: inc.reportId || `#${inc._id.substring(0, 8)}`,
+            id: inc.reportId || inc._id,
             type: inc.title,
             reporter: inc.reportedBy?.name || "Anonymous",
             loc: inc.address || "Unknown Location",
@@ -147,7 +147,15 @@ const AdminDashboard = () => {
               inc.status.charAt(0).toUpperCase() +
               inc.status.slice(1).toLowerCase(),
             priority: inc.priority || "Medium",
+            upvotes: inc.upvotes || 0,
+            urgencyScore: inc.urgencyScore || 1,
           }));
+          // Sort by urgency: upvotes (community impact) + urgencyScore, highest first
+          allIncidents.sort((a, b) => {
+            const urgencyA = a.upvotes + a.urgencyScore;
+            const urgencyB = b.upvotes + b.urgencyScore;
+            return urgencyB - urgencyA;
+          });
           setReports(allIncidents.slice(0, 5));
         }
       } catch (error) {
@@ -349,6 +357,9 @@ const AdminDashboard = () => {
                     Location
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
+                    Urgency
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                     Status
                   </th>
                   <th className="px-6 py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">
@@ -368,6 +379,7 @@ const AdminDashboard = () => {
                         animate="visible"
                         className="group cursor-pointer transition-all duration-300"
                         style={{ background: "transparent" }}
+                        onClick={() => navigate(`/admin/incident/${report.id}`)}
                         whileHover={{
                           backgroundColor: "rgba(16,185,129,0.03)",
                         }}
@@ -394,11 +406,47 @@ const AdminDashboard = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4">
+                          {(() => {
+                            const score = report.upvotes + report.urgencyScore;
+                            const level = score >= 10 ? "critical" : score >= 5 ? "high" : score >= 2 ? "medium" : "low";
+                            const styles = {
+                              critical: { bg: "rgba(239,68,68,0.1)", color: "#ef4444", border: "rgba(239,68,68,0.2)", label: "CRITICAL" },
+                              high: { bg: "rgba(245,158,11,0.1)", color: "#f59e0b", border: "rgba(245,158,11,0.2)", label: "HIGH" },
+                              medium: { bg: "rgba(59,130,246,0.08)", color: "#3b82f6", border: "rgba(59,130,246,0.15)", label: "MEDIUM" },
+                              low: { bg: "rgba(107,114,128,0.08)", color: "#6b7280", border: "rgba(107,114,128,0.15)", label: "LOW" },
+                            };
+                            const s = styles[level];
+                            return (
+                              <div className="flex flex-col items-start gap-1">
+                                <span className="px-2.5 py-1 rounded-lg text-[10px] font-black tracking-wider flex items-center gap-1.5"
+                                  style={{ background: s.bg, color: s.color, border: `1px solid ${s.border}` }}>
+                                  {(level === "critical" || level === "high") && (
+                                    <span className="relative flex h-1.5 w-1.5">
+                                      <span className="animate-ping absolute h-full w-full rounded-full opacity-75" style={{ background: s.color }}></span>
+                                      <span className="relative rounded-full h-1.5 w-1.5" style={{ background: s.color }}></span>
+                                    </span>
+                                  )}
+                                  {s.label}
+                                </span>
+                                {report.upvotes > 0 && (
+                                  <span className="text-[10px] text-gray-500 font-mono">
+                                    {report.upvotes} upvote{report.upvotes !== 1 ? "s" : ""}
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })()}
+                        </td>
+                        <td className="px-6 py-4">
                           <StatusBadge status={report.status} />
                         </td>
                         <td className="px-6 py-4 text-right">
                           <button
-                            className="p-2 rounded-lg text-gray-400 hover:text-white transition-all"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/admin/incident/${report.id}`);
+                            }}
+                            className="p-2 rounded-lg text-gray-400 hover:text-white transition-all relative z-10"
                             style={{ background: "rgba(255,255,255,0.03)" }}
                           >
                             <ArrowUpRight size={16} />
@@ -409,7 +457,7 @@ const AdminDashboard = () => {
                   ) : (
                     <tr>
                       <td
-                        colSpan="4"
+                        colSpan="5"
                         className="px-6 py-12 text-center text-gray-500 italic"
                       >
                         No incidents found.

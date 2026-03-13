@@ -1,4 +1,5 @@
 import { Broadcast } from "../models/broadcast.model.js";
+import { Notification } from "../models/notification.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
@@ -30,6 +31,15 @@ export const createBroadcast = asyncHandler(async (req, res) => {
         message,
         isAuthority: req.user.role === 'admin' || req.user.role === 'authority',
         createdBy: req.user._id,
+    });
+
+    // Trigger global notification
+    await Notification.create({
+        recipient: null,
+        title: "New Broadcast Alert",
+        message: `${mappedType.replace(/_/g, ' ')}: ${message}`,
+        type: "BROADCAST",
+        relatedId: broadcast._id,
     });
 
     return res.status(201).json(new ApiResponse(201, broadcast, "Broadcast created successfully"));

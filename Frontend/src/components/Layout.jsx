@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { Home, Bell, FileText, User } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
+import NotificationsDropdown from "./NotificationsDropdown";
 import { useUser } from "../context/UserContext";
 import { motion } from "framer-motion";
 
@@ -85,6 +86,7 @@ const Layout = () => {
 
           {/* Right */}
           <div className="flex items-center gap-4">
+            <NotificationsDropdown />
             <ThemeToggle />
             <Link to="/profile" className="relative group">
               <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 opacity-0 group-hover:opacity-40 blur-md transition-opacity duration-500"></div>

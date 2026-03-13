@@ -2,15 +2,17 @@ import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Zap, Droplets, PawPrint, Construction, ArrowLeft,
-  Camera, Check, X, MapPin, Loader2,
+  Camera, Check, X, MapPin, Loader2, ThumbsUp, AlertTriangle, Users,
 } from "lucide-react";
 import { useReports } from "../context/ReportContext";
+import { useUser } from "../context/UserContext";
 import { motion, AnimatePresence } from "framer-motion";
 
 const ReportIncident = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const { addReport } = useReports();
+  const { user } = useUser();
 
   const [step, setStep] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -22,6 +24,13 @@ const ReportIncident = () => {
   const [locationStatus, setLocationStatus] = useState("idle");
   const [coords, setCoords] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // ── Incident DNA state ──
+  const [nearbyIncidents, setNearbyIncidents] = useState([]);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [pendingReport, setPendingReport] = useState(null);
+  const [isUpvoting, setIsUpvoting] = useState(false);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState(null);
 
   const categories = [
     { id: "water", label: "Water & Sanitation", icon: Droplets, color: "#3b82f6", bg: "rgba(59,130,246,0.1)" },
@@ -52,33 +61,114 @@ const ReportIncident = () => {
     );
   };
 
+  // ── Upload image (shared between flows) ──
+  const uploadImage = async () => {
+    if (!imageFile) return null;
+    const fd = new FormData(); fd.append("image", imageFile);
+    try {
+      const res = await fetch("/api/v1/upload", { method: "POST", body: fd });
+      if (!res.ok) throw new Error("Upload failed");
+      return (await res.json()).data.url;
+    } catch (e) { console.error(e); alert("Image upload failed."); return null; }
+  };
+
+  // ── Build report object ──
+  const buildReport = (imgUrl) => ({
+    id: "#" + Math.floor(10000 + Math.random() * 90000),
+    category: selectedCategory.label,
+    issue: formData.specificIssue || selectedCategory.label,
+    description: formData.description,
+    location: formData.address || (coords ? `GPS: ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}` : "Manual Location Entry"),
+    address: formData.address || "",
+    latitude: coords?.lat || null, longitude: coords?.lng || null,
+    image: imgUrl || null,
+    date: "Just now", status: "Open",
+    statusColor: "text-orange-500 bg-orange-500/10",
+    authorityMessage: null, authorityProof: null,
+  });
+
+  // ── Submit with duplicate check ──
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    let uploadedImageUrl = null;
-    if (imageFile) {
-      const fd = new FormData(); fd.append("image", imageFile);
+    const imgUrl = await uploadImage();
+    setUploadedImageUrl(imgUrl);
+
+    // If we have GPS coords, check for nearby duplicates first
+    if (coords) {
       try {
-        const res = await fetch("/api/v1/upload", { method: "POST", body: fd });
-        if (!res.ok) throw new Error("Upload failed");
-        uploadedImageUrl = (await res.json()).data.url;
-      } catch (e) { console.error(e); alert("Image upload failed."); }
+        const res = await fetch("/api/v1/incidents/check-nearby", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${user?.token}`,
+          },
+          body: JSON.stringify({
+            latitude: coords.lat,
+            longitude: coords.lng,
+            category: selectedCategory.label,
+          }),
+        });
+
+        if (res.ok) {
+          const result = await res.json();
+          if (result.data && result.data.length > 0) {
+            // Nearby duplicates found — show modal
+            setNearbyIncidents(result.data);
+            const report = buildReport(imgUrl);
+            setPendingReport(report);
+            setShowDuplicateModal(true);
+            setIsSubmitting(false);
+            return;
+          }
+        }
+      } catch (e) {
+        console.error("Nearby check failed, proceeding with submission:", e);
+      }
     }
-    const newReport = {
-      id: "#" + Math.floor(10000 + Math.random() * 90000),
-      category: selectedCategory.label,
-      issue: formData.specificIssue || selectedCategory.label,
-      description: formData.description,
-      location: formData.address || (coords ? `GPS: ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}` : "Manual Location Entry"),
-      address: formData.address || "",
-      latitude: coords?.lat || null, longitude: coords?.lng || null,
-      image: uploadedImageUrl || null,
-      date: "Just now", status: "Open",
-      statusColor: "text-orange-500 bg-orange-500/10",
-      authorityMessage: null, authorityProof: null,
-    };
+
+    // No duplicates found — create normally
+    const newReport = buildReport(imgUrl);
     addReport(newReport);
     setIsSubmitting(false);
     setTimeout(() => setStep(3), 800);
+  };
+
+  // ── Upvote an existing incident instead of creating duplicate ──
+  const handleUpvote = async (incidentId) => {
+    setIsUpvoting(true);
+    try {
+      const res = await fetch(`/api/v1/incidents/${incidentId}/upvote`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${user?.token}`,
+        },
+      });
+      if (!res.ok) throw new Error("Upvote failed");
+      setShowDuplicateModal(false);
+      setStep(4); // upvote success step
+    } catch (e) {
+      console.error(e);
+      alert("Failed to upvote. Please try again.");
+    } finally {
+      setIsUpvoting(false);
+    }
+  };
+
+  // ── Submit anyway (user says "no, mine is different") ──
+  const handleSubmitAnyway = () => {
+    setShowDuplicateModal(false);
+    if (pendingReport) {
+      addReport(pendingReport);
+      setTimeout(() => setStep(3), 800);
+    }
+  };
+
+  const timeAgo = (dateStr) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const hours = Math.floor(diff / 3600000);
+    if (hours < 1) return "Just now";
+    if (hours < 24) return `${hours}h ago`;
+    return `${Math.floor(hours / 24)}d ago`;
   };
 
   const fadeUp = { hidden: { y: 24, opacity: 0 }, visible: { y: 0, opacity: 1, transition: { type: "spring", stiffness: 100, damping: 18 } } };
@@ -221,13 +311,129 @@ const ReportIncident = () => {
             boxShadow: isSubmitting ? undefined : "0 8px 25px -5px rgba(16,185,129,0.4)",
           }}
         >
-          {isSubmitting ? <><Loader2 size={20} className="animate-spin" /> Uploading...</> : "Submit Report"}
+          {isSubmitting ? <><Loader2 size={20} className="animate-spin" /> Checking & Uploading...</> : "Submit Report"}
         </motion.button>
       </div>
+
+      {/* ── SIMILAR ISSUE FOUND MODAL ── */}
+      <AnimatePresence>
+        {showDuplicateModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+            style={{ backdropFilter: "blur(12px)", background: "rgba(0,0,0,0.6)" }}
+          >
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0, y: 30 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.85, opacity: 0, y: 30 }}
+              transition={{ type: "spring", stiffness: 200, damping: 22 }}
+              className="w-full max-w-md rounded-3xl overflow-hidden"
+              style={{
+                background: "linear-gradient(135deg, rgba(15,23,42,0.98), rgba(15,23,42,0.95))",
+                border: "1px solid rgba(255,255,255,0.08)",
+                boxShadow: "0 25px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)",
+              }}
+            >
+              {/* Modal Header */}
+              <div className="px-6 pt-6 pb-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2.5 rounded-xl" style={{ background: "rgba(245,158,11,0.1)", border: "1px solid rgba(245,158,11,0.15)" }}>
+                    <AlertTriangle size={20} className="text-amber-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-black text-white">Similar Issue Found</h3>
+                    <p className="text-xs text-gray-400">A report near your location already exists</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Nearby Incidents List */}
+              <div className="px-6 space-y-3 max-h-64 overflow-y-auto">
+                {nearbyIncidents.map((inc) => (
+                  <motion.div
+                    key={inc._id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    className="rounded-2xl p-4 group"
+                    style={{
+                      background: "rgba(255,255,255,0.03)",
+                      border: "1px solid rgba(255,255,255,0.06)",
+                    }}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex-1">
+                        <p className="text-sm font-bold text-white line-clamp-1">{inc.title}</p>
+                        <p className="text-xs text-gray-500 font-mono mt-0.5">{inc.reportId}</p>
+                      </div>
+                      <span className="text-[10px] text-gray-500 whitespace-nowrap ml-2">{timeAgo(inc.createdAt)}</span>
+                    </div>
+
+                    {inc.address && (
+                      <div className="flex items-center gap-1.5 text-gray-400 mb-3">
+                        <MapPin size={12} className="text-emerald-500 shrink-0" />
+                        <span className="text-xs line-clamp-1">{inc.address}</span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                        <Users size={12} />
+                        <span className="font-bold">{inc.upvotes || 0}</span> citizens reported this
+                      </div>
+
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => handleUpvote(inc._id)}
+                        disabled={isUpvoting}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-white transition-all"
+                        style={{
+                          background: "linear-gradient(135deg, #f59e0b, #f97316)",
+                          boxShadow: "0 4px 12px -2px rgba(245,158,11,0.4)",
+                        }}
+                      >
+                        {isUpvoting ? <Loader2 size={12} className="animate-spin" /> : <ThumbsUp size={12} />}
+                        Me Too
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-6 space-y-3">
+                <div className="h-px w-full" style={{ background: "rgba(255,255,255,0.06)" }}></div>
+                <p className="text-center text-xs text-gray-500">Not the same issue?</p>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleSubmitAnyway}
+                  className="w-full py-3 rounded-xl text-sm font-bold text-white transition-all"
+                  style={{
+                    background: "linear-gradient(135deg, #10b981, #059669)",
+                    boxShadow: "0 4px 15px -3px rgba(16,185,129,0.4)",
+                  }}
+                >
+                  No, Submit My Report
+                </motion.button>
+                <button
+                  onClick={() => setShowDuplicateModal(false)}
+                  className="w-full py-2.5 rounded-xl text-sm font-medium text-gray-400 hover:text-white transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 
-  // ── STEP 3: Success ──
+  // ── STEP 3: Success (New Report) ──
   if (step === 3) return (
     <motion.div className="h-[60vh] flex flex-col items-center justify-center text-center max-w-md mx-auto"
       initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 100 }}>
@@ -255,6 +461,31 @@ const ReportIncident = () => {
           Done
         </motion.button>
       </div>
+    </motion.div>
+  );
+
+  // ── STEP 4: Upvote Success ──
+  if (step === 4) return (
+    <motion.div className="h-[60vh] flex flex-col items-center justify-center text-center max-w-md mx-auto"
+      initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 100 }}>
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ type: "spring", stiffness: 200, delay: 0.2 }}
+        className="w-24 h-24 rounded-full flex items-center justify-center mb-6"
+        style={{ background: "rgba(245,158,11,0.1)", boxShadow: "0 0 40px rgba(245,158,11,0.15)" }}
+      >
+        <ThumbsUp size={42} className="text-amber-500" strokeWidth={2.5} />
+      </motion.div>
+      <h2 className="text-3xl font-bold text-wayanad-text mb-2">Upvote Recorded!</h2>
+      <p className="text-wayanad-muted mb-2">Your voice has been counted. The more citizens report this, the higher its priority.</p>
+      <p className="text-xs text-wayanad-muted/60 mb-8">Authorities can see the total citizen impact for this issue.</p>
+      <motion.button whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }}
+        onClick={() => { setStep(1); navigate("/"); }}
+        className="px-8 py-3 rounded-xl font-bold text-white"
+        style={{ background: "linear-gradient(135deg, #10b981, #059669)", boxShadow: "0 4px 15px -3px rgba(16,185,129,0.4)" }}>
+        Back to Home
+      </motion.button>
     </motion.div>
   );
 };

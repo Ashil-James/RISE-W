@@ -22,6 +22,7 @@ import broadcastRouter from "./routes/broadcast.routes.js";
 import uploadRouter from "./routes/upload.routes.js";
 import adminRouter from "./routes/admin.routes.js";
 import authorityRouter from "./routes/authority.routes.js";
+import notificationRouter from "./routes/notification.routes.js";
 
 // routes declaration
 app.use("/api/v1/users", userRouter); // Unified user routes (auth + profile)
@@ -30,6 +31,7 @@ app.use("/api/v1/broadcasts", broadcastRouter);
 app.use("/api/v1/upload", uploadRouter);
 app.use("/api/v1/admin", adminRouter);
 app.use("/api/v1/authority", authorityRouter);
+app.use("/api/v1/notifications", notificationRouter);
 
 // backward compatibility for /auth if needed, or just use /users
 app.use("/api/v1/auth", userRouter);

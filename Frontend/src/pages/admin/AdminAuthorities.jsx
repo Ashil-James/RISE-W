@@ -11,6 +11,7 @@ import {
     Sparkles,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useUser } from "../../context/UserContext";
 
@@ -101,6 +102,7 @@ const ShimmerSkeleton = () => (
 );
 
 const AdminAuthorities = () => {
+    const navigate = useNavigate();
     const { user } = useUser();
     const [loading, setLoading] = useState(true);
     const [incidents, setIncidents] = useState([]);
@@ -289,6 +291,7 @@ const AdminAuthorities = () => {
                                 {!selectedAuthority && <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Authority</th>}
                                 <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Status</th>
                                 <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Reported</th>
+                                <th className="px-6 py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">Action</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/[0.03]">
@@ -296,11 +299,12 @@ const AdminAuthorities = () => {
                                 {activeIncidents.length > 0 ? (
                                     activeIncidents.map((incident, index) => (
                                         <motion.tr key={incident._id} custom={index} variants={rowVariants} initial="hidden" animate="visible"
-                                            className="group transition-all duration-300 hover:bg-emerald-500/[0.03]">
+                                            className="group cursor-pointer transition-all duration-300 hover:bg-emerald-500/[0.03]"
+                                            onClick={() => navigate(`/admin/incident/${incident.reportId || incident._id}`)}>
                                             <td className="px-6 py-5">
                                                 <div className="flex flex-col">
                                                     <span className="text-white font-bold text-base line-clamp-1 pr-4 group-hover:text-emerald-300 transition-colors">{incident.title}</span>
-                                                    <span className="text-xs text-gray-500 font-mono mt-1">{incident.reportId} • {incident.category}</span>
+                                                    <span className="text-xs text-gray-500 font-mono mt-1">{incident.reportId || incident._id.substring(0,8)} • {incident.category}</span>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-5">
@@ -319,11 +323,23 @@ const AdminAuthorities = () => {
                                             )}
                                             <td className="px-6 py-5 whitespace-nowrap"><StatusBadge status={incident.status} /></td>
                                             <td className="px-6 py-5 whitespace-nowrap text-sm text-gray-400 font-mono tabular-nums">{new Date(incident.createdAt).toLocaleDateString()}</td>
+                                            <td className="px-6 py-5 text-right whitespace-nowrap">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        navigate(`/admin/incident/${incident.reportId || incident._id}`);
+                                                    }}
+                                                    className="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-300 hover:text-white transition-all relative z-10"
+                                                    style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)" }}
+                                                >
+                                                    View Details
+                                                </button>
+                                            </td>
                                         </motion.tr>
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={selectedAuthority ? "4" : "5"} className="px-6 py-16 text-center">
+                                        <td colSpan={selectedAuthority ? "5" : "6"} className="px-6 py-16 text-center">
                                             <div className="flex flex-col items-center text-gray-500">
                                                 <Search size={48} className="mb-4 opacity-20" />
                                                 <p className="text-lg font-medium text-white mb-1">No incidents found</p>

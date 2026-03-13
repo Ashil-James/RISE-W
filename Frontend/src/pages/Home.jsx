@@ -61,7 +61,10 @@ const Home = () => {
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none -z-10 rounded-3xl"
           style={{ background: "radial-gradient(500px circle at var(--mx, 50%) var(--my, 50%), rgba(16,185,129,0.06), transparent 60%)" }} />
 
-        <h1 className="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500 tracking-tight drop-shadow-sm">
+        <h1 
+          className="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500 tracking-tight drop-shadow-sm"
+          style={{ transform: "translateZ(0)", WebkitTransform: "translateZ(0)" }}
+        >
           Township Portal
         </h1>
         <p className="text-wayanad-muted text-lg md:text-xl font-medium max-w-2xl mx-auto">

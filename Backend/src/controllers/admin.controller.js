@@ -1,6 +1,7 @@
 import { Incident } from "../models/incident.model.js";
 import { Broadcast } from "../models/broadcast.model.js";
 import { User } from "../models/user.model.js";
+import { Notification } from "../models/notification.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
@@ -15,10 +16,31 @@ export const getAllIncidents = asyncHandler(async (req, res) => {
 export const GetIncidentbyReportId = asyncHandler(async (req, res) => {
     const { reportId } = req.params;
 
-    const incident = await Incident.findOne({ reportId }).populate(
+    let incident = await Incident.findOne({ reportId }).populate(
         "reportedBy",
         "name email"
     );
+
+    // Fallback: If not found by reportId (e.g., legacy test data without a reportId), 
+    // and the param is a valid length or starts with "ID-", try finding by _id if possible.
+    if (!incident) {
+        let searchId = reportId;
+        if (reportId.startsWith("ID-")) {
+            searchId = reportId.substring(3); // Extract the prefix
+            // It's a substring of the original ID, so we use a regex or just fallback
+        }
+        
+        try {
+            // If it's a valid 24 char hex or we just do a generic search
+            if (reportId.length === 24) {
+               incident = await Incident.findById(reportId).populate("reportedBy", "name email");
+            } else if (reportId.startsWith("ID-")) {
+               incident = await Incident.findOne({ _id: { $regex: `^${searchId}` } }).populate("reportedBy", "name email");
+            }
+        } catch (e) {
+            // Ignore cast errors string to ObjectId
+        }
+    }
 
     if (!incident) {
         return res
@@ -53,6 +75,15 @@ export const createBroadcast = asyncHandler(async (req, res) => {
         message,
         createdBy: req.user._id,
         isAuthority: true,
+    });
+
+    // Trigger global notification
+    await Notification.create({
+        recipient: null,
+        title: "New Broadcast Alert",
+        message: `${type.replace(/_/g, ' ')}: ${message}`,
+        type: "BROADCAST",
+        relatedId: broadcast._id,
     });
 
     return res

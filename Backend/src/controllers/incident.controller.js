@@ -4,7 +4,13 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
 export const getAllIncidents = asyncHandler(async (req, res) => {
-    const incidents = await Incident.find({ reportedBy: req.user._id });
+    // Return incidents the user reported OR upvoted
+    const incidents = await Incident.find({
+        $or: [
+            { reportedBy: req.user._id },
+            { upvotedBy: req.user._id },
+        ],
+    }).sort({ createdAt: -1 });
     return res.status(200).json(new ApiResponse(200, incidents, "Incidents fetched successfully"));
 });
 
@@ -82,4 +88,59 @@ export const deleteIncident = asyncHandler(async (req, res) => {
 
     await Incident.deleteOne({ _id: req.params.id });
     return res.status(200).json(new ApiResponse(200, null, "Incident deleted successfully"));
+});
+
+// ── Incident DNA: Check for nearby duplicate incidents ──
+export const checkNearbyIncidents = asyncHandler(async (req, res) => {
+    const { latitude, longitude, category } = req.body;
+
+    if (!latitude || !longitude) {
+        return res.status(200).json(new ApiResponse(200, [], "No coordinates provided, skipping nearby check"));
+    }
+
+    const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
+
+    const nearby = await Incident.find({
+        category,
+        status: { $in: ["OPEN", "ACCEPTED", "IN_PROGRESS"] },
+        createdAt: { $gte: fortyEightHoursAgo },
+        location: {
+            $nearSphere: {
+                $geometry: {
+                    type: "Point",
+                    coordinates: [parseFloat(longitude), parseFloat(latitude)],
+                },
+                $maxDistance: 200, // 200 meters
+            },
+        },
+    })
+        .select("title category address upvotes reportId createdAt image location")
+        .limit(5)
+        .lean();
+
+    return res.status(200).json(new ApiResponse(200, nearby, "Nearby incidents checked"));
+});
+
+// ── Incident DNA: Upvote an existing incident ──
+export const upvoteIncident = asyncHandler(async (req, res) => {
+    const incident = await Incident.findById(req.params.id);
+
+    if (!incident) {
+        throw new ApiError(404, "Incident not found");
+    }
+
+    // Prevent duplicate upvotes from the same user
+    const alreadyUpvoted = incident.upvotedBy?.some(
+        (uid) => uid.toString() === req.user._id.toString()
+    );
+
+    if (alreadyUpvoted) {
+        return res.status(200).json(new ApiResponse(200, incident, "Already upvoted"));
+    }
+
+    incident.upvotes = (incident.upvotes || 0) + 1;
+    incident.upvotedBy = [...(incident.upvotedBy || []), req.user._id];
+    await incident.save();
+
+    return res.status(200).json(new ApiResponse(200, incident, "Upvote recorded successfully"));
 });
