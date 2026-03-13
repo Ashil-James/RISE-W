@@ -110,6 +110,7 @@ const AdminDashboard = () => {
     pending: 0,
     resolved: 0,
     users: 0,
+    rejected: 0,
   });
   const [reports, setReports] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -131,6 +132,7 @@ const AdminDashboard = () => {
             pending: s.openIncidents,
             resolved: s.resolvedIncidents,
             users: s.totalUsers,
+            rejected: s.rejectedIncidents || 0,
           });
         }
 
@@ -290,6 +292,13 @@ const AdminDashboard = () => {
           trend="+24"
           icon={Users}
           color="purple"
+        />
+        <StatsCard
+          title="Rejected"
+          value={stats.rejected}
+          trend="-2%"
+          icon={AlertTriangle}
+          color="rose"
         />
       </motion.div>
 
@@ -565,6 +574,11 @@ const StatsCard = ({ title, value, trend, icon: Icon, color, isAlert }) => {
       glow: "rgba(139,92,246,0.4)",
       accent: "rgba(139,92,246,0.08)",
     },
+    rose: {
+      bg: "linear-gradient(135deg, #f43f5e, #e11d48)",
+      glow: "rgba(244,63,94,0.4)",
+      accent: "rgba(244,63,94,0.08)",
+    },
   };
   const g = gradients[color] || gradients.blue;
 
@@ -634,6 +648,16 @@ const StatusBadge = ({ status }) => {
       bg: "rgba(245,158,11,0.08)",
       color: "#f59e0b",
       border: "rgba(245,158,11,0.15)",
+    },
+    Accepted: {
+      bg: "rgba(59,130,246,0.08)",
+      color: "#3b82f6",
+      border: "rgba(59,130,246,0.15)",
+    },
+    Rejected: {
+      bg: "rgba(239,68,68,0.08)",
+      color: "#ef4444",
+      border: "rgba(239,68,68,0.15)",
     },
     "In progress": {
       bg: "rgba(59,130,246,0.08)",

@@ -58,6 +58,7 @@ const mapStatusToLifecycle = (backendStatus) => {
         case "RESOLVED": return "Resolved";
         case "CLOSED": return "Work Completed";
         case "REOPENED": return "Reopened";
+        case "REJECTED": return "Rejected";
         default: return "New";
     }
 };

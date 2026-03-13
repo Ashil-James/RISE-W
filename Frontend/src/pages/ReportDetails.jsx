@@ -42,6 +42,7 @@ const ReportDetails = () => {
         Closed: { bg: "rgba(16,185,129,0.06)", color: "#10b981", border: "rgba(16,185,129,0.12)", badge: "rgba(16,185,129,0.1)" },
         Revoked: { bg: "rgba(107,114,128,0.06)", color: "#6b7280", border: "rgba(107,114,128,0.12)", badge: "rgba(107,114,128,0.1)" },
         Open: { bg: "rgba(249,115,22,0.06)", color: "#f97316", border: "rgba(249,115,22,0.12)", badge: "rgba(249,115,22,0.1)" },
+        Rejected: { bg: "rgba(239,68,68,0.06)", color: "#ef4444", border: "rgba(239,68,68,0.12)", badge: "rgba(239,68,68,0.1)" },
     };
     const accent = statusAccents[report.status] || statusAccents.Open;
 
@@ -113,7 +114,7 @@ const ReportDetails = () => {
                     <div className="h-px bg-wayanad-border w-full"></div>
 
                     {/* Authority Response / Actions */}
-                    {report.status === "Resolved" || report.status === "Closed" ? (
+                    {report.status === "Resolved" || report.status === "Closed" || report.status === "Rejected" ? (
                         <div>
                             <h3 className="text-sm font-bold text-wayanad-muted uppercase mb-3">Authority Response</h3>
                             <div className="rounded-xl p-4 mb-6" style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}>

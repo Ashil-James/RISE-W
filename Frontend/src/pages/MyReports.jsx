@@ -12,8 +12,8 @@ const MyReports = () => {
   const filteredReports = reports.filter((r) => {
     const status = r.status.toLowerCase();
     return filter === "active"
-      ? ["open", "in progress", "resolved", "pending"].includes(status)
-      : ["closed", "revoked"].includes(status);
+      ? ["open", "in progress", "resolved", "pending", "accepted"].includes(status)
+      : ["closed", "revoked", "rejected"].includes(status);
   });
 
   const stagger = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.06, delayChildren: 0.1 } } };
@@ -45,8 +45,8 @@ const MyReports = () => {
             key={tab}
             onClick={() => setFilter(tab)}
             className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 ${filter === tab
-                ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg"
-                : "text-wayanad-muted hover:text-wayanad-text"
+              ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg"
+              : "text-wayanad-muted hover:text-wayanad-text"
               }`}
             style={filter === tab ? { boxShadow: "0 4px 15px -3px rgba(16,185,129,0.4)" } : {}}
           >

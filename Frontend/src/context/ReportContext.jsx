@@ -49,9 +49,9 @@ export const ReportProvider = ({ children }) => {
           date: item.createdAt || item.date,
           category: item.category || "General",
           location: item.address || "Unknown",
-          status: item.status === 'RESOLVED' ? 'Resolved' : item.status === 'CLOSED' ? 'Closed' : 'Open',
+          status: item.status === 'RESOLVED' ? 'Resolved' : item.status === 'CLOSED' ? 'Closed' : item.status === 'ACCEPTED' ? 'Accepted' : item.status === 'REJECTED' ? 'Rejected' : 'Open',
           image: item.image,
-          statusColor: (item.status === 'RESOLVED' || item.status === 'VERIFIED') ? "text-blue-500 bg-blue-500/10" : item.status === 'CLOSED' ? "text-emerald-500 bg-emerald-500/10" : "text-orange-500 bg-orange-500/10",
+          statusColor: (item.status === 'RESOLVED' || item.status === 'VERIFIED') ? "text-blue-500 bg-blue-500/10" : item.status === 'CLOSED' ? "text-emerald-500 bg-emerald-500/10" : item.status === 'ACCEPTED' ? "text-blue-400 bg-blue-500/10" : item.status === 'REJECTED' ? "text-red-500 bg-red-500/10" : "text-orange-500 bg-orange-500/10",
         }));
         setReports(mappedReports);
       } catch (err) {

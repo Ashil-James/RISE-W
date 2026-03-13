@@ -93,8 +93,11 @@ export const updateUserRole = asyncHandler(async (req, res) => {
 
 export const getSystemStats = asyncHandler(async (req, res) => {
     const totalIncidents = await Incident.countDocuments();
-    const openIncidents = await Incident.countDocuments({ status: "OPEN" });
+    const openIncidents = await Incident.countDocuments({
+        status: { $in: ["OPEN", "ACCEPTED", "IN_PROGRESS"] }
+    });
     const resolvedIncidents = await Incident.countDocuments({ status: "RESOLVED" });
+    const rejectedIncidents = await Incident.countDocuments({ status: "REJECTED" });
     const totalUsers = await User.countDocuments({ role: "user" });
 
     return res.status(200).json(
@@ -104,6 +107,7 @@ export const getSystemStats = asyncHandler(async (req, res) => {
                 totalIncidents,
                 openIncidents,
                 resolvedIncidents,
+                rejectedIncidents,
                 totalUsers,
             },
             "System statistics retrieved successfully"
