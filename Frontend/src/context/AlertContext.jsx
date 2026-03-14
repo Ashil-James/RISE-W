@@ -7,13 +7,27 @@ const AlertContext = createContext();
 export const useAlerts = () => useContext(AlertContext);
 
 export const AlertProvider = ({ children }) => {
-    const [alerts, setAlerts] = useState([]);
-    const [loading, setLoading] = useState(true);
+    // Attempt to load cached alerts instantly, but protect against corrupted previous states
+    let cachedAlerts = [];
+    try {
+        const parsed = JSON.parse(localStorage.getItem('rise_alerts') || '[]');
+        if (Array.isArray(parsed)) {
+            cachedAlerts = parsed.filter(a => a && a.id && a.title); // must have valid fields
+        }
+    } catch (err) {
+        localStorage.removeItem('rise_alerts');
+    }
+    
+    const [alerts, setAlerts] = useState(cachedAlerts);
+    const [loading, setLoading] = useState(cachedAlerts.length === 0);
     const { user, logout } = useUser();
 
     const fetchAlerts = async () => {
         try {
-            const { data: response } = await axios.get('/api/v1/broadcasts');
+            const config = user?.token ? {
+                headers: { Authorization: `Bearer ${user.token}` }
+            } : {};
+            const { data: response } = await axios.get('/api/v1/broadcasts', config);
             const broadcasts = response.data;
             // Map backend broadcasts to frontend alerts structure
             const mappedAlerts = broadcasts.map(b => ({
@@ -26,7 +40,9 @@ export const AlertProvider = ({ children }) => {
                 icon: b.severity === 'High' ? 'AlertTriangle' : b.severity === 'Medium' ? 'Zap' : 'Info',
                 isAuthority: b.isAuthority,
             }));
+            
             setAlerts(mappedAlerts);
+            localStorage.setItem('rise_alerts', JSON.stringify(mappedAlerts)); // Cache for instant loads
         } catch (error) {
             console.error("Failed to fetch alerts:", error);
         } finally {

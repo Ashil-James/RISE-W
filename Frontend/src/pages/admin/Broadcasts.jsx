@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { useAlerts } from "../../context/AlertContext";
 import { useUser } from "../../context/UserContext";
+import ProximityMapPicker from "../../components/ProximityMapPicker";
 
 const Broadcasts = () => {
   const { user } = useUser();
@@ -23,6 +24,10 @@ const Broadcasts = () => {
     message: "",
   });
 
+  const [isTargeted, setIsTargeted] = useState(false);
+  const [targetCenter, setTargetCenter] = useState(null);
+  const [targetRadiusKm, setTargetRadiusKm] = useState(1);
+
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -32,13 +37,27 @@ const Broadcasts = () => {
     try {
       if (!user?.token) throw new Error("Authentication required");
 
+      if (isTargeted && !targetCenter) {
+        alert("Please drop a pin on the map to define the target area.");
+        setLoading(false);
+        return;
+      }
+
+      const payload = {
+        ...formData,
+        targetArea: isTargeted ? {
+          center: targetCenter,
+          radiusKm: targetRadiusKm
+        } : null
+      };
+
       const config = {
         headers: {
           Authorization: `Bearer ${user.token}`,
         },
       };
 
-      await axios.post("/api/v1/broadcasts", formData, config);
+      await axios.post("/api/v1/broadcasts", payload, config);
 
       setSent(true);
       if (refreshAlerts) refreshAlerts();
@@ -46,6 +65,8 @@ const Broadcasts = () => {
       setTimeout(() => {
         setSent(false);
         setFormData({ ...formData, location: "", message: "" });
+        setTargetCenter(null);
+        setIsTargeted(false);
       }, 3000);
     } catch (error) {
       console.error("Failed to send broadcast:", error);
@@ -157,6 +178,41 @@ const Broadcasts = () => {
                 />
               </div>
             </div>
+
+            {/* Targeted vs Global Toggle */}
+            <div className="space-y-3">
+              <label className="text-xs font-black text-gray-500 uppercase tracking-[0.2em] ml-1">
+                Distribution Scope
+              </label>
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  type="button"
+                  onClick={() => setIsTargeted(false)}
+                  className={`py-4 rounded-xl font-bold transition-all border ${!isTargeted ? 'bg-blue-500/20 text-blue-400 border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 'bg-black/40 text-gray-400 border-white/5 hover:bg-white/5'}`}
+                >
+                  Global Broadcast
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsTargeted(true)}
+                  className={`py-4 rounded-xl font-bold transition-all border ${isTargeted ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.3)]' : 'bg-black/40 text-gray-400 border-white/5 hover:bg-white/5'}`}
+                >
+                  Proximity Targeted
+                </button>
+              </div>
+            </div>
+
+            {/* Proximity Map Viewer */}
+            {isTargeted && (
+              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="pt-2">
+                <ProximityMapPicker 
+                  center={targetCenter}
+                  setCenter={setTargetCenter}
+                  radiusKm={targetRadiusKm}
+                  setRadiusKm={setTargetRadiusKm}
+                />
+              </motion.div>
+            )}
 
             {/* Message */}
             <div className="space-y-3">

@@ -5,10 +5,11 @@ import { useUser } from "../context/UserContext";
 import { useAlerts } from "../context/AlertContext";
 import { motion } from "framer-motion";
 import axios from "axios";
+import WeatherWidget from "../components/WeatherWidget";
 
 const Home = () => {
   const { user } = useUser();
-  const { alerts } = useAlerts();
+  const { alerts, loading: alertsLoading } = useAlerts();
   const latestAlert = alerts.length > 0 ? alerts[0] : null;
   const heroRef = useRef(null);
   const [activeSurvey, setActiveSurvey] = useState(false);
@@ -65,6 +66,11 @@ const Home = () => {
   return (
     <motion.div className="flex flex-col items-center justify-center min-h-[80vh] relative z-10" variants={stagger} initial="hidden" animate="visible">
 
+      {/* ── Live Weather Widget (Top Dashboard Status) ── */}
+      <motion.div variants={fadeUp} className="mb-8 mt-2 z-20 relative">
+        <WeatherWidget />
+      </motion.div>
+
       {/* ── Hero (with subtle cursor spotlight) ── */}
       <motion.div
         ref={heroRef}
@@ -106,9 +112,15 @@ const Home = () => {
         </Link>
       </motion.div>
 
+
       {/* ── Post-Storm Survey Banner ── */}
       {activeSurvey && (
-        <motion.div variants={fadeUp} className="w-full max-w-md mb-8">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 100, damping: 20 }}
+          className="w-full max-w-md mb-8"
+        >
           <Link to="/survey">
             <motion.div
               whileHover={{ scale: 1.02, y: -2 }}
@@ -141,7 +153,16 @@ const Home = () => {
       </motion.div>
 
       {/* ── Alert Ticker ── */}
-      {latestAlert && (
+      {alertsLoading ? (
+        <div className="w-full max-w-3xl glass-card rounded-2xl p-4 flex items-center gap-4 animate-pulse relative overflow-hidden">
+          <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl bg-white/5"></div>
+          <div className="w-10 h-10 rounded-xl bg-white/10 flex-shrink-0"></div>
+          <div className="flex-1 py-1">
+            <div className="h-2.5 bg-white/10 rounded w-24 mb-2"></div>
+            <div className="h-3 bg-white/10 rounded w-48"></div>
+          </div>
+        </div>
+      ) : latestAlert && (
         <Link to="/alerts" className="w-full max-w-3xl">
           <motion.div
             className="w-full glass-card rounded-2xl p-4 flex items-center gap-4 group cursor-pointer relative overflow-hidden"

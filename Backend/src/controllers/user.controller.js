@@ -12,7 +12,7 @@ const getUserStats = async (userId) => {
 };
 
 export const registerUser = asyncHandler(async (req, res) => {
-    const { name, email, password, phoneNumber } = req.body;
+    const { name, email, password, phoneNumber, location } = req.body;
 
     const userExists = await User.findOne({ email });
 
@@ -20,12 +20,18 @@ export const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(400, "User with email already exists");
     }
 
-    const user = await User.create({
+    const userData = {
         name,
         email,
         password,
         phoneNumber,
-    });
+    };
+
+    if (location && location.coordinates && location.coordinates.length === 2) {
+        userData.location = location;
+    }
+
+    const user = await User.create(userData);
 
     const createdUser = await User.findById(user._id).select("-password");
 
@@ -99,16 +105,16 @@ export const updateAccountDetails = asyncHandler(async (req, res) => {
         throw new ApiError(400, "All fields are required");
     }
 
+    const updateFields = { name, email, phoneNumber };
+
+    // Prevent corrupting the `$geoWithin` spherical index with missing coordinates
+    if (location && location.coordinates && location.coordinates.length === 2) {
+        updateFields.location = location;
+    }
+
     const user = await User.findByIdAndUpdate(
         req.user?._id,
-        {
-            $set: {
-                name,
-                email,
-                phoneNumber,
-                location
-            }
-        },
+        { $set: updateFields },
         { new: true }
     ).select("-password");
 

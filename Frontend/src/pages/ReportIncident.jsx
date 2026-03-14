@@ -2,11 +2,12 @@ import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Zap, Droplets, PawPrint, Construction, ArrowLeft,
-  Camera, Check, X, MapPin, Loader2, ThumbsUp, AlertTriangle, Users,
+  Camera, Check, X, MapPin, Loader2, ThumbsUp, AlertTriangle, Users, Map as MapIcon
 } from "lucide-react";
 import { useReports } from "../context/ReportContext";
 import { useUser } from "../context/UserContext";
 import { motion, AnimatePresence } from "framer-motion";
+import LocationPickerMap from "../components/LocationPickerMap";
 
 const ReportIncident = () => {
   const navigate = useNavigate();
@@ -21,8 +22,9 @@ const ReportIncident = () => {
   });
   const [selectedImage, setSelectedImage] = useState(null);
   const [imageFile, setImageFile] = useState(null);
-  const [locationStatus, setLocationStatus] = useState("idle");
-  const [coords, setCoords] = useState(null);
+  const [coords, setCoords] = useState(null); // {lat, lon}
+  const [locationName, setLocationName] = useState("");
+  const [showMap, setShowMap] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // ── Incident DNA state ──
@@ -43,23 +45,7 @@ const ReportIncident = () => {
   const handleInputChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
   const handleImagePick = (e) => { const f = e.target.files[0]; if (f) { setImageFile(f); setSelectedImage(URL.createObjectURL(f)); } };
 
-  const handleGetLocation = () => {
-    if (!navigator.geolocation) { alert("Geolocation not supported"); return; }
-    setLocationStatus("loading");
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude, longitude } = pos.coords;
-        setCoords({ lat: latitude, lng: longitude });
-        try {
-          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
-          const data = await res.json();
-          if (data.display_name) setFormData(prev => ({ ...prev, address: data.display_name.split(',').slice(0, 4).join(', ') }));
-        } catch (e) { console.error("Geocoding failed", e); }
-        setLocationStatus("success");
-      },
-      () => { setLocationStatus("error"); alert("Unable to retrieve location"); },
-    );
-  };
+  // Native geolocating handled in LocationPickerMap component now.
 
   // ── Upload image (shared between flows) ──
   const uploadImage = async () => {
@@ -78,9 +64,9 @@ const ReportIncident = () => {
     category: selectedCategory.label,
     issue: formData.specificIssue || selectedCategory.label,
     description: formData.description,
-    location: formData.address || (coords ? `GPS: ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}` : "Manual Location Entry"),
-    address: formData.address || "",
-    latitude: coords?.lat || null, longitude: coords?.lng || null,
+    location: formData.address || locationName || (coords ? `GPS: ${coords.lat.toFixed(4)}, ${coords.lon.toFixed(4)}` : "Manual Location Entry"),
+    address: formData.address || locationName || "",
+    latitude: coords?.lat || null, longitude: coords?.lon || null,
     image: imgUrl || null,
     date: "Just now", status: "Open",
     statusColor: "text-orange-500 bg-orange-500/10",
@@ -104,7 +90,7 @@ const ReportIncident = () => {
           },
           body: JSON.stringify({
             latitude: coords.lat,
-            longitude: coords.lng,
+            longitude: coords.lon,
             category: selectedCategory.label,
           }),
         });
@@ -236,41 +222,49 @@ const ReportIncident = () => {
 
         {/* Description + GPS */}
         <div>
-          <div className="flex justify-between items-center mb-2">
-            <label className="text-xs font-bold text-wayanad-muted uppercase">Description</label>
-            <motion.button
-              onClick={handleGetLocation}
-              disabled={locationStatus === "success" || locationStatus === "loading"}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className={`text-xs font-bold px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-all ${locationStatus === "success" ? "text-white" : locationStatus === "error" ? "text-white" : "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10"
-                }`}
-              style={{
-                background: locationStatus === "success" ? "linear-gradient(135deg, #10b981, #06b6d4)"
-                  : locationStatus === "error" ? "#ef4444"
-                    : "var(--glass-bg)",
-                border: locationStatus === "success" || locationStatus === "error" ? "none" : "1px solid var(--glass-border)",
-                boxShadow: locationStatus === "success" ? "0 4px 12px rgba(16,185,129,0.3)" : undefined,
-              }}
-            >
-              {locationStatus === "loading" && <Loader2 size={12} className="animate-spin" />}
-              {locationStatus === "success" ? <><Check size={12} /> Location Attached</> : locationStatus === "error" ? "Retry Location" : <><MapPin size={12} /> Get My Location</>}
-            </motion.button>
-          </div>
+          <label className="text-xs font-bold text-wayanad-muted uppercase mb-2 block">Location</label>
+          
+          {!showMap ? (
+            <div className="flex gap-3 mb-4">
+              <button
+                type="button"
+                onClick={() => setShowMap(true)}
+                className="flex-[1.5] flex items-center justify-center gap-2 py-3 px-4 bg-white/5 dark:bg-black/20 border border-wayanad-border rounded-xl text-wayanad-text hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:border-emerald-300 transition-all focus:ring-2 focus:ring-emerald-500/50"
+              >
+                <MapIcon size={18} className="text-emerald-500" />
+                <span className="font-medium whitespace-nowrap text-sm">
+                  {coords ? "Adjust Pin" : "Pick on Map"}
+                </span>
+              </button>
+              {locationName && (
+                <div className="flex-[2] flex items-center px-4 py-3 bg-white/5 dark:bg-black/10 border border-emerald-500/30 rounded-xl text-sm text-wayanad-text truncate">
+                  {locationName}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="w-full h-[360px] animate-fade-up mb-4">
+              <LocationPickerMap 
+                location={coords}
+                setLocation={setCoords}
+                locationName={locationName}
+                setLocationName={setLocationName}
+                onClose={() => setShowMap(false)}
+              />
+            </div>
+          )}
 
           <div className="mb-4">
-            <label className="text-xs font-bold text-wayanad-muted uppercase mb-2 block">Location Address</label>
-            <textarea name="address" rows="2" value={formData.address} onChange={handleInputChange}
+            <label className="text-xs font-bold text-wayanad-muted uppercase mb-2 block">Additional Address Details <span className="text-wayanad-muted/60 font-normal lowercase">(optional)</span></label>
+            <textarea name="address" rows="1" value={formData.address} onChange={handleInputChange}
               className="w-full bg-wayanad-bg border border-wayanad-border rounded-xl p-4 text-wayanad-text outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 resize-none transition-all"
-              placeholder="Address will appear here..." />
+              placeholder="E.g. Near the old banyan tree..." />
           </div>
 
+          <label className="text-xs font-bold text-wayanad-muted uppercase mb-2 block">Description</label>
           <textarea name="description" rows="3" onChange={handleInputChange}
             className="w-full bg-wayanad-bg border border-wayanad-border rounded-xl p-4 text-wayanad-text outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 resize-none transition-all"
-            placeholder="Details..." />
-          {locationStatus === "success" && (
-            <p className="text-xs text-emerald-500 mt-2 font-mono">Lat: {coords.lat.toFixed(5)}, Lng: {coords.lng.toFixed(5)}</p>
-          )}
+            placeholder="Details of the issue..." />
         </div>
 
         {/* Image Upload */}

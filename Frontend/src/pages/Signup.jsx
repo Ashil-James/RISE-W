@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { User, Mail, Lock, Phone, ArrowRight, Leaf } from "lucide-react";
+import { User, Mail, Lock, Phone, ArrowRight, Leaf, Map as MapIcon, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import ThemeToggle from "../components/ThemeToggle";
 import { useUser } from "../context/UserContext";
 import { useAuth } from "../context/AuthContext";
+import LocationPickerMap from "../components/LocationPickerMap";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -18,6 +19,9 @@ const Signup = () => {
     email: "",
     password: "",
   });
+  const [location, setLocation] = useState(null);
+  const [locationName, setLocationName] = useState("");
+  const [showMap, setShowMap] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -29,19 +33,28 @@ const Signup = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // Native geolocating handled in LocationPickerMap component now.
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
     try {
-      // Backend expects: name, email, password
-      // Using proxy /api/v1
-      const { data: response } = await axios.post("/api/v1/auth/register", {
+      const payload = {
         name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
         password: formData.password,
         phoneNumber: formData.phone,
-      });
+      };
+
+      if (location) {
+        payload.location = {
+          type: "Point",
+          coordinates: [location.lon, location.lat],
+        };
+      }
+
+      const { data: response } = await axios.post("/api/v1/auth/register", payload);
 
       const userData = response.data;
       userLogin(userData);
@@ -208,6 +221,43 @@ const Signup = () => {
               <p className="mt-2 text-xs text-wayanad-muted text-right">
                 Must be at least 8 characters
               </p>
+            </div>
+
+            {/* Location (Optional but recommended) */}
+            <div>
+              <label className="block text-sm font-medium text-wayanad-text mb-2 ml-1">
+                Your Location <span className="text-wayanad-muted font-normal">(for weather alerts)</span>
+              </label>
+
+              {!showMap ? (
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowMap(true)}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-white/50 dark:bg-black/20 border border-wayanad-border rounded-xl text-wayanad-text hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:border-emerald-300 transition-all focus:ring-2 focus:ring-emerald-500/50"
+                  >
+                    <MapIcon size={18} className="text-emerald-500" />
+                    <span className="font-medium whitespace-nowrap">
+                      {location ? "Adjust Location" : "Pick on Map"}
+                    </span>
+                  </button>
+                  {locationName && (
+                    <div className="flex-[2] flex items-center px-4 py-3 bg-white/30 dark:bg-black/10 border border-wayanad-border rounded-xl text-sm text-wayanad-text truncate">
+                      {locationName}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="w-full h-[360px] animate-fade-up">
+                  <LocationPickerMap 
+                    location={location}
+                    setLocation={setLocation}
+                    locationName={locationName}
+                    setLocationName={setLocationName}
+                    onClose={() => setShowMap(false)}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Submit Button */}

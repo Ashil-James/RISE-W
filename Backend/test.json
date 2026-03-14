@@ -1,0 +1,31 @@
+{
+  "statusCode": 200,
+  "data": [
+    {
+      "_id": "69b5075c700188e281dc1625",
+      "type": "WILDLIFE_ALERT",
+      "severity": "Medium",
+      "location": "Main Area",
+      "message": "Testing",
+      "isAuthority": true,
+      "createdBy": "69a9ff02c7d381bfe5cc817c",
+      "createdAt": "2026-03-14T06:59:40.311Z",
+      "updatedAt": "2026-03-14T06:59:40.311Z",
+      "__v": 0
+    },
+    {
+      "_id": "69b445017534f7824beeb86a",
+      "type": "ROAD_BLOCK",
+      "severity": "Low",
+      "location": "MVK",
+      "message": "Road block\n",
+      "isAuthority": true,
+      "createdBy": "69a9ff02c7d381bfe5cc817c",
+      "createdAt": "2026-03-13T17:10:25.173Z",
+      "updatedAt": "2026-03-13T17:10:25.173Z",
+      "__v": 0
+    }
+  ],
+  "message": "Broadcasts fetched successfully",
+  "success": true
+}
