@@ -18,6 +18,7 @@ import MyReports from "./pages/MyReports";
 import ReportDetails from "./pages/ReportDetails";
 import Alerts from "./pages/Alerts";
 import CreateAlert from "./pages/CreateAlert";
+import PostStormSurvey from "./pages/PostStormSurvey";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Profile from "./pages/Profile";
@@ -28,6 +29,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import Broadcasts from "./pages/admin/Broadcasts";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminAuthorities from "./pages/admin/AdminAuthorities";
+import AdminIncidentDetail from "./pages/admin/AdminIncidentDetail";
 
 // --- AUTHORITY PAGES ---
 import AuthorityLayout from "./pages/authority/AuthorityLayout";
@@ -73,6 +75,7 @@ function App() {
                     <Route path="my-reports/:id" element={<ReportDetails />} />
                     <Route path="alerts" element={<Alerts />} />
                     <Route path="create-alert" element={<CreateAlert />} />
+                    <Route path="survey" element={<PostStormSurvey />} />
                   </Route>
                 </Route>
 
@@ -93,6 +96,7 @@ function App() {
                   <Route path="broadcasts" element={<Broadcasts />} />
                   <Route path="users" element={<AdminUsers />} />
                   <Route path="authorities" element={<AdminAuthorities />} />
+                  <Route path="incident/:reportId" element={<AdminIncidentDetail />} />
                 </Route>
 
                 {/* --- AUTHORITY ROUTES (Protected) --- */}

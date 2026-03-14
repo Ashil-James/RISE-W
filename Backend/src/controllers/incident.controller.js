@@ -90,6 +90,43 @@ export const deleteIncident = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, null, "Incident deleted successfully"));
 });
 
+export const batchCreateIncidents = asyncHandler(async (req, res) => {
+    const { incidents, latitude, longitude, address } = req.body;
+
+    if (!incidents || !Array.isArray(incidents) || incidents.length === 0) {
+        throw new ApiError(400, "No incidents provided");
+    }
+
+    const locationData = latitude && longitude ? {
+        type: 'Point',
+        coordinates: [parseFloat(longitude), parseFloat(latitude)],
+    } : undefined;
+
+    const createdIncidents = [];
+
+    for (const report of incidents) {
+        // report = { title, description, category }
+        const incidentData = {
+            title: report.title,
+            description: report.description,
+            category: report.category,
+            address: address || "From Post-Storm Survey",
+            reportedBy: req.user._id,
+            status: 'OPEN',
+            assignedAuthority: CATEGORY_TO_AUTHORITY[report.category] || "CIVIL",
+        };
+
+        if (locationData) {
+            incidentData.location = locationData;
+        }
+
+        const incident = await Incident.create(incidentData);
+        createdIncidents.push(incident);
+    }
+
+    return res.status(201).json(new ApiResponse(201, createdIncidents, "Batch incidents reported successfully"));
+});
+
 // ── Incident DNA: Check for nearby duplicate incidents ──
 export const checkNearbyIncidents = asyncHandler(async (req, res) => {
     const { latitude, longitude, category } = req.body;

@@ -106,11 +106,12 @@ const NotificationsDropdown = () => {
                         transition={{ duration: 0.2 }}
                         className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl overflow-hidden shadow-2xl z-50"
                         style={{
-                            background: "var(--glass-bg)",
+                            background: "#0c1117",
                             backdropFilter: "blur(20px)",
                             WebkitBackdropFilter: "blur(20px)",
                             isolation: "isolate",
-                            border: "1px solid var(--glass-border)",
+                            border: "1px solid rgba(255,255,255,0.08)",
+                            boxShadow: "0 25px 60px -15px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05)",
                         }}
                     >
                         <div className="p-4 border-b border-white/[0.05] flex justify-between items-center">

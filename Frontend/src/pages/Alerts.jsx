@@ -124,6 +124,16 @@ const Alerts = () => {
                         </span>
                       </div>
                       <p className="text-wayanad-text/80 mt-1.5 text-sm leading-relaxed">{alert.message}</p>
+
+                      {alert.message.includes("Post-Storm Survey") && (
+                        <button
+                          onClick={() => navigate("/survey")}
+                          className="mt-3 px-4 py-2 bg-wayanad-primary text-white text-xs font-bold rounded-lg shadow-md shadow-wayanad-primary/20 hover:opacity-90 transition-all"
+                        >
+                          Start Survey
+                        </button>
+                      )}
+
                       {alert.location && (
                         <p className="mt-2 text-xs font-bold text-wayanad-muted flex items-center gap-1">
                           <Zap size={10} className="text-current" /> {alert.location}

@@ -1,15 +1,30 @@
-import React, { useRef, useCallback } from "react";
+import React, { useRef, useCallback, useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ChevronRight, Zap, AlertTriangle, Info, ArrowRight } from "lucide-react";
+import { ChevronRight, Zap, AlertTriangle, Info, ArrowRight, CloudRain } from "lucide-react";
 import { useUser } from "../context/UserContext";
 import { useAlerts } from "../context/AlertContext";
 import { motion } from "framer-motion";
+import axios from "axios";
 
 const Home = () => {
   const { user } = useUser();
   const { alerts } = useAlerts();
   const latestAlert = alerts.length > 0 ? alerts[0] : null;
   const heroRef = useRef(null);
+  const [activeSurvey, setActiveSurvey] = useState(false);
+
+  // Check for active post-storm survey
+  useEffect(() => {
+    const checkSurvey = async () => {
+      if (!user?.token) return;
+      try {
+        const config = { headers: { Authorization: `Bearer ${user.token}` } };
+        const { data } = await axios.get("/api/v1/weather/active-survey", config);
+        if (data.success && data.data) setActiveSurvey(true);
+      } catch {}
+    };
+    checkSurvey();
+  }, [user?.token]);
 
   const handleMouseMove = useCallback((e) => {
     if (!heroRef.current) return;
@@ -90,6 +105,33 @@ const Home = () => {
           </motion.button>
         </Link>
       </motion.div>
+
+      {/* ── Post-Storm Survey Banner ── */}
+      {activeSurvey && (
+        <motion.div variants={fadeUp} className="w-full max-w-md mb-8">
+          <Link to="/survey">
+            <motion.div
+              whileHover={{ scale: 1.02, y: -2 }}
+              className="w-full rounded-2xl p-4 flex items-center gap-4 cursor-pointer relative overflow-hidden group"
+              style={{
+                background: "linear-gradient(135deg, rgba(59,130,246,0.1), rgba(6,182,212,0.05))",
+                border: "1px solid rgba(59,130,246,0.2)",
+                boxShadow: "0 4px 20px -5px rgba(59,130,246,0.3)",
+              }}
+            >
+              <div className="absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl bg-blue-500" />
+              <div className="p-2.5 rounded-xl bg-blue-500/15 text-blue-500 flex-shrink-0">
+                <CloudRain size={20} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-blue-400 text-xs font-black uppercase tracking-wider">Post-Storm Survey Active</h4>
+                <p className="text-wayanad-muted text-sm mt-0.5">Report damages in your area now</p>
+              </div>
+              <ChevronRight size={16} className="text-blue-400 group-hover:translate-x-1 transition-transform flex-shrink-0" />
+            </motion.div>
+          </Link>
+        </motion.div>
+      )}
 
       {/* ── Subtext ── */}
       <motion.div className="mb-12" variants={fadeUp}>
