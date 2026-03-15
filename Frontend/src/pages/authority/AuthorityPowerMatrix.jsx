@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search, ChevronDown, ListFilter, ArrowRight, CheckCircle, AlertTriangle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { Loader2 } from "lucide-react";
 
 const TABS = [
     "Registry",
@@ -36,14 +38,82 @@ const lifecycleColor = (status) => {
 };
 
 const AuthorityPowerMatrix = () => {
-    const navigate = useNavigate();
+    const { user } = useAuth();
     const [activeTab, setActiveTab] = useState("Registry");
     const [search, setSearch] = useState("");
     const [urgencyFilter, setUrgencyFilter] = useState("Any Urgency");
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+    const [incidents, setIncidents] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const mapStatusToLifecycle = (backendStatus) => {
+        switch (backendStatus) {
+            case "OPEN": return "New";
+            case "ACCEPTED": return "Accepted";
+            case "IN_PROGRESS": return "Active Ops";
+            case "VERIFIED": return "Assessment";
+            case "RESOLVED": return "Resolved";
+            case "CLOSED": return "Resolved";
+            case "REOPENED": return "Reopened";
+            default: return "New";
+        }
+    };
+
+    const getDuration = (dateString) => {
+        if (!dateString) return "Just now";
+        const start = new Date(dateString);
+        const now = new Date();
+        const diffTime = Math.abs(now - start);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        if (diffDays > 0) return `${diffDays} Days`;
+        const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+        if (diffHours > 0) return `${diffHours} Hrs`;
+        const diffMins = Math.floor(diffTime / (1000 * 60));
+        return `${diffMins} Mins`;
+    };
+
+    useEffect(() => {
+        const fetchIncidents = async () => {
+            try {
+                const token = user?.token || localStorage.getItem("token") || (user && user.accessToken ? user.accessToken : null);
+                const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+
+                const res = await fetch("/api/v1/authority/power/incidents", {
+                    headers: authHeader,
+                });
+
+                if (!res.ok) throw new Error("Failed to fetch power incidents");
+                const result = await res.json();
+
+                if (result.success) {
+                    const formatted = result.data.map(item => ({
+                        id: item._id,
+                        ref: item.reportId || `#POW-${item._id.substring(item._id.length - 4).toUpperCase()}`,
+                        category: item.category || "Power Issue",
+                        subtype: item.title || "Undisclosed Issue",
+                        loc: item.address || "Location Unavailable",
+                        urg: item.urgencyScore || 10,
+                        lifecycle: mapStatusToLifecycle(item.status),
+                        duration: getDuration(item.createdAt),
+                        protocol: "View Case"
+                    }));
+                    setIncidents(formatted);
+                }
+            } catch (err) {
+                console.error("Error fetching power matrix data:", err);
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchIncidents();
+    }, [user]);
+
     // Filtering
-    const filteredData = MOCK_REGISTRY.filter((row) => {
+    const filteredData = incidents.filter((row) => {
         if (activeTab !== "Registry" && row.lifecycle !== activeTab) return false;
         if (search && !row.ref.toLowerCase().includes(search.toLowerCase())) return false;
         if (urgencyFilter === "Critical (75+)" && row.urg < 75) return false;
@@ -151,7 +221,25 @@ const AuthorityPowerMatrix = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
-                                {filteredData.length > 0 ? (
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan={8} className="py-20 text-center text-amber-500 font-medium">
+                                            <div className="flex flex-col items-center justify-center gap-4">
+                                                <Loader2 size={32} className="animate-spin" />
+                                                <span className="text-sm font-bold tracking-widest uppercase">Fetching Diagnostics...</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : error ? (
+                                    <tr>
+                                        <td colSpan={8} className="py-20 text-center text-red-400 font-medium">
+                                            <div className="flex flex-col items-center justify-center gap-4">
+                                                <AlertTriangle size={32} />
+                                                <span className="text-sm font-bold uppercase">Failed to synchronize: {error}</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : filteredData.length > 0 ? (
                                     filteredData.map((row) => (
                                         <tr key={row.ref} className="hover:bg-white/5 transition-colors group cursor-default">
                                             <td className="px-5 py-4 font-mono text-sm text-amber-400 font-bold">{row.ref}</td>
@@ -175,7 +263,7 @@ const AuthorityPowerMatrix = () => {
                                             <td className="px-5 py-4 text-sm font-bold text-gray-400">{row.duration}</td>
                                             <td className="px-5 py-4 text-right">
                                                 <button
-                                                    onClick={() => navigate(`/authority/power/case/${row.ref.replace('#', '')}`)}
+                                                    onClick={() => navigate(`/authority/power/case/${row.id}`)}
                                                     className="inline-flex items-center gap-1.5 px-4 py-2 bg-amber-500/10 hover:bg-amber-500 text-amber-400 hover:text-white border border-amber-500/30 rounded-lg text-xs font-bold transition-all shadow-lg hover:shadow-amber-500/25 group/btn"
                                                 >
                                                     {row.protocol}

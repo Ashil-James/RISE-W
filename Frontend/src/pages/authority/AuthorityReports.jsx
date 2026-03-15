@@ -30,18 +30,20 @@ const AuthorityReports = () => {
     // defaults to water
 
     // API Data state
-    const [incidents, setIncidents] = useState([]);
+    const [analytics, setAnalytics] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchIncidents = async () => {
+        const fetchAnalytics = async () => {
             try {
                 const token = user?.token || localStorage.getItem("token") || (user && user.accessToken ? user.accessToken : null);
                 const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
 
-                // Currently fetching water incidents for everyone since that's our backend route
-                // In future, this could be dynamic based on the path
-                const res = await fetch("/api/v1/authority/water/incidents", {
+                const endpoint = isPower
+                    ? "/api/v1/authority/power/analytics"
+                    : "/api/v1/authority/water/incidents";
+
+                const res = await fetch(endpoint, {
                     headers: authHeader,
                 });
 
@@ -49,7 +51,9 @@ const AuthorityReports = () => {
                 const result = await res.json();
 
                 if (result.success) {
-                    setIncidents(result.data);
+                    if (isPower) {
+                        setAnalytics(result.data);
+                    }
                 }
             } catch (err) {
                 console.error("Error fetching authority reports stats:", err);
@@ -58,8 +62,8 @@ const AuthorityReports = () => {
             }
         };
 
-        fetchIncidents();
-    }, [user]);
+        fetchAnalytics();
+    }, [user, isPower]);
 
     const themeColor = isPower ? "#F59E0B" : isRoad ? "#F97316" : "#0EA5E9";
     const themeAccent = isPower ? "text-amber-400" : isRoad ? "text-orange-400" : "text-sky-400";
@@ -75,78 +79,16 @@ const AuthorityReports = () => {
     };
 
     // --- DATA CALCULATION LOGIC ---
-
-    // 1. Weekly Data (Mon - Sun)
-    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-    const weeklyCounts = { Mon: 0, Tue: 0, Wed: 0, Thu: 0, Fri: 0, Sat: 0, Sun: 0 };
-
-    incidents.forEach(inc => {
-        const d = new Date(inc.createdAt);
-        // Basic filter to roughly account for "last 7 days" (Optional depending on UI logic)
-        weeklyCounts[days[d.getDay()]] += 1;
-    });
-
-    const weeklyData = [
-        { name: "Mon", count: weeklyCounts["Mon"] },
-        { name: "Tue", count: weeklyCounts["Tue"] },
-        { name: "Wed", count: weeklyCounts["Wed"] },
-        { name: "Thu", count: weeklyCounts["Thu"] },
-        { name: "Fri", count: weeklyCounts["Fri"] },
-        { name: "Sat", count: weeklyCounts["Sat"] },
-        { name: "Sun", count: weeklyCounts["Sun"] },
-    ];
-
-    // 2. Category Data
-    const issueMap = {};
-    incidents.forEach(inc => {
-        const subtype = inc.title || "Unknown";
-        issueMap[subtype] = (issueMap[subtype] || 0) + 1;
-    });
-    const categoryData = Object.keys(issueMap).map(key => ({
-        name: key,
-        value: issueMap[key]
-    })).sort((a, b) => b.value - a.value).slice(0, 4); // Top 4 issues
-
-    // 3. Sector Data
-    const sectorMap = {};
-    incidents.forEach(inc => {
-        // Mock sector based on string analysis or default to 'Unknown'
-        // Let's assume the address is like "Sector A, ..." or we just grab the first word
-        let sec = (inc.address || "Unknown Loc").split(',')[0].trim();
-        if (sec.length > 15) sec = sec.substring(0, 15) + "...";
-        sectorMap[sec] = (sectorMap[sec] || 0) + 1;
-    });
-    const sectorData = Object.keys(sectorMap).map(key => ({
-        name: key,
-        count: sectorMap[key]
-    })).sort((a, b) => b.count - a.count).slice(0, 5); // top 5 locations
-
-    // 4. Stats
-    const totalComplaints = incidents.length;
-    const resolvedComplaints = incidents.filter(i => i.status === 'RESOLVED' || i.status === 'CLOSED').length;
-
-    // Avg resolution time in hours (mock tracking 'updatedAt' - 'createdAt' for resolved)
-    let totalTimeSecs = 0;
-
-    incidents.filter(i => i.status === 'RESOLVED' || i.status === 'CLOSED').forEach(i => {
-        const start = new Date(i.createdAt);
-        const end = new Date(i.updatedAt);
-        totalTimeSecs += Math.abs(end - start) / 1000;
-    });
-
-    const avgResolutionHours = resolvedComplaints > 0
-        ? (totalTimeSecs / resolvedComplaints / 3600).toFixed(1)
-        : 0;
-
-    const resolutionRate = totalComplaints > 0
-        ? Math.round((resolvedComplaints / totalComplaints) * 100)
-        : 0;
+    const weeklyData = analytics?.weeklyTrend || [];
+    const categoryData = analytics?.categories || [];
+    const sectorData = analytics?.sectors || [];
+    const dataStats = analytics?.stats || { total: 0, resolved: 0, avgTime: 0, rate: 0 };
 
     const stats = [
-        { label: "Total Complaints Received", value: loading ? "-" : totalComplaints.toString(), icon: Activity, change: "+0%" },
-        { label: "Complaints Resolved", value: loading ? "-" : resolvedComplaints.toString(), icon: CheckCircle, change: "+0%" },
-        { label: "Avg Resolution Time", value: loading ? "-" : `${avgResolutionHours} hrs`, icon: Clock, change: "-0%" },
-        { label: "Resolution Rate %", value: loading ? "-" : `${resolutionRate}%`, icon: TrendingUp, change: "+0%" },
+        { label: "Total Complaints Received", value: loading ? "-" : dataStats.total.toString(), icon: Activity, change: "+0%" },
+        { label: "Complaints Resolved", value: loading ? "-" : dataStats.resolved.toString(), icon: CheckCircle, change: "+0%" },
+        { label: "Avg Resolution Time", value: loading ? "-" : `${dataStats.avgTime} hrs`, icon: Clock, change: "-0%" },
+        { label: "Resolution Rate %", value: loading ? "-" : `${dataStats.rate}%`, icon: TrendingUp, change: "+0%" },
     ];
 
     const COLORS = [themeColor, "#6366f1", "#8b5cf6", "#ec4899", "#f43f5e"];

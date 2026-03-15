@@ -14,6 +14,15 @@ export const getAllIncidents = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, incidents, "Incidents fetched successfully"));
 });
 
+export const getUserPowerIncidents = asyncHandler(async (req, res) => {
+    const incidents = await Incident.find({
+        reportedBy: req.user._id,
+        assignedAuthority: "ELECTRICITY"
+    }).sort({ createdAt: -1 });
+
+    return res.status(200).json(new ApiResponse(200, incidents, "User power incidents fetched successfully"));
+});
+
 export const getIncidentById = asyncHandler(async (req, res) => {
     const incident = await Incident.findById(req.params.id);
 
