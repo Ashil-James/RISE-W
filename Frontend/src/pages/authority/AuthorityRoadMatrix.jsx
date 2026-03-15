@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import { Search, ChevronDown, ListFilter, ArrowRight, CheckCircle, AlertTriangle } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, ChevronDown, ListFilter, ArrowRight, CheckCircle, AlertTriangle, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const TABS = [
     "Registry",
@@ -11,17 +12,10 @@ const TABS = [
     "Assessment",
     "Resolved",
     "Reopened",
+    "Rejected",
 ];
 
 const URGENCY_LEVELS = ["Any Urgency", "Critical (75+)", "High (50-74)", "Low (0-49)"];
-
-const MOCK_REGISTRY = [
-    { ref: "#ROA-2041", category: "Surface Damage", subtype: "Major Pothole", loc: "Sector G Hwy", urg: 85, lifecycle: "New", duration: "1 Days", protocol: "View Case" },
-    { ref: "#ROA-5502", category: "Traffic Signal", subtype: "Traffic Signal Damage", loc: "Avenue A", urg: 12, lifecycle: "Resolved", duration: "5 Days", protocol: "View Case" },
-    { ref: "#ROA-8821", category: "Road Blockage", subtype: "Fallen Tree", loc: "Sector A", urg: 95, lifecycle: "Accepted", duration: "2 Hrs", protocol: "View Case" },
-    { ref: "#ROA-3304", category: "Drainage", subtype: "Drainage Overflow on Road", loc: "Sector D", urg: 45, lifecycle: "Active Ops", duration: "3 Days", protocol: "View Case" },
-    { ref: "#ROA-1992", category: "Signage", subtype: "Street Sign Damage", loc: "Sector F", urg: 28, lifecycle: "Assessment", duration: "4 Days", protocol: "View Case" },
-];
 
 const lifecycleColor = (status) => {
     const map = {
@@ -31,19 +25,90 @@ const lifecycleColor = (status) => {
         Assessment: "text-orange-400 bg-orange-500/10 border-orange-500/20 shadow-[0_0_15px_rgba(249,115,22,0.1)]",
         Resolved: "text-green-400 bg-green-500/10 border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.1)]",
         Reopened: "text-red-400 bg-red-500/10 border-red-500/20 animate-pulse",
+        Rejected: "text-red-400 bg-red-500/10 border-red-500/20",
     };
     return map[status] || "text-gray-400 bg-white/5 border-white/10";
 };
 
 const AuthorityRoadMatrix = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [activeTab, setActiveTab] = useState("Registry");
     const [search, setSearch] = useState("");
     const [urgencyFilter, setUrgencyFilter] = useState("Any Urgency");
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+    const [incidents, setIncidents] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    const mapStatusToLifecycle = (backendStatus) => {
+        switch (backendStatus) {
+            case "OPEN": return "New";
+            case "ACCEPTED": return "Accepted";
+            case "IN_PROGRESS": return "Active Ops";
+            case "VERIFIED": return "Assessment";
+            case "RESOLVED": return "Resolved";
+            case "CLOSED": return "Resolved";
+            case "REOPENED": return "Reopened";
+            case "REJECTED": return "Rejected";
+            default: return "New";
+        }
+    };
+
+    const getDuration = (dateString) => {
+        if (!dateString) return "Just now";
+        const start = new Date(dateString);
+        const now = new Date();
+        const diffTime = Math.abs(now - start);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        if (diffDays > 0) return `${diffDays} Days`;
+        const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+        if (diffHours > 0) return `${diffHours} Hrs`;
+        const diffMins = Math.floor(diffTime / (1000 * 60));
+        return `${diffMins} Mins`;
+    };
+
+    useEffect(() => {
+        const fetchIncidents = async () => {
+            try {
+                const token = user?.token || localStorage.getItem("token") || (user && user.accessToken ? user.accessToken : null);
+                const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+
+                const res = await fetch("/api/v1/authority/road/incidents", {
+                    headers: authHeader,
+                });
+
+                if (!res.ok) throw new Error("Failed to fetch road incidents");
+                const result = await res.json();
+
+                if (result.success) {
+                    const formatted = result.data.map(item => ({
+                        id: item._id,
+                        ref: item.reportId || `#ROA-${item._id.substring(item._id.length - 4).toUpperCase()}`,
+                        category: item.category || "Infrastructure",
+                        subtype: item.title || "Undisclosed Issue",
+                        loc: item.address || "Location Unavailable",
+                        urg: item.urgencyScore || 10,
+                        lifecycle: mapStatusToLifecycle(item.status),
+                        duration: getDuration(item.createdAt),
+                        protocol: "View Case"
+                    }));
+                    setIncidents(formatted);
+                }
+            } catch (err) {
+                console.error("Error fetching road matrix data:", err);
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchIncidents();
+    }, [user]);
+
     // Filtering
-    const filteredData = MOCK_REGISTRY.filter((row) => {
+    const filteredData = incidents.filter((row) => {
         if (activeTab !== "Registry" && row.lifecycle !== activeTab) return false;
         if (search && !row.ref.toLowerCase().includes(search.toLowerCase())) return false;
         if (urgencyFilter === "Critical (75+)" && row.urg < 75) return false;
@@ -151,7 +216,25 @@ const AuthorityRoadMatrix = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
-                                {filteredData.length > 0 ? (
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan={8} className="py-20 text-center text-orange-500 font-medium">
+                                            <div className="flex flex-col items-center justify-center gap-4">
+                                                <Loader2 size={32} className="animate-spin" />
+                                                <span className="text-sm font-bold tracking-widest uppercase">Fetching Diagnostics...</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : error ? (
+                                    <tr>
+                                        <td colSpan={8} className="py-20 text-center text-red-400 font-medium">
+                                            <div className="flex flex-col items-center justify-center gap-4">
+                                                <AlertTriangle size={32} />
+                                                <span className="text-sm font-bold uppercase">Failed to synchronize: {error}</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : filteredData.length > 0 ? (
                                     filteredData.map((row) => (
                                         <tr key={row.ref} className="hover:bg-white/5 transition-colors group cursor-default">
                                             <td className="px-5 py-4 font-mono text-sm text-orange-400 font-bold">{row.ref}</td>
@@ -175,7 +258,7 @@ const AuthorityRoadMatrix = () => {
                                             <td className="px-5 py-4 text-sm font-bold text-gray-400">{row.duration}</td>
                                             <td className="px-5 py-4 text-right">
                                                 <button
-                                                    onClick={() => navigate(`/authority/road/case/${row.ref.replace('#', '')}`)}
+                                                    onClick={() => navigate(`/authority/road/case/${row.id}`)}
                                                     className="inline-flex items-center gap-1.5 px-4 py-2 bg-orange-500/10 hover:bg-orange-500 text-orange-400 hover:text-white border border-orange-500/30 rounded-lg text-xs font-bold transition-all shadow-lg hover:shadow-orange-500/25 group/btn"
                                                 >
                                                     {row.protocol}
@@ -202,3 +285,4 @@ const AuthorityRoadMatrix = () => {
 };
 
 export default AuthorityRoadMatrix;
+

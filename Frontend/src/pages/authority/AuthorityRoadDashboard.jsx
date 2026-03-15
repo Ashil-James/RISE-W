@@ -1,17 +1,19 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
     Construction,
     Clock,
     CheckCircle,
     AlertTriangle,
     ArrowUpRight,
-    AlertCircle
+    AlertCircle,
+    Loader2
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 // ─── StatCard Component ────────────────────────────────────────────────────────
-const StatCard = ({ title, value, icon: Icon, delay, bgClass, iconClass }) => (
+const StatCard = ({ title, value, icon: Icon, delay, bgClass, iconClass, loading }) => (
     <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -29,29 +31,92 @@ const StatCard = ({ title, value, icon: Icon, delay, bgClass, iconClass }) => (
         </div>
 
         <div className="relative z-10">
-            <h3 className="text-3xl font-black text-white mb-1 tracking-tight">{value}</h3>
+            {loading ? (
+                <Loader2 className="animate-spin text-gray-500 mb-2" size={24} />
+            ) : (
+                <h3 className="text-3xl font-black text-white mb-1 tracking-tight">{value}</h3>
+            )}
             <p className="text-gray-400 text-sm font-medium">{title}</p>
         </div>
     </motion.div>
 );
 
-// ─── Mock Data ───────────
+// ─── Styles ───────────
 const STATUS_STYLES = {
     New: "bg-blue-500/10 text-blue-400 border-blue-500/20 animate-pulse",
+    Accepted: "bg-blue-500/10 text-blue-400 border-blue-500/20",
     "In Progress": "bg-orange-500/10 text-orange-400 border-orange-500/20 shadow-[0_0_15px_rgba(249,115,22,0.1)]",
     Resolved: "bg-green-500/10 text-green-400 border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.1)]",
     Rejected: "bg-red-500/10 text-red-400 border-red-500/20",
     "High Urgency": "bg-red-500/10 text-red-400 border-red-500/20 animate-ping",
 };
 
-const CRITICAL_MOCK = [
-    { id: "ROA-2041", category: "Surface Damage", subtype: "Major Pothole", loc: "Sector G Hwy", urg: 85, status: "New", days: 1 },
-    { id: "ROA-2045", category: "Traffic Signal", subtype: "Traffic Signal Damage", loc: "Avenue A", urg: 90, status: "New", days: 2 },
-    { id: "ROA-2030", category: "Drainage", subtype: "Drainage Overflow on Road", loc: "Sector C", urg: 60, status: "In Progress", days: 4 },
-];
-
 const AuthorityRoadDashboard = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
+
+    const [stats, setStats] = useState({ new: 0, inProgress: 0, completed: 0, highUrgency: 0 });
+    const [criticalIncidents, setCriticalIncidents] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [statsLoading, setStatsLoading] = useState(true);
+
+    const mapStatusToLifecycle = (backendStatus) => {
+        switch (backendStatus) {
+            case "OPEN": return "New";
+            case "ACCEPTED": return "Accepted";
+            case "IN_PROGRESS": return "In Progress";
+            case "VERIFIED": return "Resolved";
+            case "RESOLVED": return "Resolved";
+            case "CLOSED": return "Resolved";
+            case "REOPENED": return "New";
+            default: return "New";
+        }
+    };
+
+    const getDaysOpen = (dateString) => {
+        if (!dateString) return 0;
+        const start = new Date(dateString);
+        const now = new Date();
+        const diffTime = Math.abs(now - start);
+        return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    };
+
+    useEffect(() => {
+        const fetchDashboardData = async () => {
+            try {
+                const token = user?.token || localStorage.getItem("token") || (user && user.accessToken ? user.accessToken : null);
+                const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+
+                // Fetch Stats
+                const statsRes = await fetch("/api/v1/authority/road/stats", { headers: authHeader });
+                const statsData = await statsRes.json();
+                if (statsData.success) setStats(statsData.data);
+                setStatsLoading(false);
+
+                // Fetch Critical Incidents
+                const criticalRes = await fetch("/api/v1/authority/road/critical", { headers: authHeader });
+                const criticalData = await criticalRes.json();
+                if (criticalData.success) {
+                    setCriticalIncidents(criticalData.data.map(item => ({
+                        id: item._id,
+                        reportId: item.reportId || `#ROA-${item._id.substring(item._id.length - 4).toUpperCase()}`,
+                        category: item.category || "Infrastructure",
+                        subtype: item.title,
+                        loc: item.address || "Unknown",
+                        urg: item.urgencyScore,
+                        status: mapStatusToLifecycle(item.status),
+                        days: getDaysOpen(item.createdAt)
+                    })));
+                }
+            } catch (err) {
+                console.error("Error fetching road dashboard data:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDashboardData();
+    }, [user]);
 
     const getGreeting = () => {
         const hour = new Date().getHours();
@@ -89,34 +154,38 @@ const AuthorityRoadDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard
                     title="New Complaints"
-                    value={24}
+                    value={stats.new}
                     icon={Construction}
                     bgClass="bg-blue-500/10 group-hover:bg-blue-500/20"
                     iconClass="text-blue-400"
+                    loading={statsLoading}
                     delay={0.1}
                 />
                 <StatCard
                     title="In Progress"
-                    value={31}
+                    value={stats.inProgress}
                     icon={Clock}
                     bgClass="bg-orange-500/10 group-hover:bg-orange-500/20"
                     iconClass="text-orange-400"
+                    loading={statsLoading}
                     delay={0.2}
                 />
                 <StatCard
                     title="Work Completed"
-                    value={112}
+                    value={stats.completed}
                     icon={CheckCircle}
                     bgClass="bg-green-500/10 group-hover:bg-green-500/20"
                     iconClass="text-green-400"
+                    loading={statsLoading}
                     delay={0.3}
                 />
                 <StatCard
                     title="High Urgency"
-                    value={14}
+                    value={stats.highUrgency}
                     icon={AlertTriangle}
                     bgClass="bg-red-500/10 group-hover:bg-red-500/20"
                     iconClass="text-red-400"
+                    loading={statsLoading}
                     delay={0.4}
                 />
             </div>
@@ -142,7 +211,7 @@ const AuthorityRoadDashboard = () => {
                                 <th className="px-6 py-4">Report ID</th>
                                 <th className="px-6 py-4">Category</th>
                                 <th className="px-6 py-4">Sub-Type</th>
-                                <th className="px-5 py-4">Location</th>
+                                <th className="px-6 py-4">Location</th>
                                 <th className="px-6 py-4">Urgency</th>
                                 <th className="px-6 py-4">Status</th>
                                 <th className="px-6 py-4">Days Open</th>
@@ -150,37 +219,52 @@ const AuthorityRoadDashboard = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
-                            {CRITICAL_MOCK.map((row) => (
-                                <tr key={row.id} className="hover:bg-white/5 transition-colors group">
-                                    <td className="px-6 py-4 font-mono text-sm text-orange-400 font-bold">{row.id}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-300">{row.category}</td>
-                                    <td className="px-6 py-4 text-sm text-white font-medium">{row.subtype}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-400">{row.loc}</td>
-                                    <td className="px-6 py-4 text-sm font-black text-white">{row.urg}</td>
-                                    <td className="px-6 py-4">
-                                        {row.urg >= 75 && row.status !== "Resolved" ? (
-                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${STATUS_STYLES["High Urgency"]}`}>
-                                                <AlertTriangle size={12} />
-                                                HIGH URGENCY
-                                            </span>
-                                        ) : (
-                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${STATUS_STYLES[row.status]}`}>
-                                                {row.status === "Resolved" && <CheckCircle size={12} />}
-                                                {row.status}
-                                            </span>
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4 text-sm font-bold text-gray-300">{row.days}</td>
-                                    <td className="px-6 py-4 text-right">
-                                        <button
-                                            onClick={() => navigate(`/authority/road/case/${row.id.replace('#', '')}`)}
-                                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-orange-500/20 text-gray-300 hover:text-orange-300 border border-white/10 hover:border-orange-500/30 rounded-lg text-xs font-bold transition-all"
-                                        >
-                                            View <ArrowUpRight size={14} />
-                                        </button>
+                            {loading ? (
+                                <tr>
+                                    <td colSpan={8} className="py-20 text-center text-gray-500">
+                                        <Loader2 className="animate-spin mx-auto mb-4" size={32} />
+                                        <p className="font-bold tracking-widest uppercase text-xs">Loading Critical Items...</p>
                                     </td>
                                 </tr>
-                            ))}
+                            ) : criticalIncidents.length > 0 ? (
+                                criticalIncidents.map((row) => (
+                                    <tr key={row.id} className="hover:bg-white/5 transition-colors group">
+                                        <td className="px-6 py-4 font-mono text-sm text-orange-400 font-bold">{row.reportId}</td>
+                                        <td className="px-6 py-4 text-sm text-gray-300">{row.category}</td>
+                                        <td className="px-6 py-4 text-sm text-white font-medium">{row.subtype}</td>
+                                        <td className="px-6 py-4 text-sm text-gray-400">{row.loc}</td>
+                                        <td className="px-6 py-4 text-sm font-black text-white">{row.urg}</td>
+                                        <td className="px-6 py-4">
+                                            {row.urg >= 75 && row.status !== "Resolved" ? (
+                                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${STATUS_STYLES["High Urgency"]}`}>
+                                                    <AlertTriangle size={12} />
+                                                    HIGH URGENCY
+                                                </span>
+                                            ) : (
+                                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${STATUS_STYLES[row.status]}`}>
+                                                    {row.status === "Resolved" && <CheckCircle size={12} />}
+                                                    {row.status}
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4 text-sm font-bold text-gray-300">{row.days}</td>
+                                        <td className="px-6 py-4 text-right">
+                                            <button
+                                                onClick={() => navigate(`/authority/road/case/${row.id}`)}
+                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-orange-500/20 text-gray-300 hover:text-orange-300 border border-white/10 hover:border-orange-500/30 rounded-lg text-xs font-bold transition-all"
+                                            >
+                                                View <ArrowUpRight size={14} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={8} className="py-20 text-center text-gray-500 font-medium">
+                                        No critical attention items found.
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
@@ -190,3 +274,4 @@ const AuthorityRoadDashboard = () => {
 };
 
 export default AuthorityRoadDashboard;
+

@@ -17,7 +17,7 @@ export const AlertProvider = ({ children }) => {
     } catch (err) {
         localStorage.removeItem('rise_alerts');
     }
-    
+
     const [alerts, setAlerts] = useState(cachedAlerts);
     const [loading, setLoading] = useState(cachedAlerts.length === 0);
     const { user, logout } = useUser();
@@ -29,18 +29,34 @@ export const AlertProvider = ({ children }) => {
             } : {};
             const { data: response } = await axios.get('/api/v1/broadcasts', config);
             const broadcasts = response.data;
+            const getCategory = (backendType) => {
+                const map = {
+                    'POWER_ALERT': 'Power Issues',
+                    'WATER_ALERT': 'Water Supply',
+                    'ROAD_ALERT': 'Road Infrastructure',
+                    'WILDLIFE_ALERT': 'Wildlife Alert',
+                    'ROAD_BLOCK': 'Road Blockage',
+                    'UTILITY_WARNING': 'Utility Warning',
+                    'SAFETY_ALERT': 'Safety Alert'
+                };
+                return map[backendType] || 'General Alert';
+            };
+
             // Map backend broadcasts to frontend alerts structure
             const mappedAlerts = broadcasts.map(b => ({
                 id: b._id,
-                type: b.severity === 'High' ? 'critical' : b.severity === 'Medium' ? 'warning' : 'info',
-                title: b.type,
+                severity: b.severity === 'High' ? 'critical' : b.severity === 'Medium' ? 'warning' : 'info',
+                title: b.title || b.type,
                 message: b.message,
                 location: b.location,
                 time: b.createdAt,
                 icon: b.severity === 'High' ? 'AlertTriangle' : b.severity === 'Medium' ? 'Zap' : 'Info',
                 isAuthority: b.isAuthority,
+                backendType: b.type,
+                category: getCategory(b.type),
+                type: b.severity === 'High' ? 'critical' : b.severity === 'Medium' ? 'warning' : 'info', // Keep for compatibility
             }));
-            
+
             setAlerts(mappedAlerts);
             localStorage.setItem('rise_alerts', JSON.stringify(mappedAlerts)); // Cache for instant loads
         } catch (error) {
@@ -52,7 +68,7 @@ export const AlertProvider = ({ children }) => {
 
     useEffect(() => {
         fetchAlerts();
-    }, []);
+    }, [user?.token]);
 
     const addAlert = async (alertData) => {
         try {

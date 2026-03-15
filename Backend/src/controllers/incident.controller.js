@@ -1,4 +1,5 @@
 import { Incident } from "../models/incident.model.js";
+import { Notification } from "../models/notification.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -22,6 +23,16 @@ export const getUserPowerIncidents = asyncHandler(async (req, res) => {
 
     return res.status(200).json(new ApiResponse(200, incidents, "User power incidents fetched successfully"));
 });
+
+export const getUserRoadIncidents = asyncHandler(async (req, res) => {
+    const incidents = await Incident.find({
+        reportedBy: req.user._id,
+        assignedAuthority: "CIVIL"
+    }).sort({ createdAt: -1 });
+
+    return res.status(200).json(new ApiResponse(200, incidents, "User road incidents fetched successfully"));
+});
+
 
 export const getIncidentById = asyncHandler(async (req, res) => {
     const incident = await Incident.findById(req.params.id);
@@ -66,6 +77,15 @@ export const createIncident = asyncHandler(async (req, res) => {
     }
 
     const incident = await Incident.create(incidentData);
+
+    // Create Notification for Authority
+    await Notification.create({
+        title: "New Complaint Received",
+        message: `A new ${incident.category} complaint has been filed: "${incident.title}"`,
+        type: "NEW_INCIDENT",
+        targetDepartment: incident.assignedAuthority,
+        relatedId: incident._id,
+    });
 
     return res.status(201).json(new ApiResponse(201, incident, "Incident reported successfully"));
 });
@@ -130,6 +150,16 @@ export const batchCreateIncidents = asyncHandler(async (req, res) => {
         }
 
         const incident = await Incident.create(incidentData);
+
+        // Create Notification for Authority
+        await Notification.create({
+            title: "New Complaint Received (Survey)",
+            message: `A new ${incident.category} complaint has been filed via storm survey: "${incident.title}"`,
+            type: "NEW_INCIDENT",
+            targetDepartment: incident.assignedAuthority,
+            relatedId: incident._id,
+        });
+
         createdIncidents.push(incident);
     }
 

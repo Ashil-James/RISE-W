@@ -1,15 +1,19 @@
 import React, { useRef, useCallback, useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { ChevronRight, Zap, AlertTriangle, Info, ArrowRight, CloudRain } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  ChevronRight, Zap, AlertTriangle, Info, ArrowRight,
+  CloudRain
+} from "lucide-react";
 import { useUser } from "../context/UserContext";
 import { useAlerts } from "../context/AlertContext";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import WeatherWidget from "../components/WeatherWidget";
 
 const Home = () => {
   const { user } = useUser();
   const { alerts, loading: alertsLoading } = useAlerts();
+  const navigate = useNavigate();
   const latestAlert = alerts.length > 0 ? alerts[0] : null;
   const heroRef = useRef(null);
   const [activeSurvey, setActiveSurvey] = useState(false);
@@ -22,7 +26,7 @@ const Home = () => {
         const config = { headers: { Authorization: `Bearer ${user.token}` } };
         const { data } = await axios.get("/api/v1/weather/active-survey", config);
         if (data.success && data.data) setActiveSurvey(true);
-      } catch {}
+      } catch { }
     };
     checkSurvey();
   }, [user?.token]);
@@ -82,7 +86,7 @@ const Home = () => {
         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none -z-10 rounded-3xl"
           style={{ background: "radial-gradient(500px circle at var(--mx, 50%) var(--my, 50%), rgba(16,185,129,0.06), transparent 60%)" }} />
 
-        <h1 
+        <h1
           className="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500 tracking-tight drop-shadow-sm"
           style={{ transform: "translateZ(0)", WebkitTransform: "translateZ(0)" }}
         >
@@ -115,7 +119,7 @@ const Home = () => {
 
       {/* ── Post-Storm Survey Banner ── */}
       {activeSurvey && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ type: "spring", stiffness: 100, damping: 20 }}

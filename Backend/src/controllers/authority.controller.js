@@ -210,3 +210,167 @@ export const getPowerReportAnalytics = asyncHandler(async (req, res) => {
         sectors: sectorData
     }, "Power analytics retrieved successfully"));
 });
+
+// Road Infrastructure Authority (CIVIL)
+export const getRoadIncidents = asyncHandler(async (req, res) => {
+    const incidents = await Incident.find({
+        assignedAuthority: "CIVIL"
+    })
+        .populate("reportedBy", "name email")
+        .sort({ createdAt: -1 });
+
+    res.json(new ApiResponse(200, incidents, "Road incidents retrieved successfully"));
+});
+
+export const getRoadDashboardStats = asyncHandler(async (req, res) => {
+    const stats = await Incident.aggregate([
+        {
+            $match: { assignedAuthority: "CIVIL" }
+        },
+        {
+            $group: {
+                _id: "$status",
+                count: { $sum: 1 }
+            }
+        }
+    ]);
+
+    const result = {
+        new: 0,
+        inProgress: 0,
+        completed: 0,
+        highUrgency: 0
+    };
+
+    stats.forEach(s => {
+        if (["OPEN", "REOPENED"].includes(s._id)) result.new += s.count;
+        if (["ACCEPTED", "IN_PROGRESS"].includes(s._id)) result.inProgress += s.count;
+        if (["RESOLVED", "VERIFIED", "CLOSED"].includes(s._id)) result.completed += s.count;
+    });
+
+    result.highUrgency = await Incident.countDocuments({
+        assignedAuthority: "CIVIL",
+        urgencyScore: { $gte: 75 },
+        status: { $nin: ["RESOLVED", "VERIFIED", "CLOSED"] }
+    });
+
+    res.json(new ApiResponse(200, result, "Road dashboard stats retrieved successfully"));
+});
+
+export const getRoadCriticalIncidents = asyncHandler(async (req, res) => {
+    const incidents = await Incident.find({
+        assignedAuthority: "CIVIL",
+        urgencyScore: { $gte: 75 },
+        status: { $nin: ["RESOLVED", "VERIFIED", "CLOSED"] }
+    })
+        .populate("reportedBy", "name email")
+        .sort({ urgencyScore: -1, createdAt: -1 });
+
+    res.json(new ApiResponse(200, incidents, "Road critical incidents retrieved successfully"));
+});
+
+export const getRoadReportAnalytics = asyncHandler(async (req, res) => {
+    const totalComplaints = await Incident.countDocuments({ assignedAuthority: "CIVIL" });
+
+    const resolvedIncidents = await Incident.find({
+        assignedAuthority: "CIVIL",
+        status: { $in: ["RESOLVED", "VERIFIED", "CLOSED"] }
+    });
+
+    const resolvedCount = resolvedIncidents.length;
+
+    // Calculate Average Resolution Time
+    let totalResolutionTime = 0;
+    resolvedIncidents.forEach(inc => {
+        const start = new Date(inc.createdAt);
+        const end = new Date(inc.updatedAt);
+        totalResolutionTime += Math.abs(end - start);
+    });
+
+    const avgResolutionHours = resolvedCount > 0
+        ? (totalResolutionTime / resolvedCount / (1000 * 60 * 60)).toFixed(1)
+        : 0;
+
+    const resolutionRate = totalComplaints > 0
+        ? Math.round((resolvedCount / totalComplaints) * 100)
+        : 0;
+
+    // Weekly Trend (last 7 days including today)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+
+    const weeklyTrend = await Incident.aggregate([
+        {
+            $match: {
+                assignedAuthority: "CIVIL",
+                createdAt: { $gte: sevenDaysAgo }
+            }
+        },
+        {
+            $group: {
+                _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                count: { $sum: 1 }
+            }
+        },
+        { $sort: { _id: 1 } }
+    ]);
+
+    // Map to last 7 days names
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const last7Days = [];
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        const match = weeklyTrend.find(w => w._id === dateStr);
+        last7Days.push({
+            name: dayNames[d.getDay()],
+            count: match ? match.count : 0
+        });
+    }
+
+    // Category Breakdown (Top 4)
+    const categories = await Incident.aggregate([
+        { $match: { assignedAuthority: "CIVIL" } },
+        {
+            $group: {
+                _id: "$title",
+                value: { $sum: 1 }
+            }
+        },
+        { $sort: { value: -1 } },
+        { $limit: 4 }
+    ]);
+
+    const formattedCategories = categories.map(c => ({
+        name: c._id || "Undisclosed",
+        value: c.value
+    }));
+
+    // Sector Breakdown (Top 5)
+    const allIncidentsForSectors = await Incident.find({ assignedAuthority: "CIVIL" }, "address");
+    const sectorMap = {};
+    allIncidentsForSectors.forEach(inc => {
+        let sec = (inc.address || "Unknown Loc").split(',')[0].trim();
+        if (sec.length > 15) sec = sec.substring(0, 15) + "...";
+        sectorMap[sec] = (sectorMap[sec] || 0) + 1;
+    });
+
+    const sectorData = Object.keys(sectorMap)
+        .map(key => ({ name: key, count: sectorMap[key] }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+
+    res.json(new ApiResponse(200, {
+        stats: {
+            total: totalComplaints,
+            resolved: resolvedCount,
+            avgTime: avgResolutionHours,
+            rate: resolutionRate
+        },
+        weeklyTrend: last7Days,
+        categories: formattedCategories,
+        sectors: sectorData
+    }, "Road analytics retrieved successfully"));
+});

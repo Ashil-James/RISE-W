@@ -2,9 +2,13 @@ import mongoose from "mongoose";
 
 const broadcastSchema = new mongoose.Schema(
     {
+        title: {
+            type: String,
+            required: true,
+        },
         type: {
             type: String,
-            enum: ["WILDLIFE_ALERT", "ROAD_BLOCK", "UTILITY_WARNING", "SAFETY_ALERT"],
+            enum: ["WILDLIFE_ALERT", "ROAD_BLOCK", "UTILITY_WARNING", "SAFETY_ALERT", "POWER_ALERT", "WATER_ALERT", "ROAD_ALERT"],
             required: true,
         },
         severity: {

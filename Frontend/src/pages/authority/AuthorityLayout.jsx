@@ -31,58 +31,88 @@ const AuthorityLayout = () => {
 
     const [notifications, setNotifications] = useState([]);
 
-    React.useEffect(() => {
-        const fetchNotifications = async () => {
-            try {
-                // Fetch water incidents for notifications
-                const token = authUser?.token || localStorage.getItem("token") || (authUser && authUser.accessToken ? authUser.accessToken : null);
-                if (!token) return;
+    const fetchNotifications = async () => {
+        try {
+            const token = authUser?.token || localStorage.getItem("token") || (authUser && authUser.accessToken ? authUser.accessToken : null);
+            if (!token) return;
 
-                const res = await fetch("/api/v1/authority/water/incidents", {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+            const res = await fetch("/api/v1/notifications", {
+                headers: { Authorization: `Bearer ${token}` }
+            });
 
-                if (res.ok) {
-                    const result = await res.json();
-                    if (result.success && result.data) {
-                        // Take the 5 most recent incidents
-                        const recent = result.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+            if (res.ok) {
+                const result = await res.json();
+                if (result.success && result.data) {
+                    const mapped = result.data.map(notif => {
+                        const now = new Date();
+                        const then = new Date(notif.createdAt);
+                        const diffMins = Math.floor((now - then) / 60000);
+                        let timeStr = `${diffMins} min ago`;
+                        if (diffMins > 60) {
+                            const hrs = Math.floor(diffMins / 60);
+                            timeStr = `${hrs} hr ago`;
+                            if (hrs > 24) timeStr = `${Math.floor(hrs / 24)} d ago`;
+                        }
 
-                        const mapped = recent.map(inc => {
-                            const now = new Date();
-                            const then = new Date(inc.createdAt);
-                            const diffMins = Math.floor((now - then) / 60000);
-                            let timeStr = `${diffMins} min ago`;
-                            if (diffMins > 60) {
-                                const hrs = Math.floor(diffMins / 60);
-                                timeStr = `${hrs} hr ago`;
-                                if (hrs > 24) timeStr = `${Math.floor(hrs / 24)} d ago`;
-                            }
-
-                            let title = "Complaint Updated";
-                            if (inc.status === "OPEN") { title = "New Complaint Received"; }
-                            else if (inc.status === "IN_PROGRESS" || inc.status === "ACCEPTED") { title = "Complaint In Progress"; }
-                            else if (inc.status === "RESOLVED" || inc.status === "CLOSED") { title = "Complaint Resolved"; }
-
-                            return {
-                                id: inc._id,
-                                title: title,
-                                message: `${inc.title || inc.category} reported at ${inc.address ? inc.address.split(',')[0] : "Unknown"}`,
-                                time: timeStr,
-                                type: inc.urgencyScore >= 75 ? "urgent" : "new",
-                                unread: inc.status === "OPEN" || inc.urgencyScore >= 75
-                            };
-                        });
-                        setNotifications(mapped);
-                    }
+                        return {
+                            id: notif._id,
+                            title: notif.title,
+                            message: notif.message,
+                            time: timeStr,
+                            type: notif.type === "INCIDENT_UPDATE" ? "new" : "urgent",
+                            unread: !notif.userReadStatus
+                        };
+                    });
+                    setNotifications(mapped);
                 }
-            } catch (err) {
-                console.error("Failed to fetch notifications:", err);
             }
-        };
+        } catch (err) {
+            console.error("Failed to fetch notifications:", err);
+        }
+    };
 
+    React.useEffect(() => {
         fetchNotifications();
+        // Poll every 30 seconds for new notifications
+        const interval = setInterval(fetchNotifications, 30000);
+        return () => clearInterval(interval);
     }, [authUser]);
+
+    const handleMarkAsRead = async (id) => {
+        try {
+            const token = authUser?.token || localStorage.getItem("token") || (authUser && authUser.accessToken ? authUser.accessToken : null);
+            if (!token) return;
+
+            const res = await fetch(`/api/v1/notifications/${id}/read`, {
+                method: 'PATCH',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                setNotifications(prev => prev.map(n => n.id === id ? { ...n, unread: false } : n));
+            }
+        } catch (err) {
+            console.error("Failed to mark notification as read:", err);
+        }
+    };
+
+    const handleMarkAllAsRead = async () => {
+        try {
+            const token = authUser?.token || localStorage.getItem("token") || (authUser && authUser.accessToken ? authUser.accessToken : null);
+            if (!token) return;
+
+            const res = await fetch("/api/v1/notifications/mark-all-read", {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+            }
+        } catch (err) {
+            console.error("Failed to mark all as read:", err);
+        }
+    };
 
 
     const unreadCount = notifications.filter(n => n.unread).length;
@@ -330,6 +360,7 @@ const AuthorityLayout = () => {
                                                 notifications.map((n) => (
                                                     <div
                                                         key={n.id}
+                                                        onClick={() => n.unread && handleMarkAsRead(n.id)}
                                                         className={`px-4 py-4 border-b border-white/5 hover:bg-white/[0.02] transition-colors cursor-pointer relative group ${n.unread ? "bg-white/[0.01]" : ""}`}
                                                     >
                                                         {n.unread && (
@@ -363,7 +394,7 @@ const AuthorityLayout = () => {
 
                                         <div className="px-4 py-2 text-center bg-white/5 border-t border-white/5">
                                             <button
-                                                onClick={() => setNotifications(notifications.map(n => ({ ...n, unread: false })))}
+                                                onClick={handleMarkAllAsRead}
                                                 className="text-[10px] font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest"
                                             >
                                                 Mark all as read

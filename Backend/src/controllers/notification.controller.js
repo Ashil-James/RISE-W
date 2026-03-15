@@ -6,13 +6,19 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 export const getUserNotifications = asyncHandler(async (req, res) => {
     const userId = req.user._id;
 
-    // Fetch personal notifications OR global ones
+    // Fetch personal notifications, department-specific ones, OR universal global ones
     const notifications = await Notification.find({
         $or: [
             { recipient: userId },
-            { recipient: null } // Global broadcasts
+            {
+                recipient: null,
+                $or: [
+                    { targetDepartment: req.user.department },
+                    { targetDepartment: { $exists: false } }
+                ]
+            }
         ]
-    }).sort({ createdAt: -1 }).limit(50); // Limit to latest 50 for performance
+    }).sort({ createdAt: -1 }).limit(50);
 
     // Add a dynamic field indicating if this user has read it
     const formattedNotifications = notifications.map(notif => {
@@ -77,15 +83,18 @@ export const markAllAsRead = asyncHandler(async (req, res) => {
         { $set: { isRead: true } }
     );
 
-    // 2. Mark all global notifications as read by adding userId to readBy roughly
-    // First find unread global notifications
-    const globalUnread = await Notification.find({
+    // 2. Mark all department-specific and universal global notifications as read
+    const sharedUnread = await Notification.find({
         recipient: null,
+        $or: [
+            { targetDepartment: req.user.department },
+            { targetDepartment: { $exists: false } }
+        ],
         readBy: { $ne: userId }
     });
 
     // Update each one
-    for (const notif of globalUnread) {
+    for (const notif of sharedUnread) {
         notif.readBy.push(userId);
         await notif.save();
     }

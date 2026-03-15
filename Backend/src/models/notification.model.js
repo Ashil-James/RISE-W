@@ -17,8 +17,12 @@ const notificationSchema = new mongoose.Schema(
         },
         type: {
             type: String,
-            enum: ["INCIDENT_UPDATE", "BROADCAST", "SYSTEM"],
+            enum: ["INCIDENT_UPDATE", "BROADCAST", "SYSTEM", "NEW_INCIDENT"],
             required: true,
+        },
+        targetDepartment: {
+            type: String,
+            enum: ["WATER", "ELECTRICITY", "CIVIL", "ADMIN"],
         },
         relatedId: {
             // Can refer to an Incident ID or a Broadcast ID

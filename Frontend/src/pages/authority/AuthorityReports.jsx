@@ -41,7 +41,9 @@ const AuthorityReports = () => {
 
                 const endpoint = isPower
                     ? "/api/v1/authority/power/analytics"
-                    : "/api/v1/authority/water/incidents";
+                    : isRoad
+                        ? "/api/v1/authority/road/analytics"
+                        : "/api/v1/authority/water/incidents";
 
                 const res = await fetch(endpoint, {
                     headers: authHeader,
@@ -51,7 +53,7 @@ const AuthorityReports = () => {
                 const result = await res.json();
 
                 if (result.success) {
-                    if (isPower) {
+                    if (isPower || isRoad) {
                         setAnalytics(result.data);
                     }
                 }

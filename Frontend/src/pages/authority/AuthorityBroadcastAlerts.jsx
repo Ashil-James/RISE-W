@@ -97,9 +97,9 @@ const AuthorityBroadcastAlerts = () => {
 
 
     // Authority Type Determination
-    const isPower = authUser?.role === "power_authority" || window.location.pathname.includes("/power");
-    const isRoad = authUser?.role === "road_authority" || window.location.pathname.includes("/road");
-    const isWater = !isPower && !isRoad;
+    const isPower = authUser?.department === "ELECTRICITY" || window.location.pathname.includes("/power");
+    const isRoad = authUser?.department === "CIVIL" || window.location.pathname.includes("/road");
+    const isWater = authUser?.department === "WATER" || (!isPower && !isRoad);
 
     const authorityName = isPower ? "Power Authority" : isRoad ? "Road Infrastructure Authority" : "Water Authority";
     const authorityShort = isPower ? "Power" : isRoad ? "Road" : "Water";
@@ -187,7 +187,8 @@ const AuthorityBroadcastAlerts = () => {
             };
 
             const dataToPost = {
-                type: formData.title === "Other" ? formData.customTitle : formData.title,
+                title: formData.title === "Other" ? formData.customTitle : formData.title,
+                type: formData.title,
                 severity: formData.priority === "Urgent" ? "High" : formData.priority === "Important" ? "Medium" : "Low",
                 location: formData.location || "Multiple Areas",
                 message: formData.message,
@@ -213,8 +214,22 @@ const AuthorityBroadcastAlerts = () => {
         }
     };
 
-    // Filter alerts by current authority for history
-    const historyAlerts = allAlerts.filter(a => a.isAuthority);
+    // Filter alerts for history box
+    const historyAlerts = allAlerts.filter(a => {
+        // Must be an authority broadcast
+        if (!a.isAuthority) return false;
+
+        // Power Authority: show only power alerts
+        if (isPower && a.backendType === 'POWER_ALERT') return true;
+
+        // Road Authority: show road, block, and wildlife alerts
+        if (isRoad && (a.backendType === 'ROAD_ALERT' || a.backendType === 'ROAD_BLOCK' || a.backendType === 'WILDLIFE_ALERT')) return true;
+
+        // Water Authority: show only water alerts
+        if (isWater && a.backendType === 'WATER_ALERT') return true;
+
+        return false;
+    });
 
     return (
         <div className="space-y-10 pb-20">
@@ -426,12 +441,12 @@ const AuthorityBroadcastAlerts = () => {
                                         <tr key={alert.id || i} className="group hover:bg-white/[0.02] transition-colors">
                                             <td className="px-6 py-4">
                                                 <p className="text-sm font-bold text-white group-hover:text-sky-400 transition-colors">
-                                                    {alert.title.length > 30 ? alert.title.substring(0, 30) + "..." : alert.title}
+                                                    {alert.title}
                                                 </p>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className="text-xs font-bold text-gray-400">
-                                                    {alert.title.includes("Wildlife") ? "Wildlife Alert" : alert.title}
+                                                    {alert.category}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4">
