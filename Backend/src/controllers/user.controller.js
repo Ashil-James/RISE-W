@@ -43,12 +43,12 @@ export const registerUser = asyncHandler(async (req, res) => {
 
     return res.status(201).json(
         new ApiResponse(
-            201, 
-            { 
-                ...createdUser._doc, 
-                accessToken, 
-                token: accessToken 
-            }, 
+            201,
+            {
+                ...createdUser._doc,
+                accessToken,
+                token: accessToken
+            },
             "User registered Successfully"
         )
     );
@@ -74,6 +74,11 @@ export const loginUser = asyncHandler(async (req, res) => {
     }
 
     const accessToken = user.generateAccessToken();
+
+    // Update last login
+    user.lastLogin = new Date();
+    await user.save({ validateBeforeSave: false });
+
     const loggedInUser = await User.findById(user._id).select("-password");
     const stats = await getUserStats(user._id);
 
