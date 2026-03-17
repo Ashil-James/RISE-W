@@ -13,6 +13,7 @@ const TABS = [
     "Resolved",
     "Reopened",
     "Rejected",
+    "Revoked",
 ];
 
 const URGENCY_LEVELS = ["Any Urgency", "Critical (75+)", "High (50-74)", "Low (0-49)"];
@@ -26,6 +27,7 @@ const lifecycleColor = (status) => {
         Resolved: "text-green-400 bg-green-500/10 border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.1)]",
         Reopened: "text-red-400 bg-red-500/10 border-red-500/20 animate-pulse",
         Rejected: "text-red-400 bg-red-500/10 border-red-500/20",
+        Revoked: "text-gray-300 bg-gray-500/10 border-gray-500/20",
     };
     return map[status] || "text-gray-400 bg-white/5 border-white/10";
 };
@@ -49,12 +51,13 @@ const AuthorityRoadMatrix = () => {
             case "IN_PROGRESS": return "Active Ops";
             case "VERIFIED": return "Assessment";
             case "RESOLVED": return "Resolved";
-            case "CLOSED": return "Resolved";
-            case "REOPENED": return "Reopened";
-            case "REJECTED": return "Rejected";
-            default: return "New";
-        }
-    };
+        case "CLOSED": return "Resolved";
+        case "REOPENED": return "Reopened";
+        case "REJECTED": return "Rejected";
+        case "REVOKED": return "Revoked";
+        default: return "New";
+    }
+};
 
     const getDuration = (dateString) => {
         if (!dateString) return "Just now";

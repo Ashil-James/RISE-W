@@ -42,6 +42,7 @@ const incidentSchema = new mongoose.Schema(
                 "REOPENED",
                 "CLOSED",
                 "REJECTED",
+                "REVOKED",
             ],
             default: "OPEN",
         },

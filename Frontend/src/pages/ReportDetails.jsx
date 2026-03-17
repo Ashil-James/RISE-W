@@ -7,8 +7,12 @@ import { motion, AnimatePresence } from "framer-motion";
 const ReportDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { reports, updateReportStatus } = useReports();
+    const { reports, respondToResolution, revokeReport } = useReports();
     const [showRevokeConfirm, setShowRevokeConfirm] = useState(false);
+    const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+    const [feedbackError, setFeedbackError] = useState("");
+    const [isRevoking, setIsRevoking] = useState(false);
+    const [revokeError, setRevokeError] = useState("");
 
     const report = reports.find((r) => r.id.toString() === id || r.id === `#${id}` || r.id.includes(id));
 
@@ -33,16 +37,58 @@ const ReportDetails = () => {
         );
     }
 
-    const handleVerify = () => { updateReportStatus(report.id, "Closed"); navigate("/my-reports"); };
-    const handleReopen = () => { updateReportStatus(report.id, "Open"); };
-    const handleRevoke = () => { updateReportStatus(report.id, "Revoked"); navigate("/my-reports"); };
+    const handleVerify = async () => {
+        setFeedbackError("");
+        setIsSubmittingFeedback(true);
+        const result = await respondToResolution(report.id, "confirm_resolved");
+        setIsSubmittingFeedback(false);
+
+        if (result.success) {
+            navigate("/my-reports");
+            return;
+        }
+
+        setFeedbackError(result.message || "Failed to close this report.");
+    };
+
+    const handleReopen = async () => {
+        setFeedbackError("");
+        setIsSubmittingFeedback(true);
+        const result = await respondToResolution(report.id, "reject_resolution");
+        setIsSubmittingFeedback(false);
+
+        if (result.success) {
+            return;
+        }
+
+        setFeedbackError(result.message || "Failed to reopen this report.");
+    };
+
+    const canRevoke = report.rawStatus === "OPEN" || report.status === "Open";
+
+    const handleRevoke = async () => {
+        setRevokeError("");
+        setIsRevoking(true);
+        const result = await revokeReport(report.id);
+        setIsRevoking(false);
+
+        if (result.success) {
+            navigate("/my-reports");
+            return;
+        }
+
+        setRevokeError(result.message || "Failed to revoke this report.");
+    };
 
     const statusAccents = {
         Resolved: { bg: "rgba(59,130,246,0.06)", color: "#3b82f6", border: "rgba(59,130,246,0.12)", badge: "rgba(59,130,246,0.1)" },
         Closed: { bg: "rgba(16,185,129,0.06)", color: "#10b981", border: "rgba(16,185,129,0.12)", badge: "rgba(16,185,129,0.1)" },
         Revoked: { bg: "rgba(107,114,128,0.06)", color: "#6b7280", border: "rgba(107,114,128,0.12)", badge: "rgba(107,114,128,0.1)" },
         Open: { bg: "rgba(249,115,22,0.06)", color: "#f97316", border: "rgba(249,115,22,0.12)", badge: "rgba(249,115,22,0.1)" },
+        Reopened: { bg: "rgba(239,68,68,0.06)", color: "#ef4444", border: "rgba(239,68,68,0.12)", badge: "rgba(239,68,68,0.1)" },
         Rejected: { bg: "rgba(239,68,68,0.06)", color: "#ef4444", border: "rgba(239,68,68,0.12)", badge: "rgba(239,68,68,0.1)" },
+        Accepted: { bg: "rgba(59,130,246,0.06)", color: "#3b82f6", border: "rgba(59,130,246,0.12)", badge: "rgba(59,130,246,0.1)" },
+        "In Progress": { bg: "rgba(245,158,11,0.06)", color: "#f59e0b", border: "rgba(245,158,11,0.12)", badge: "rgba(245,158,11,0.1)" },
     };
     const accent = statusAccents[report.status] || statusAccents.Open;
 
@@ -114,7 +160,7 @@ const ReportDetails = () => {
                     <div className="h-px bg-wayanad-border w-full"></div>
 
                     {/* Authority Response / Actions */}
-                    {report.status === "Resolved" || report.status === "Closed" || report.status === "Rejected" ? (
+                    {report.status === "Resolved" || report.status === "Closed" || report.status === "Rejected" || report.status === "Reopened" ? (
                         <div>
                             <h3 className="text-sm font-bold text-wayanad-muted uppercase mb-3">Authority Response</h3>
                             <div className="rounded-xl p-4 mb-6" style={{ background: "var(--glass-bg)", border: "1px solid var(--glass-border)" }}>
@@ -136,17 +182,19 @@ const ReportDetails = () => {
                             {report.status === "Resolved" && (
                                 <div className="flex gap-3">
                                     <motion.button onClick={handleVerify}
+                                        disabled={isSubmittingFeedback}
                                         whileHover={{ scale: 1.02, y: -2 }}
                                         whileTap={{ scale: 0.98 }}
-                                        className="flex-1 text-white py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2"
+                                        className="flex-1 text-white py-3 rounded-xl text-sm font-bold flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
                                         style={{ background: "linear-gradient(135deg, #10b981, #059669)", boxShadow: "0 8px 25px -5px rgba(16,185,129,0.4)" }}>
-                                        <CheckCircle2 size={18} /> Verify & Close
+                                        <CheckCircle2 size={18} /> {isSubmittingFeedback ? "Submitting..." : "Verify & Close"}
                                     </motion.button>
                                     <motion.button onClick={handleReopen}
+                                        disabled={isSubmittingFeedback}
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
-                                        className="flex-1 glass-card py-3 rounded-xl text-sm font-bold text-wayanad-text hover:text-red-500 flex items-center justify-center gap-2 transition-colors">
-                                        <XCircle size={18} /> Not Fixed
+                                        className="flex-1 glass-card py-3 rounded-xl text-sm font-bold text-wayanad-text hover:text-red-500 flex items-center justify-center gap-2 transition-colors disabled:opacity-60 disabled:cursor-not-allowed">
+                                        <XCircle size={18} /> {isSubmittingFeedback ? "Submitting..." : "Not Fixed"}
                                     </motion.button>
                                 </div>
                             )}
@@ -155,6 +203,19 @@ const ReportDetails = () => {
                                 <div className="text-center p-4 rounded-xl font-bold flex items-center justify-center gap-2"
                                     style={{ background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.12)", color: "#10b981" }}>
                                     <CheckCircle2 size={18} /> This report has been verified and closed.
+                                </div>
+                            )}
+
+                            {report.status === "Reopened" && (
+                                <div className="text-center p-4 rounded-xl font-bold flex items-center justify-center gap-2"
+                                    style={{ background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.12)", color: "#ef4444" }}>
+                                    <XCircle size={18} /> You marked this issue as not fixed. The authorities can now see it as reopened.
+                                </div>
+                            )}
+
+                            {feedbackError && (
+                                <div className="mt-4 text-sm text-red-500 font-medium">
+                                    {feedbackError}
                                 </div>
                             )}
                         </div>
@@ -169,15 +230,17 @@ const ReportDetails = () => {
                                 <p className="text-xs mt-1 opacity-70">You will be notified once a resolution is posted.</p>
                             </div>
 
+                            {canRevoke && (
                             <div className="border-t border-wayanad-border pt-6">
                                 <AnimatePresence mode="wait">
                                     {!showRevokeConfirm ? (
                                         <motion.button key="revokeBtn"
                                             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                            disabled={isRevoking}
                                             onClick={() => setShowRevokeConfirm(true)}
                                             whileHover={{ scale: 1.01 }}
                                             whileTap={{ scale: 0.99 }}
-                                            className="w-full py-3 rounded-xl text-sm font-bold text-red-500 flex items-center justify-center gap-2 transition-all"
+                                            className="w-full py-3 rounded-xl text-sm font-bold text-red-500 flex items-center justify-center gap-2 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
                                             style={{ border: "1px solid rgba(239,68,68,0.2)", background: "rgba(239,68,68,0.04)" }}>
                                             <Trash2 size={16} /> Revoke Report
                                         </motion.button>
@@ -186,25 +249,34 @@ const ReportDetails = () => {
                                             initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
                                             className="rounded-xl p-4" style={{ border: "1px solid rgba(239,68,68,0.2)", background: "rgba(239,68,68,0.04)" }}>
                                             <p className="text-sm text-center text-wayanad-text mb-3 font-medium">Are you sure you want to revoke this report?</p>
+                                            <p className="text-xs text-center text-wayanad-muted mb-3">This is only allowed before the authority accepts it, and only if no other user has supported it.</p>
                                             <div className="flex gap-3">
                                                 <motion.button onClick={handleRevoke}
+                                                    disabled={isRevoking}
                                                     whileHover={{ scale: 1.02 }}
                                                     whileTap={{ scale: 0.98 }}
-                                                    className="flex-1 text-white py-2.5 rounded-xl text-sm font-bold"
+                                                    className="flex-1 text-white py-2.5 rounded-xl text-sm font-bold disabled:opacity-60 disabled:cursor-not-allowed"
                                                     style={{ background: "#ef4444" }}>
-                                                    Yes, Revoke
+                                                    {isRevoking ? "Revoking..." : "Yes, Revoke"}
                                                 </motion.button>
                                                 <motion.button onClick={() => setShowRevokeConfirm(false)}
+                                                    disabled={isRevoking}
                                                     whileHover={{ scale: 1.02 }}
                                                     whileTap={{ scale: 0.98 }}
-                                                    className="flex-1 glass-card text-wayanad-text py-2.5 rounded-xl text-sm font-bold">
+                                                    className="flex-1 glass-card text-wayanad-text py-2.5 rounded-xl text-sm font-bold disabled:opacity-60 disabled:cursor-not-allowed">
                                                     Cancel
                                                 </motion.button>
                                             </div>
+                                            {revokeError && (
+                                                <div className="mt-3 text-sm text-red-500 text-center font-medium">
+                                                    {revokeError}
+                                                </div>
+                                            )}
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
                             </div>
+                            )}
                         </div>
                     )}
                 </div>

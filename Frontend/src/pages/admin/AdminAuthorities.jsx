@@ -128,8 +128,8 @@ const AdminAuthorities = () => {
     const getAuthorityStats = (authId) => {
         const authIncidents = incidents.filter((inc) => inc.assignedAuthority === authId);
         const total = authIncidents.length;
-        const pending = authIncidents.filter((inc) => ["OPEN", "IN_PROGRESS"].includes(inc.status)).length;
-        const resolved = authIncidents.filter((inc) => inc.status === "RESOLVED").length;
+        const pending = authIncidents.filter((inc) => ["OPEN", "ACCEPTED", "IN_PROGRESS", "REOPENED"].includes(inc.status)).length;
+        const resolved = authIncidents.filter((inc) => ["RESOLVED", "VERIFIED", "CLOSED"].includes(inc.status)).length;
         return { total, pending, resolved };
     };
 
@@ -360,10 +360,14 @@ const AdminAuthorities = () => {
 const StatusBadge = ({ status }) => {
     const styles = {
         OPEN: { bg: "rgba(239,68,68,0.08)", color: "#ef4444", border: "rgba(239,68,68,0.15)" },
+        ACCEPTED: { bg: "rgba(59,130,246,0.08)", color: "#3b82f6", border: "rgba(59,130,246,0.15)" },
         IN_PROGRESS: { bg: "rgba(245,158,11,0.08)", color: "#f59e0b", border: "rgba(245,158,11,0.15)" },
         RESOLVED: { bg: "rgba(16,185,129,0.08)", color: "#10b981", border: "rgba(16,185,129,0.15)" },
         VERIFIED: { bg: "rgba(59,130,246,0.08)", color: "#3b82f6", border: "rgba(59,130,246,0.15)" },
         CLOSED: { bg: "rgba(107,114,128,0.08)", color: "#6b7280", border: "rgba(107,114,128,0.15)" },
+        REOPENED: { bg: "rgba(239,68,68,0.08)", color: "#ef4444", border: "rgba(239,68,68,0.15)" },
+        REJECTED: { bg: "rgba(239,68,68,0.08)", color: "#ef4444", border: "rgba(239,68,68,0.15)" },
+        REVOKED: { bg: "rgba(107,114,128,0.08)", color: "#9ca3af", border: "rgba(107,114,128,0.15)" },
     };
     const s = styles[status] || styles.CLOSED;
 

@@ -44,6 +44,7 @@ const AuthorityRoadCase = () => {
             case "CLOSED": return "Work Completed";
             case "REOPENED": return "Reopened";
             case "REJECTED": return "Rejected";
+            case "REVOKED": return "Revoked";
             default: return "New";
         }
     };
@@ -98,6 +99,8 @@ const AuthorityRoadCase = () => {
         Resolved: "bg-green-500/10 text-green-400 border-green-500/20",
         "Work Completed": "bg-green-500/10 text-green-400 border-green-500/20",
         Rejected: "bg-red-500/10 text-red-400 border-red-500/20",
+        Reopened: "bg-red-500/10 text-red-400 border-red-500/20 animate-pulse",
+        Revoked: "bg-gray-500/10 text-gray-300 border-gray-500/20",
     };
 
     const currentStatusStyle = STATUS_STYLES[status] || STATUS_STYLES["New"];
@@ -284,7 +287,7 @@ const AuthorityRoadCase = () => {
                             </div>
                         )}
 
-                        {(status !== "New" && status !== "Rejected") && (
+                        {(status !== "New" && status !== "Rejected" && status !== "Revoked") && (
                             <div className="pt-2">
                                 <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
                                     <UserCheck className="text-orange-400" size={20} />
@@ -347,6 +350,12 @@ const AuthorityRoadCase = () => {
                         {status === "Rejected" && (
                             <div className="p-5 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center gap-3 text-red-500 font-bold">
                                 <XCircle size={20} /> Case Rejected Operations: {incident.authorityMessage || "N/A"}
+                            </div>
+                        )}
+
+                        {status === "Revoked" && (
+                            <div className="p-5 bg-gray-500/10 border border-gray-500/20 rounded-xl flex items-center gap-3 text-gray-300 font-bold">
+                                <XCircle size={20} /> Reporter revoked this case before authority acceptance.
                             </div>
                         )}
                     </motion.div>

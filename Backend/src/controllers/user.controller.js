@@ -6,8 +6,14 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 
 const getUserStats = async (userId) => {
     const total = await Incident.countDocuments({ reportedBy: userId });
-    const resolved = await Incident.countDocuments({ reportedBy: userId, status: 'RESOLVED' });
-    const pending = await Incident.countDocuments({ reportedBy: userId, status: { $in: ['OPEN', 'IN_PROGRESS', 'ACCEPTED'] } });
+    const resolved = await Incident.countDocuments({
+        reportedBy: userId,
+        status: { $in: ['RESOLVED', 'VERIFIED', 'CLOSED'] }
+    });
+    const pending = await Incident.countDocuments({
+        reportedBy: userId,
+        status: { $in: ['OPEN', 'IN_PROGRESS', 'ACCEPTED', 'REOPENED'] }
+    });
     return { total, resolved, pending };
 };
 

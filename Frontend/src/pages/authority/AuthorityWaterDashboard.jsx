@@ -46,7 +46,8 @@ const STATUS_STYLES = {
     "High Urgency": "bg-red-500/10 text-red-400 border-red-500/20 animate-ping",
     Accepted: "bg-blue-500/10 text-blue-400 border-blue-500/20",
     Reopened: "bg-red-500/10 text-red-400 border-red-500/20 animate-pulse",
-    Assessment: "bg-amber-500/10 text-amber-400 border-amber-500/20"
+    Assessment: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    Revoked: "bg-gray-500/10 text-gray-300 border-gray-500/20"
 };
 
 const mapStatusToLifecycle = (backendStatus) => {
@@ -59,6 +60,7 @@ const mapStatusToLifecycle = (backendStatus) => {
         case "CLOSED": return "Work Completed";
         case "REOPENED": return "Reopened";
         case "REJECTED": return "Rejected";
+        case "REVOKED": return "Revoked";
         default: return "New";
     }
 };
@@ -117,7 +119,7 @@ const AuthorityWaterDashboard = () => {
                     const newCount = formatted.filter(i => i.status === "New").length;
                     const inProgCount = formatted.filter(i => i.status === "In Progress" || i.status === "Accepted" || i.status === "Assessment").length;
                     const compCount = formatted.filter(i => i.status === "Resolved" || i.status === "Work Completed").length;
-                    const urgCount = formatted.filter(i => i.urg >= 75 && i.status !== "Resolved" && i.status !== "Work Completed").length;
+                    const urgCount = formatted.filter(i => i.urg >= 75 && i.status !== "Resolved" && i.status !== "Work Completed" && i.status !== "Revoked").length;
 
                     setStats({ new: newCount, inProgress: inProgCount, completed: compCount, highUrgency: urgCount });
                 }
@@ -140,7 +142,7 @@ const AuthorityWaterDashboard = () => {
         return "System Monitoring Active";
     };
 
-    const criticalItems = incidents.filter(i => i.urg >= 50 && i.status !== "Resolved" && i.status !== "Work Completed")
+    const criticalItems = incidents.filter(i => i.urg >= 50 && i.status !== "Resolved" && i.status !== "Work Completed" && i.status !== "Revoked")
         .sort((a, b) => b.urg - a.urg)
         .slice(0, 5); // top 5 critical items
 

@@ -101,6 +101,31 @@ const GlassCard = ({ children, className = "", ...props }) => (
   </motion.div>
 );
 
+const formatIncidentStatus = (status) => {
+  switch (status) {
+    case "OPEN":
+      return "Open";
+    case "ACCEPTED":
+      return "Accepted";
+    case "IN_PROGRESS":
+      return "In Progress";
+    case "RESOLVED":
+      return "Resolved";
+    case "VERIFIED":
+      return "Verified";
+    case "CLOSED":
+      return "Closed";
+    case "REOPENED":
+      return "Reopened";
+    case "REJECTED":
+      return "Rejected";
+    case "REVOKED":
+      return "Revoked";
+    default:
+      return status;
+  }
+};
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { user } = useUser();
@@ -143,9 +168,7 @@ const AdminDashboard = () => {
             reporter: inc.reportedBy?.name || "Anonymous",
             loc: inc.address || "Unknown Location",
             date: new Date(inc.createdAt).toLocaleDateString(),
-            status:
-              inc.status.charAt(0).toUpperCase() +
-              inc.status.slice(1).toLowerCase(),
+            status: formatIncidentStatus(inc.status),
             priority: inc.priority || "Medium",
             upvotes: inc.upvotes || 0,
             urgencyScore: inc.urgencyScore || 1,
@@ -712,10 +735,35 @@ const StatusBadge = ({ status }) => {
       color: "#3b82f6",
       border: "rgba(59,130,246,0.15)",
     },
+    "In Progress": {
+      bg: "rgba(59,130,246,0.08)",
+      color: "#3b82f6",
+      border: "rgba(59,130,246,0.15)",
+    },
     Resolved: {
       bg: "rgba(16,185,129,0.08)",
       color: "#10b981",
       border: "rgba(16,185,129,0.15)",
+    },
+    Verified: {
+      bg: "rgba(59,130,246,0.08)",
+      color: "#3b82f6",
+      border: "rgba(59,130,246,0.15)",
+    },
+    Closed: {
+      bg: "rgba(107,114,128,0.08)",
+      color: "#6b7280",
+      border: "rgba(107,114,128,0.15)",
+    },
+    Reopened: {
+      bg: "rgba(239,68,68,0.08)",
+      color: "#ef4444",
+      border: "rgba(239,68,68,0.15)",
+    },
+    Revoked: {
+      bg: "rgba(107,114,128,0.08)",
+      color: "#9ca3af",
+      border: "rgba(107,114,128,0.15)",
     },
     Open: {
       bg: "rgba(239,68,68,0.08)",

@@ -64,7 +64,9 @@ const AdminIncidentDetail = () => {
     RESOLVED: { bg: "rgba(16,185,129,0.08)", color: "#10b981", border: "rgba(16,185,129,0.15)" },
     VERIFIED: { bg: "rgba(59,130,246,0.08)", color: "#3b82f6", border: "rgba(59,130,246,0.15)" },
     CLOSED: { bg: "rgba(107,114,128,0.08)", color: "#6b7280", border: "rgba(107,114,128,0.15)" },
+    REOPENED: { bg: "rgba(239,68,68,0.08)", color: "#ef4444", border: "rgba(239,68,68,0.15)" },
     REJECTED: { bg: "rgba(239,68,68,0.08)", color: "#ef4444", border: "rgba(239,68,68,0.15)" },
+    REVOKED: { bg: "rgba(107,114,128,0.08)", color: "#9ca3af", border: "rgba(107,114,128,0.15)" },
   };
   const ss = statusStyles[incident.status] || statusStyles.OPEN;
 
@@ -241,6 +243,33 @@ const AdminIncidentDetail = () => {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {incident.status === "REOPENED" && (
+            <div className="rounded-xl p-4" style={{ background: "rgba(239,68,68,0.04)", border: "1px solid rgba(239,68,68,0.1)" }}>
+              <p className="text-xs font-bold text-red-400 uppercase mb-2 flex items-center gap-2">
+                <AlertTriangle size={12} /> Citizen Response
+              </p>
+              <p className="text-gray-300">The reporting user rejected the authority resolution and reopened this incident for follow-up.</p>
+            </div>
+          )}
+
+          {incident.status === "CLOSED" && incident.verifiedByUser && (
+            <div className="rounded-xl p-4" style={{ background: "rgba(16,185,129,0.04)", border: "1px solid rgba(16,185,129,0.1)" }}>
+              <p className="text-xs font-bold text-emerald-400 uppercase mb-2 flex items-center gap-2">
+                <CheckCircle size={12} /> Citizen Response
+              </p>
+              <p className="text-gray-300">The reporting user confirmed that the issue was resolved and closed the incident.</p>
+            </div>
+          )}
+
+          {incident.status === "REVOKED" && (
+            <div className="rounded-xl p-4" style={{ background: "rgba(107,114,128,0.08)", border: "1px solid rgba(107,114,128,0.15)" }}>
+              <p className="text-xs font-bold text-gray-300 uppercase mb-2 flex items-center gap-2">
+                <AlertTriangle size={12} /> Citizen Response
+              </p>
+              <p className="text-gray-300">The reporting user revoked this incident before authority acceptance.</p>
             </div>
           )}
 

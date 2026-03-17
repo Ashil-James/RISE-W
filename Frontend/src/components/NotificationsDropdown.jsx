@@ -1,15 +1,32 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Bell, CheckCircle, Info, AlertTriangle, Check, X } from "lucide-react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
+import { Bell, CheckCircle, Info, AlertTriangle, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import axios from "axios";
 import { useUser } from "../context/UserContext";
+import { useNotificationFeed } from "../hooks/useNotificationFeed";
+import NotificationToastStack from "./NotificationToastStack";
 
 const NotificationsDropdown = () => {
     const { user } = useUser();
-    const [notifications, setNotifications] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
-    const [loading, setLoading] = useState(false);
     const dropdownRef = useRef(null);
+    const welcomeToast = useMemo(() => ({
+        id: "user-portal-welcome",
+        title: "Notifications Active",
+        message: "You will see quick popups here when broadcasts or incident updates arrive.",
+    }), []);
+    const {
+        notifications,
+        loading,
+        toasts,
+        unreadCount,
+        refreshNotifications,
+        markAsRead,
+        markAllAsRead,
+        dismissToast,
+    } = useNotificationFeed({
+        token: user?.token,
+        welcomeToast,
+    });
 
     // Close when clicking outside
     useEffect(() => {
@@ -22,55 +39,12 @@ const NotificationsDropdown = () => {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    const fetchNotifications = async () => {
-        if (!user?.token) return;
-        try {
-            setLoading(true);
-            const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            const { data } = await axios.get("/api/v1/notifications", config);
-            if (data.success) {
-                setNotifications(data.data);
-            }
-        } catch (error) {
-            console.error("Failed to fetch notifications:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // Fetch initially
-    useEffect(() => {
-        fetchNotifications();
-    }, [user?.token]);
-
-    const markAsRead = async (id) => {
-        try {
-            const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            await axios.patch(`/api/v1/notifications/${id}/read`, {}, config);
-            setNotifications((prev) =>
-                prev.map((n) => (n._id === id ? { ...n, userReadStatus: true } : n))
-            );
-        } catch (error) {
-            console.error("Failed to mark as read:", error);
-        }
-    };
-
-    const markAllAsRead = async () => {
-        try {
-            const config = { headers: { Authorization: `Bearer ${user.token}` } };
-            await axios.post("/api/v1/notifications/mark-all-read", {}, config);
-            setNotifications((prev) => prev.map((n) => ({ ...n, userReadStatus: true })));
-        } catch (error) {
-            console.error("Failed to mark all as read:", error);
-        }
-    };
-
     const toggleDropdown = () => {
-        if (!isOpen) fetchNotifications();
+        if (!isOpen) {
+            refreshNotifications();
+        }
         setIsOpen(!isOpen);
     };
-
-    const unreadCount = notifications.filter((n) => !n.userReadStatus).length;
 
     const getIcon = (type) => {
         switch (type) {
@@ -82,6 +56,8 @@ const NotificationsDropdown = () => {
 
     return (
         <div className="relative" ref={dropdownRef}>
+            <NotificationToastStack toasts={toasts} onDismiss={dismissToast} />
+
             {/* Bell Icon & Badge */}
             <button
                 onClick={toggleDropdown}
@@ -143,16 +119,16 @@ const NotificationsDropdown = () => {
                                 <div className="divide-y divide-white/[0.03]">
                                     {notifications.map((notif) => (
                                         <div
-                                            key={notif._id}
+                                            key={notif.id}
                                             className={`p-4 transition-colors hover:bg-white/[0.02] flex gap-3 ${
-                                                !notif.userReadStatus ? "bg-white/[0.03]" : ""
+                                                notif.unread ? "bg-white/[0.03]" : ""
                                             }`}
                                         >
                                             <div className="mt-0.5 flex-shrink-0">
                                                 {getIcon(notif.type)}
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className={`text-sm mb-1 ${!notif.userReadStatus ? "font-bold text-wayanad-text" : "text-wayanad-text/80"}`}>
+                                                <p className={`text-sm mb-1 ${notif.unread ? "font-bold text-wayanad-text" : "text-wayanad-text/80"}`}>
                                                     {notif.title}
                                                 </p>
                                                 <p className="text-xs text-wayanad-muted line-clamp-2">
@@ -164,9 +140,9 @@ const NotificationsDropdown = () => {
                                                     })}
                                                 </p>
                                             </div>
-                                            {!notif.userReadStatus && (
+                                            {notif.unread && (
                                                 <button
-                                                    onClick={() => markAsRead(notif._id)}
+                                                    onClick={() => markAsRead(notif.id)}
                                                     className="flex-shrink-0 p-1 rounded-full text-emerald-500 hover:bg-emerald-500/10 transition-colors h-fit"
                                                     title="Mark as read"
                                                 >

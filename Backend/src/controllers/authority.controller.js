@@ -27,7 +27,7 @@ export const getPowerIncidents = asyncHandler(async (req, res) => {
 
 export const getPowerDashboardStats = asyncHandler(async (req, res) => {
     // We want: New, In Progress, Work Completed, High Urgency
-    // Statuses: OPEN, ACCEPTED, IN_PROGRESS, RESOLVED, VERIFIED, REOPENED, CLOSED, REJECTED
+    // Statuses: OPEN, ACCEPTED, IN_PROGRESS, RESOLVED, VERIFIED, REOPENED, CLOSED, REJECTED, REVOKED
 
     const stats = await Incident.aggregate([
         {
@@ -59,7 +59,7 @@ export const getPowerDashboardStats = asyncHandler(async (req, res) => {
     result.highUrgency = await Incident.countDocuments({
         assignedAuthority: "ELECTRICITY",
         urgencyScore: { $gte: 75 },
-        status: { $nin: ["RESOLVED", "VERIFIED", "CLOSED"] }
+        status: { $nin: ["RESOLVED", "VERIFIED", "CLOSED", "REVOKED"] }
     });
 
     res.json(new ApiResponse(200, result, "Power dashboard stats retrieved successfully"));
@@ -69,7 +69,7 @@ export const getPowerCriticalIncidents = asyncHandler(async (req, res) => {
     const incidents = await Incident.find({
         assignedAuthority: "ELECTRICITY",
         urgencyScore: { $gte: 75 },
-        status: { $nin: ["RESOLVED", "VERIFIED", "CLOSED"] }
+        status: { $nin: ["RESOLVED", "VERIFIED", "CLOSED", "REVOKED"] }
     })
         .populate("reportedBy", "name email")
         .sort({ urgencyScore: -1, createdAt: -1 });
@@ -87,7 +87,12 @@ export const updateIncidentStatus = asyncHandler(async (req, res) => {
         return res.status(404).json(new ApiResponse(404, null, "Incident not found"));
     }
 
-    if (status) incident.status = status;
+    if (status) {
+        incident.status = status;
+        if (status !== "CLOSED") {
+            incident.verifiedByUser = false;
+        }
+    }
     if (authorityMessage) incident.authorityMessage = authorityMessage;
 
     const updatedIncident = await incident.save();
@@ -251,7 +256,7 @@ export const getRoadDashboardStats = asyncHandler(async (req, res) => {
     result.highUrgency = await Incident.countDocuments({
         assignedAuthority: "CIVIL",
         urgencyScore: { $gte: 75 },
-        status: { $nin: ["RESOLVED", "VERIFIED", "CLOSED"] }
+        status: { $nin: ["RESOLVED", "VERIFIED", "CLOSED", "REVOKED"] }
     });
 
     res.json(new ApiResponse(200, result, "Road dashboard stats retrieved successfully"));
@@ -261,7 +266,7 @@ export const getRoadCriticalIncidents = asyncHandler(async (req, res) => {
     const incidents = await Incident.find({
         assignedAuthority: "CIVIL",
         urgencyScore: { $gte: 75 },
-        status: { $nin: ["RESOLVED", "VERIFIED", "CLOSED"] }
+        status: { $nin: ["RESOLVED", "VERIFIED", "CLOSED", "REVOKED"] }
     })
         .populate("reportedBy", "name email")
         .sort({ urgencyScore: -1, createdAt: -1 });

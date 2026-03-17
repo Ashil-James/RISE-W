@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import {
     LogOut,
@@ -20,6 +20,8 @@ import {
 
 import { useAuth } from "../../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNotificationFeed } from "../../hooks/useNotificationFeed";
+import NotificationToastStack from "../../components/NotificationToastStack";
 
 const AuthorityLayout = () => {
     const location = useLocation();
@@ -28,94 +30,25 @@ const AuthorityLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-
-    const [notifications, setNotifications] = useState([]);
-
-    const fetchNotifications = async () => {
-        try {
-            const token = authUser?.token || localStorage.getItem("token") || (authUser && authUser.accessToken ? authUser.accessToken : null);
-            if (!token) return;
-
-            const res = await fetch("/api/v1/notifications", {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
-            if (res.ok) {
-                const result = await res.json();
-                if (result.success && result.data) {
-                    const mapped = result.data.map(notif => {
-                        const now = new Date();
-                        const then = new Date(notif.createdAt);
-                        const diffMins = Math.floor((now - then) / 60000);
-                        let timeStr = `${diffMins} min ago`;
-                        if (diffMins > 60) {
-                            const hrs = Math.floor(diffMins / 60);
-                            timeStr = `${hrs} hr ago`;
-                            if (hrs > 24) timeStr = `${Math.floor(hrs / 24)} d ago`;
-                        }
-
-                        return {
-                            id: notif._id,
-                            title: notif.title,
-                            message: notif.message,
-                            time: timeStr,
-                            type: notif.type === "INCIDENT_UPDATE" ? "new" : "urgent",
-                            unread: !notif.userReadStatus
-                        };
-                    });
-                    setNotifications(mapped);
-                }
-            }
-        } catch (err) {
-            console.error("Failed to fetch notifications:", err);
-        }
-    };
-
-    React.useEffect(() => {
-        fetchNotifications();
-        // Poll every 30 seconds for new notifications
-        const interval = setInterval(fetchNotifications, 30000);
-        return () => clearInterval(interval);
-    }, [authUser]);
-
-    const handleMarkAsRead = async (id) => {
-        try {
-            const token = authUser?.token || localStorage.getItem("token") || (authUser && authUser.accessToken ? authUser.accessToken : null);
-            if (!token) return;
-
-            const res = await fetch(`/api/v1/notifications/${id}/read`, {
-                method: 'PATCH',
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
-            if (res.ok) {
-                setNotifications(prev => prev.map(n => n.id === id ? { ...n, unread: false } : n));
-            }
-        } catch (err) {
-            console.error("Failed to mark notification as read:", err);
-        }
-    };
-
-    const handleMarkAllAsRead = async () => {
-        try {
-            const token = authUser?.token || localStorage.getItem("token") || (authUser && authUser.accessToken ? authUser.accessToken : null);
-            if (!token) return;
-
-            const res = await fetch("/api/v1/notifications/mark-all-read", {
-                method: 'POST',
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
-            if (res.ok) {
-                setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
-            }
-        } catch (err) {
-            console.error("Failed to mark all as read:", err);
-        }
-    };
-
-
-    const unreadCount = notifications.filter(n => n.unread).length;
+    const notificationToken = authUser?.token || localStorage.getItem("token") || (authUser && authUser.accessToken ? authUser.accessToken : null);
+    const welcomeToast = useMemo(() => ({
+        id: "authority-portal-welcome",
+        title: "Live Notifications Active",
+        message: "New incidents, broadcasts, and updates will appear here as popup alerts.",
+    }), []);
+    const {
+        notifications,
+        toasts,
+        unreadCount,
+        refreshNotifications,
+        markAsRead,
+        markAllAsRead,
+        dismissToast,
+    } = useNotificationFeed({
+        token: notificationToken,
+        initialToastLimit: 3,
+        welcomeToast,
+    });
 
     const isPower = location.pathname.includes("/power") || authUser?.role === "power_authority";
     const isRoad = location.pathname.includes("/road") || authUser?.role === "road_authority";
@@ -185,6 +118,26 @@ const AuthorityLayout = () => {
         navigate("/login");
     };
 
+    const formatNotificationAge = (createdAt) => {
+        if (!createdAt) {
+            return "Just now";
+        }
+
+        const diffMinutes = Math.max(0, Math.floor((Date.now() - new Date(createdAt).getTime()) / 60000));
+        if (diffMinutes < 1) return "Just now";
+        if (diffMinutes < 60) return `${diffMinutes} min ago`;
+        const diffHours = Math.floor(diffMinutes / 60);
+        if (diffHours < 24) return `${diffHours} hr ago`;
+        return `${Math.floor(diffHours / 24)} d ago`;
+    };
+
+    const toggleNotificationsPanel = () => {
+        if (!isNotificationsOpen) {
+            refreshNotifications();
+        }
+        setIsNotificationsOpen((prev) => !prev);
+    };
+
     const NavItem = ({ to, icon: Icon, label }) => {
         const isActive = location.pathname.includes(to);
 
@@ -229,6 +182,8 @@ const AuthorityLayout = () => {
                 {/* Subtle Grid Overlay */}
                 <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,black,transparent)]"></div>
             </div>
+
+            <NotificationToastStack toasts={toasts} onDismiss={dismissToast} />
 
             {/* MOBILE TOGGLE */}
             <button
@@ -329,7 +284,7 @@ const AuthorityLayout = () => {
                         <div className="relative">
                             <button
                                 id="notifications-dropdown-trigger"
-                                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                                onClick={toggleNotificationsPanel}
                                 className={`relative p-2 transition-colors ${isNotificationsOpen ? "text-white" : "text-gray-400 hover:text-white"}`}
                             >
                                 <Bell size={20} />
@@ -360,7 +315,7 @@ const AuthorityLayout = () => {
                                                 notifications.map((n) => (
                                                     <div
                                                         key={n.id}
-                                                        onClick={() => n.unread && handleMarkAsRead(n.id)}
+                                                        onClick={() => n.unread && markAsRead(n.id)}
                                                         className={`px-4 py-4 border-b border-white/5 hover:bg-white/[0.02] transition-colors cursor-pointer relative group ${n.unread ? "bg-white/[0.01]" : ""}`}
                                                     >
                                                         {n.unread && (
@@ -378,7 +333,7 @@ const AuthorityLayout = () => {
                                                                     {n.message}
                                                                 </p>
                                                                 <p className="text-[10px] text-gray-500 mt-2 font-medium">
-                                                                    {n.time}
+                                                                    {formatNotificationAge(n.createdAt)}
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -394,7 +349,7 @@ const AuthorityLayout = () => {
 
                                         <div className="px-4 py-2 text-center bg-white/5 border-t border-white/5">
                                             <button
-                                                onClick={handleMarkAllAsRead}
+                                                onClick={markAllAsRead}
                                                 className="text-[10px] font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest"
                                             >
                                                 Mark all as read

@@ -125,9 +125,11 @@ export const updateUserRole = asyncHandler(async (req, res) => {
 export const getSystemStats = asyncHandler(async (req, res) => {
     const totalIncidents = await Incident.countDocuments();
     const openIncidents = await Incident.countDocuments({
-        status: { $in: ["OPEN", "ACCEPTED", "IN_PROGRESS"] }
+        status: { $in: ["OPEN", "ACCEPTED", "IN_PROGRESS", "REOPENED"] }
     });
-    const resolvedIncidents = await Incident.countDocuments({ status: "RESOLVED" });
+    const resolvedIncidents = await Incident.countDocuments({
+        status: { $in: ["RESOLVED", "VERIFIED", "CLOSED"] }
+    });
     const rejectedIncidents = await Incident.countDocuments({ status: "REJECTED" });
     const totalUsers = await User.countDocuments({ role: "user" });
 

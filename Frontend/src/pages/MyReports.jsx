@@ -12,7 +12,7 @@ const MyReports = () => {
   const filteredReports = reports.filter((r) => {
     const status = r.status.toLowerCase();
     return filter === "active"
-      ? ["open", "in progress", "resolved", "pending", "accepted"].includes(status)
+      ? ["open", "in progress", "resolved", "pending", "accepted", "reopened"].includes(status)
       : ["closed", "revoked", "rejected"].includes(status);
   });
 

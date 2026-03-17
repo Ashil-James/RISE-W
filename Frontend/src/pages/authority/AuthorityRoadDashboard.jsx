@@ -48,6 +48,7 @@ const STATUS_STYLES = {
     "In Progress": "bg-orange-500/10 text-orange-400 border-orange-500/20 shadow-[0_0_15px_rgba(249,115,22,0.1)]",
     Resolved: "bg-green-500/10 text-green-400 border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.1)]",
     Rejected: "bg-red-500/10 text-red-400 border-red-500/20",
+    Revoked: "bg-gray-500/10 text-gray-300 border-gray-500/20",
     "High Urgency": "bg-red-500/10 text-red-400 border-red-500/20 animate-ping",
 };
 
@@ -69,6 +70,7 @@ const AuthorityRoadDashboard = () => {
             case "RESOLVED": return "Resolved";
             case "CLOSED": return "Resolved";
             case "REOPENED": return "New";
+            case "REVOKED": return "Revoked";
             default: return "New";
         }
     };

@@ -108,6 +108,102 @@ export const updateIncident = asyncHandler(async (req, res) => {
     return res.status(200).json(new ApiResponse(200, updatedIncident, "Incident updated successfully"));
 });
 
+export const revokeIncident = asyncHandler(async (req, res) => {
+    const incident = await Incident.findById(req.params.id);
+
+    if (!incident) {
+        throw new ApiError(404, "Incident not found");
+    }
+
+    if (incident.reportedBy.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "You can only revoke incidents you reported");
+    }
+
+    if (incident.status !== "OPEN") {
+        throw new ApiError(400, "This incident can only be revoked before it is accepted");
+    }
+
+    const hasOtherSupporters = (incident.upvotedBy || []).some(
+        (uid) => uid.toString() !== req.user._id.toString()
+    );
+
+    if (hasOtherSupporters) {
+        throw new ApiError(400, "This incident cannot be revoked because other users have already supported it");
+    }
+
+    incident.status = "REVOKED";
+    incident.verifiedByUser = false;
+
+    const updatedIncident = await incident.save();
+
+    await Notification.create({
+        recipient: null,
+        title: "Incident Revoked By Citizen",
+        message: `The reporting citizen revoked "${updatedIncident.title}" before authority acceptance.`,
+        type: "INCIDENT_UPDATE",
+        targetDepartment: updatedIncident.assignedAuthority,
+        relatedId: updatedIncident._id,
+    });
+
+    return res.status(200).json(
+        new ApiResponse(200, updatedIncident, "Incident revoked successfully")
+    );
+});
+
+export const respondToIncidentResolution = asyncHandler(async (req, res) => {
+    const { action } = req.body;
+
+    if (!["confirm_resolved", "reject_resolution"].includes(action)) {
+        throw new ApiError(400, "Invalid resolution response");
+    }
+
+    const incident = await Incident.findById(req.params.id);
+
+    if (!incident) {
+        throw new ApiError(404, "Incident not found");
+    }
+
+    if (incident.reportedBy.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "You can only respond to incidents you reported");
+    }
+
+    const confirmingResolution = action === "confirm_resolved";
+
+    const allowedStatuses = confirmingResolution
+        ? ["RESOLVED", "VERIFIED", "CLOSED"]
+        : ["RESOLVED", "VERIFIED", "REOPENED"];
+
+    if (!allowedStatuses.includes(incident.status)) {
+        throw new ApiError(400, "This incident is not awaiting user resolution feedback");
+    }
+
+    incident.status = confirmingResolution ? "CLOSED" : "REOPENED";
+    incident.verifiedByUser = confirmingResolution;
+
+    const updatedIncident = await incident.save();
+
+    await Notification.create({
+        recipient: null,
+        title: confirmingResolution ? "Incident Closed By Citizen" : "Incident Reopened By Citizen",
+        message: confirmingResolution
+            ? `The citizen confirmed that "${updatedIncident.title}" has been resolved.`
+            : `The citizen marked "${updatedIncident.title}" as not resolved and reopened the incident.`,
+        type: "INCIDENT_UPDATE",
+        targetDepartment: updatedIncident.assignedAuthority,
+        relatedId: updatedIncident._id,
+    });
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            updatedIncident,
+            confirmingResolution
+                ? "Incident closed successfully"
+                : "Incident reopened successfully"
+        )
+    );
+});
+
 export const deleteIncident = asyncHandler(async (req, res) => {
     const incident = await Incident.findById(req.params.id);
 
@@ -203,6 +299,10 @@ export const upvoteIncident = asyncHandler(async (req, res) => {
 
     if (!incident) {
         throw new ApiError(404, "Incident not found");
+    }
+
+    if (incident.status === "REVOKED") {
+        throw new ApiError(400, "Revoked incidents can no longer receive support");
     }
 
     // Prevent duplicate upvotes from the same user

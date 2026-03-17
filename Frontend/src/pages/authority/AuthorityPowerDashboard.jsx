@@ -51,6 +51,7 @@ const STATUS_STYLES = {
     VERIFIED: "bg-green-500/10 text-green-400 border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.1)]",
     CLOSED: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
     REJECTED: "bg-red-500/10 text-red-400 border-red-500/20",
+    REVOKED: "bg-gray-500/10 text-gray-300 border-gray-500/20",
     "High Urgency": "bg-red-500/10 text-red-400 border-red-500/20 animate-ping",
 };
 
