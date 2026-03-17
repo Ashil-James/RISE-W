@@ -86,6 +86,47 @@ const incidentSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        statusHistory: [
+            new mongoose.Schema(
+                {
+                    status: {
+                        type: String,
+                        enum: [
+                            "OPEN",
+                            "ACCEPTED",
+                            "IN_PROGRESS",
+                            "RESOLVED",
+                            "VERIFIED",
+                            "REOPENED",
+                            "CLOSED",
+                            "REJECTED",
+                            "REVOKED",
+                        ],
+                        required: true,
+                    },
+                    changedAt: {
+                        type: Date,
+                        default: Date.now,
+                    },
+                    actorRole: {
+                        type: String,
+                        enum: ["USER", "AUTHORITY", "SYSTEM"],
+                        required: true,
+                    },
+                    actorLabel: {
+                        type: String,
+                        required: true,
+                    },
+                    note: {
+                        type: String,
+                    },
+                    proofImage: {
+                        type: String,
+                    },
+                },
+                { _id: false },
+            ),
+        ],
     },
     {
         timestamps: true,

@@ -28,6 +28,16 @@ const broadcastSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        sourceType: {
+            type: String,
+            enum: ["OFFICIAL", "COMMUNITY"],
+        },
+        actionTarget: {
+            type: String,
+        },
+        expiresAt: {
+            type: Date,
+        },
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",

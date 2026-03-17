@@ -2,6 +2,14 @@ import { Incident } from "../models/incident.model.js";
 import { Notification } from "../models/notification.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import {
+    appendStatusHistory,
+    ensureStatusHistory,
+    getAuthorityLabel,
+    getDefaultStatusNote,
+    incidentBelongsToDepartment,
+    serializeIncidentForViewer,
+} from "../utils/incidentTracking.js";
 
 const COMPLETED_STATUSES = ["RESOLVED", "VERIFIED", "CLOSED"];
 const INACTIVE_HIGH_URGENCY_STATUSES = [...COMPLETED_STATUSES, "REJECTED", "REVOKED"];
@@ -11,16 +19,6 @@ const WATER_INCIDENT_FILTER = {
         { assignedAuthority: "WATER" },
         { category: "Water & Sanitation" },
     ],
-};
-
-const incidentBelongsToDepartment = (incident, department) => {
-    if (!department) return true;
-
-    if (department === "WATER") {
-        return incident.assignedAuthority === "WATER" || incident.category === "Water & Sanitation";
-    }
-
-    return incident.assignedAuthority === department;
 };
 
 export const getWaterIncidents = asyncHandler(async (req, res) => {
@@ -120,6 +118,8 @@ export const updateIncidentStatus = asyncHandler(async (req, res) => {
         return res.status(400).json(new ApiResponse(400, null, "This incident can no longer be updated by the authority"));
     }
 
+    const previousStatus = incident.status;
+
     if (status) {
         incident.status = status;
         if (status !== "CLOSED") {
@@ -136,6 +136,31 @@ export const updateIncidentStatus = asyncHandler(async (req, res) => {
         incident.resolutionImage = resolutionImage;
     }
 
+    if (status && status !== previousStatus) {
+        appendStatusHistory(incident, {
+            status,
+            actorRole: "AUTHORITY",
+            actorLabel: getAuthorityLabel(incident.assignedAuthority),
+            note: authorityMessage?.trim() || getDefaultStatusNote(status, incident),
+            proofImage: resolutionImage || incident.resolutionImage || "",
+        });
+    } else if (status && status === previousStatus && (authorityMessage != null || resolutionImage)) {
+        const history = ensureStatusHistory(incident);
+        const latestEntry = history[history.length - 1];
+
+        if (latestEntry?.status === status && latestEntry?.actorRole === "AUTHORITY") {
+            if (authorityMessage?.trim()) {
+                latestEntry.note = authorityMessage.trim();
+            } else if (!latestEntry.note) {
+                latestEntry.note = getDefaultStatusNote(status, incident);
+            }
+
+            if (resolutionImage) {
+                latestEntry.proofImage = resolutionImage;
+            }
+        }
+    }
+
     const updatedIncident = await incident.save();
 
     // Trigger notification
@@ -147,7 +172,9 @@ export const updateIncidentStatus = asyncHandler(async (req, res) => {
         relatedId: updatedIncident._id,
     });
 
-    res.json(new ApiResponse(200, updatedIncident, "Incident updated successfully"));
+    res.json(
+        new ApiResponse(200, serializeIncidentForViewer(updatedIncident, req.user), "Incident updated successfully"),
+    );
 });
 
 export const getPowerReportAnalytics = asyncHandler(async (req, res) => {

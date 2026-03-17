@@ -53,13 +53,14 @@ const formatToastTime = (createdAt) => {
     return `${Math.floor(diffHours / 24)} d ago`;
 };
 
-const NotificationToastStack = ({ toasts, onDismiss }) => {
+const NotificationToastStack = ({ toasts, onDismiss, onToastClick }) => {
     return (
         <div className="fixed top-20 right-4 z-[80] w-[min(24rem,calc(100vw-2rem))] space-y-3 pointer-events-none md:right-6">
             <AnimatePresence initial={false}>
                 {toasts.map((toast) => {
                     const style = TYPE_STYLES[toast.type] || TYPE_STYLES.SYSTEM;
                     const Icon = style.icon;
+                    const isClickable = typeof onToastClick === "function";
 
                     return (
                         <motion.div
@@ -68,7 +69,8 @@ const NotificationToastStack = ({ toasts, onDismiss }) => {
                             animate={{ opacity: 1, x: 0, scale: 1 }}
                             exit={{ opacity: 0, x: 60, scale: 0.96 }}
                             transition={{ type: "spring", stiffness: 260, damping: 24 }}
-                            className="pointer-events-auto relative overflow-hidden rounded-2xl p-4"
+                            onClick={isClickable ? () => onToastClick(toast) : undefined}
+                            className={`pointer-events-auto relative overflow-hidden rounded-2xl p-4 ${isClickable ? "cursor-pointer" : ""}`}
                             style={{
                                 background: "rgba(7, 12, 20, 0.94)",
                                 border: `1px solid ${style.border}`,
@@ -106,7 +108,10 @@ const NotificationToastStack = ({ toasts, onDismiss }) => {
                                         </div>
 
                                         <button
-                                            onClick={() => onDismiss(toast.id)}
+                                            onClick={(event) => {
+                                                event.stopPropagation();
+                                                onDismiss(toast.id);
+                                            }}
                                             className="rounded-lg p-1 text-gray-500 transition-colors hover:bg-white/5 hover:text-white"
                                             aria-label="Dismiss notification"
                                         >

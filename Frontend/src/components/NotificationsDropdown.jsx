@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { Bell, CheckCircle, Info, AlertTriangle, Check } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useUser } from "../context/UserContext";
@@ -7,6 +8,7 @@ import NotificationToastStack from "./NotificationToastStack";
 
 const NotificationsDropdown = () => {
     const { user } = useUser();
+    const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
     const welcomeToast = useMemo(() => ({
@@ -54,9 +56,33 @@ const NotificationsDropdown = () => {
         }
     };
 
+    const getNotificationTarget = (notification) => {
+        if ((notification.type === "INCIDENT_UPDATE" || notification.type === "NEW_INCIDENT") && notification.relatedId) {
+            return `/my-reports/${notification.relatedId}`;
+        }
+
+        if (notification.type === "BROADCAST") {
+            return notification.actionTarget || "/alerts";
+        }
+
+        return null;
+    };
+
+    const handleNotificationOpen = async (notification) => {
+        if (notification.unread) {
+            await markAsRead(notification.id);
+        }
+
+        const target = getNotificationTarget(notification);
+        if (target) {
+            setIsOpen(false);
+            navigate(target);
+        }
+    };
+
     return (
         <div className="relative" ref={dropdownRef}>
-            <NotificationToastStack toasts={toasts} onDismiss={dismissToast} />
+            <NotificationToastStack toasts={toasts} onDismiss={dismissToast} onToastClick={handleNotificationOpen} />
 
             {/* Bell Icon & Badge */}
             <button
@@ -120,9 +146,10 @@ const NotificationsDropdown = () => {
                                     {notifications.map((notif) => (
                                         <div
                                             key={notif.id}
+                                            onClick={() => handleNotificationOpen(notif)}
                                             className={`p-4 transition-colors hover:bg-white/[0.02] flex gap-3 ${
                                                 notif.unread ? "bg-white/[0.03]" : ""
-                                            }`}
+                                            } ${getNotificationTarget(notif) ? "cursor-pointer" : ""}`}
                                         >
                                             <div className="mt-0.5 flex-shrink-0">
                                                 {getIcon(notif.type)}
@@ -131,6 +158,24 @@ const NotificationsDropdown = () => {
                                                 <p className={`text-sm mb-1 ${notif.unread ? "font-bold text-wayanad-text" : "text-wayanad-text/80"}`}>
                                                     {notif.title}
                                                 </p>
+                                                {notif.type === "BROADCAST" && (notif.sourceType || notif.categoryLabel) && (
+                                                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                                                        {notif.sourceType && (
+                                                            <span className={`text-[10px] font-black uppercase tracking-[0.16em] px-2 py-0.5 rounded-full ${
+                                                                notif.sourceType === "OFFICIAL"
+                                                                    ? "bg-emerald-500/10 text-emerald-400"
+                                                                    : "bg-cyan-500/10 text-cyan-400"
+                                                            }`}>
+                                                                {notif.sourceType === "OFFICIAL" ? "Official" : "Community"}
+                                                            </span>
+                                                        )}
+                                                        {notif.categoryLabel && (
+                                                            <span className="text-[10px] font-black uppercase tracking-[0.16em] px-2 py-0.5 rounded-full bg-white/5 text-wayanad-muted">
+                                                                {notif.categoryLabel}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )}
                                                 <p className="text-xs text-wayanad-muted line-clamp-2">
                                                     {notif.message}
                                                 </p>
@@ -142,7 +187,10 @@ const NotificationsDropdown = () => {
                                             </div>
                                             {notif.unread && (
                                                 <button
-                                                    onClick={() => markAsRead(notif.id)}
+                                                    onClick={(event) => {
+                                                        event.stopPropagation();
+                                                        markAsRead(notif.id);
+                                                    }}
                                                     className="flex-shrink-0 p-1 rounded-full text-emerald-500 hover:bg-emerald-500/10 transition-colors h-fit"
                                                     title="Mark as read"
                                                 >

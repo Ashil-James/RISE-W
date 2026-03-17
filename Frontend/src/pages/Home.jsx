@@ -1,22 +1,29 @@
 import React, { useRef, useCallback, useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import {
   ChevronRight, Zap, AlertTriangle, Info, ArrowRight,
-  CloudRain
+  CloudRain, FileText, Wrench, ShieldCheck, Archive
 } from "lucide-react";
 import { useUser } from "../context/UserContext";
 import { useAlerts } from "../context/AlertContext";
-import { motion, AnimatePresence } from "framer-motion";
+import { useReports } from "../context/ReportContext";
+import { motion } from "framer-motion";
 import axios from "axios";
 import WeatherWidget from "../components/WeatherWidget";
 
 const Home = () => {
   const { user } = useUser();
   const { alerts, loading: alertsLoading } = useAlerts();
-  const navigate = useNavigate();
+  const { caseSummary, loading: reportsLoading } = useReports();
   const latestAlert = alerts.length > 0 ? alerts[0] : null;
   const heroRef = useRef(null);
   const [activeSurvey, setActiveSurvey] = useState(false);
+  const summaryCards = [
+    { label: "Action Needed", value: caseSummary.actionNeeded, icon: FileText, tint: "text-orange-400", border: "border-orange-500/20", bg: "bg-orange-500/10" },
+    { label: "In Progress", value: caseSummary.inProgress, icon: Wrench, tint: "text-amber-400", border: "border-amber-500/20", bg: "bg-amber-500/10" },
+    { label: "Awaiting Verification", value: caseSummary.awaitingVerification, icon: ShieldCheck, tint: "text-sky-400", border: "border-sky-500/20", bg: "bg-sky-500/10" },
+    { label: "Closed", value: caseSummary.closed, icon: Archive, tint: "text-emerald-400", border: "border-emerald-500/20", bg: "bg-emerald-500/10" },
+  ];
 
   // Check for active post-storm survey
   useEffect(() => {
@@ -114,6 +121,99 @@ const Home = () => {
             <ArrowRight size={20} className="relative z-10 group-hover:translate-x-1 transition-transform" />
           </motion.button>
         </Link>
+      </motion.div>
+
+      <motion.div variants={fadeUp} className="w-full max-w-5xl mb-8">
+        <div className="glass-card rounded-[2rem] p-6 md:p-7 relative overflow-hidden">
+          <div
+            className="absolute -right-16 -top-16 w-48 h-48 rounded-full blur-3xl"
+            style={{ background: "rgba(16,185,129,0.12)" }}
+          />
+
+          <div className="relative z-10 flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-[0.28em] text-emerald-500/80 mb-2">
+                My Cases
+              </p>
+              <h2 className="text-2xl md:text-3xl font-black text-wayanad-text tracking-tight">
+                See what changed in your reports
+              </h2>
+              <p className="text-sm text-wayanad-muted mt-2 max-w-2xl">
+                Track authority progress, verification requests, and your most recently updated case from one place.
+              </p>
+            </div>
+
+            <Link
+              to="/my-reports"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-bold text-wayanad-text border border-white/10 hover:border-emerald-500/30 hover:text-emerald-500 transition-colors w-fit"
+            >
+              Open Case Tracker
+              <ChevronRight size={16} />
+            </Link>
+          </div>
+
+          {reportsLoading ? (
+            <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={index} className="rounded-2xl p-5 glass-card animate-pulse min-h-[110px]" />
+              ))}
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-5">
+                {summaryCards.map((card) => (
+                  <div key={card.label} className={`rounded-2xl p-5 ${card.bg} border ${card.border}`}>
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${card.bg} ${card.tint} border ${card.border} mb-4`}>
+                      <card.icon size={18} />
+                    </div>
+                    <p className="text-2xl md:text-3xl font-black text-wayanad-text">{card.value}</p>
+                    <p className="text-xs uppercase tracking-[0.18em] text-wayanad-muted font-bold mt-2">
+                      {card.label}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {caseSummary.mostRecentlyUpdated ? (
+                <Link to={`/my-reports/${caseSummary.mostRecentlyUpdated.id}`} className="block">
+                  <motion.div
+                    whileHover={{ y: -2 }}
+                    className="rounded-[1.6rem] border border-white/10 p-5 md:p-6 flex flex-col md:flex-row md:items-center gap-4 hover:border-emerald-500/30 transition-colors"
+                    style={{ background: "rgba(255,255,255,0.03)" }}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2 mb-3">
+                        <span className="text-[11px] font-mono font-bold px-2.5 py-1 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                          {caseSummary.mostRecentlyUpdated.displayId}
+                        </span>
+                        <span className={`text-[11px] font-bold px-2.5 py-1 rounded-xl ${caseSummary.mostRecentlyUpdated.statusColor}`}>
+                          {caseSummary.mostRecentlyUpdated.status}
+                        </span>
+                        <span className="text-xs text-wayanad-muted">
+                          Updated {caseSummary.mostRecentlyUpdated.lastUpdatedLabel}
+                        </span>
+                      </div>
+                      <h3 className="text-lg md:text-xl font-bold text-wayanad-text truncate">
+                        {caseSummary.mostRecentlyUpdated.issue}
+                      </h3>
+                      <p className="text-sm text-wayanad-muted mt-1 truncate">
+                        {caseSummary.mostRecentlyUpdated.nextActionLabel} · {caseSummary.mostRecentlyUpdated.authorityLabel}
+                      </p>
+                    </div>
+                    <div className="text-sm text-emerald-500 font-bold flex items-center gap-2">
+                      View latest case
+                      <ChevronRight size={16} />
+                    </div>
+                  </motion.div>
+                </Link>
+              ) : (
+                <div className="rounded-[1.6rem] border border-dashed border-white/10 p-6 text-center text-wayanad-muted">
+                  Submit your first issue to start tracking live progress here.
+                </div>
+              )}
+            </>
+          )}
+        </div>
       </motion.div>
 
 

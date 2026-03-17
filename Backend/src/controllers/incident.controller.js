@@ -3,6 +3,34 @@ import { Notification } from "../models/notification.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import {
+    appendStatusHistory,
+    createStatusHistoryEntry,
+    getDefaultStatusNote,
+    getViewerRelation,
+    incidentBelongsToDepartment,
+    serializeIncidentForViewer,
+} from "../utils/incidentTracking.js";
+
+const serializeIncidentListForViewer = (incidents, viewer) =>
+    incidents.map((incident) => serializeIncidentForViewer(incident, viewer));
+
+const canViewIncident = (incident, user) => {
+    if (!user) return false;
+    if (user.role === "admin") return true;
+
+    if (user.role === "authority") {
+        return incidentBelongsToDepartment(incident, user.department);
+    }
+
+    return Boolean(getViewerRelation(incident, user));
+};
+
+const canManageReportedIncident = (incident, user) => {
+    if (!user) return false;
+    if (user.role === "admin") return true;
+    return getViewerRelation(incident, user) === "REPORTER";
+};
 
 export const getAllIncidents = asyncHandler(async (req, res) => {
     // Return incidents the user reported OR upvoted
@@ -12,7 +40,9 @@ export const getAllIncidents = asyncHandler(async (req, res) => {
             { upvotedBy: req.user._id },
         ],
     }).sort({ createdAt: -1 });
-    return res.status(200).json(new ApiResponse(200, incidents, "Incidents fetched successfully"));
+    return res.status(200).json(
+        new ApiResponse(200, serializeIncidentListForViewer(incidents, req.user), "Incidents fetched successfully"),
+    );
 });
 
 export const getUserPowerIncidents = asyncHandler(async (req, res) => {
@@ -21,7 +51,9 @@ export const getUserPowerIncidents = asyncHandler(async (req, res) => {
         assignedAuthority: "ELECTRICITY"
     }).sort({ createdAt: -1 });
 
-    return res.status(200).json(new ApiResponse(200, incidents, "User power incidents fetched successfully"));
+    return res.status(200).json(
+        new ApiResponse(200, serializeIncidentListForViewer(incidents, req.user), "User power incidents fetched successfully"),
+    );
 });
 
 export const getUserRoadIncidents = asyncHandler(async (req, res) => {
@@ -30,7 +62,9 @@ export const getUserRoadIncidents = asyncHandler(async (req, res) => {
         assignedAuthority: "CIVIL"
     }).sort({ createdAt: -1 });
 
-    return res.status(200).json(new ApiResponse(200, incidents, "User road incidents fetched successfully"));
+    return res.status(200).json(
+        new ApiResponse(200, serializeIncidentListForViewer(incidents, req.user), "User road incidents fetched successfully"),
+    );
 });
 
 
@@ -41,7 +75,13 @@ export const getIncidentById = asyncHandler(async (req, res) => {
         throw new ApiError(404, "Cannot find incident");
     }
 
-    return res.status(200).json(new ApiResponse(200, incident, "Incident fetched"));
+    if (!canViewIncident(incident, req.user)) {
+        throw new ApiError(403, "You are not allowed to view this incident");
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, serializeIncidentForViewer(incident, req.user), "Incident fetched"),
+    );
 });
 
 // Maps user-facing category labels to the authority enum values in the Incident model
@@ -70,6 +110,14 @@ export const createIncident = asyncHandler(async (req, res) => {
         reportedBy: req.user._id,
         status: 'OPEN',
         assignedAuthority: CATEGORY_TO_AUTHORITY[req.body.category] || "CIVIL",
+        statusHistory: [
+            createStatusHistoryEntry({
+                status: "OPEN",
+                actorRole: "USER",
+                actorLabel: "Citizen",
+                note: "Issue reported by citizen.",
+            }),
+        ],
     };
 
     if (locationData) {
@@ -87,7 +135,9 @@ export const createIncident = asyncHandler(async (req, res) => {
         relatedId: incident._id,
     });
 
-    return res.status(201).json(new ApiResponse(201, incident, "Incident reported successfully"));
+    return res.status(201).json(
+        new ApiResponse(201, serializeIncidentForViewer(incident, req.user), "Incident reported successfully"),
+    );
 });
 
 export const updateIncident = asyncHandler(async (req, res) => {
@@ -95,6 +145,10 @@ export const updateIncident = asyncHandler(async (req, res) => {
 
     if (!incident) {
         throw new ApiError(404, "Cannot find incident");
+    }
+
+    if (!canManageReportedIncident(incident, req.user)) {
+        throw new ApiError(403, "You can only edit incidents you reported");
     }
 
     if (req.body.title != null) {
@@ -105,7 +159,9 @@ export const updateIncident = asyncHandler(async (req, res) => {
     }
 
     const updatedIncident = await incident.save();
-    return res.status(200).json(new ApiResponse(200, updatedIncident, "Incident updated successfully"));
+    return res.status(200).json(
+        new ApiResponse(200, serializeIncidentForViewer(updatedIncident, req.user), "Incident updated successfully"),
+    );
 });
 
 export const revokeIncident = asyncHandler(async (req, res) => {
@@ -133,6 +189,12 @@ export const revokeIncident = asyncHandler(async (req, res) => {
 
     incident.status = "REVOKED";
     incident.verifiedByUser = false;
+    appendStatusHistory(incident, {
+        status: "REVOKED",
+        actorRole: "USER",
+        actorLabel: "Citizen",
+        note: getDefaultStatusNote("REVOKED", incident),
+    });
 
     const updatedIncident = await incident.save();
 
@@ -146,7 +208,7 @@ export const revokeIncident = asyncHandler(async (req, res) => {
     });
 
     return res.status(200).json(
-        new ApiResponse(200, updatedIncident, "Incident revoked successfully")
+        new ApiResponse(200, serializeIncidentForViewer(updatedIncident, req.user), "Incident revoked successfully")
     );
 });
 
@@ -168,6 +230,7 @@ export const respondToIncidentResolution = asyncHandler(async (req, res) => {
     }
 
     const confirmingResolution = action === "confirm_resolved";
+    const targetStatus = confirmingResolution ? "CLOSED" : "REOPENED";
 
     const allowedStatuses = confirmingResolution
         ? ["RESOLVED", "VERIFIED", "CLOSED"]
@@ -177,8 +240,26 @@ export const respondToIncidentResolution = asyncHandler(async (req, res) => {
         throw new ApiError(400, "This incident is not awaiting user resolution feedback");
     }
 
-    incident.status = confirmingResolution ? "CLOSED" : "REOPENED";
+    if (incident.status === targetStatus) {
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                serializeIncidentForViewer(incident, req.user),
+                confirmingResolution
+                    ? "Incident already closed"
+                    : "Incident already reopened",
+            ),
+        );
+    }
+
+    incident.status = targetStatus;
     incident.verifiedByUser = confirmingResolution;
+    appendStatusHistory(incident, {
+        status: targetStatus,
+        actorRole: "USER",
+        actorLabel: "Citizen",
+        note: getDefaultStatusNote(targetStatus, incident),
+    });
 
     const updatedIncident = await incident.save();
 
@@ -196,7 +277,7 @@ export const respondToIncidentResolution = asyncHandler(async (req, res) => {
     return res.status(200).json(
         new ApiResponse(
             200,
-            updatedIncident,
+            serializeIncidentForViewer(updatedIncident, req.user),
             confirmingResolution
                 ? "Incident closed successfully"
                 : "Incident reopened successfully"
@@ -209,6 +290,10 @@ export const deleteIncident = asyncHandler(async (req, res) => {
 
     if (!incident) {
         throw new ApiError(404, "Cannot find incident");
+    }
+
+    if (!canManageReportedIncident(incident, req.user)) {
+        throw new ApiError(403, "You can only delete incidents you reported");
     }
 
     await Incident.deleteOne({ _id: req.params.id });
@@ -239,6 +324,14 @@ export const batchCreateIncidents = asyncHandler(async (req, res) => {
             reportedBy: req.user._id,
             status: 'OPEN',
             assignedAuthority: CATEGORY_TO_AUTHORITY[report.category] || "CIVIL",
+            statusHistory: [
+                createStatusHistoryEntry({
+                    status: "OPEN",
+                    actorRole: "USER",
+                    actorLabel: "Citizen",
+                    note: "Issue reported by citizen.",
+                }),
+            ],
         };
 
         if (locationData) {
@@ -259,7 +352,13 @@ export const batchCreateIncidents = asyncHandler(async (req, res) => {
         createdIncidents.push(incident);
     }
 
-    return res.status(201).json(new ApiResponse(201, createdIncidents, "Batch incidents reported successfully"));
+    return res.status(201).json(
+        new ApiResponse(
+            201,
+            serializeIncidentListForViewer(createdIncidents, req.user),
+            "Batch incidents reported successfully",
+        ),
+    );
 });
 
 // ── Incident DNA: Check for nearby duplicate incidents ──
@@ -318,5 +417,7 @@ export const upvoteIncident = asyncHandler(async (req, res) => {
     incident.upvotedBy = [...(incident.upvotedBy || []), req.user._id];
     await incident.save();
 
-    return res.status(200).json(new ApiResponse(200, incident, "Upvote recorded successfully"));
+    return res.status(200).json(
+        new ApiResponse(200, serializeIncidentForViewer(incident, req.user), "Upvote recorded successfully"),
+    );
 });

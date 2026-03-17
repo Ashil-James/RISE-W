@@ -3,6 +3,7 @@ import { Incident } from "../models/incident.model.js";
 import { Notification } from "../models/notification.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { createStatusHistoryEntry } from "../utils/incidentTracking.js";
 
 // Category → authority mapping (same as in incident.controller.js)
 const SURVEY_ISSUES = {
@@ -98,6 +99,14 @@ export const submitBatchSurvey = asyncHandler(async (req, res) => {
             reportedBy: req.user._id,
             status: "OPEN",
             assignedAuthority: issueInfo.authority,
+            statusHistory: [
+                createStatusHistoryEntry({
+                    status: "OPEN",
+                    actorRole: "USER",
+                    actorLabel: "Citizen",
+                    note: "Issue reported by citizen.",
+                }),
+            ],
         };
 
         if (locationData) {

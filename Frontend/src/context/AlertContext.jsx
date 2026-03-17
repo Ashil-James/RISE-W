@@ -1,110 +1,130 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { useUser } from "./UserContext";
+import {
+  ALERT_CACHE_KEY,
+  ALERT_CACHE_VERSION,
+  isValidCachedAlert,
+  mapBroadcastToAlert,
+  severityToneToLevel,
+  sortAlertsByNewest,
+} from "../utils/alertTracking";
 
 const AlertContext = createContext();
 
 export const useAlerts = () => useContext(AlertContext);
 
-export const AlertProvider = ({ children }) => {
-    // Attempt to load cached alerts instantly, but protect against corrupted previous states
-    let cachedAlerts = [];
-    try {
-        const parsed = JSON.parse(localStorage.getItem('rise_alerts') || '[]');
-        if (Array.isArray(parsed)) {
-            cachedAlerts = parsed.filter(a => a && a.id && a.title); // must have valid fields
-        }
-    } catch (err) {
-        localStorage.removeItem('rise_alerts');
+const readCachedAlerts = () => {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(ALERT_CACHE_KEY) || "null");
+    if (!parsed || parsed.version !== ALERT_CACHE_VERSION || !Array.isArray(parsed.items)) {
+      localStorage.removeItem(ALERT_CACHE_KEY);
+      return [];
     }
 
-    const [alerts, setAlerts] = useState(cachedAlerts);
-    const [loading, setLoading] = useState(cachedAlerts.length === 0);
-    const { user, logout } = useUser();
+    return parsed.items.filter(isValidCachedAlert);
+  } catch {
+    localStorage.removeItem(ALERT_CACHE_KEY);
+    return [];
+  }
+};
 
-    const fetchAlerts = async () => {
-        try {
-            const config = user?.token ? {
-                headers: { Authorization: `Bearer ${user.token}` }
-            } : {};
-            const { data: response } = await axios.get('/api/v1/broadcasts', config);
-            const broadcasts = response.data;
-            const getCategory = (backendType) => {
-                const map = {
-                    'POWER_ALERT': 'Power Issues',
-                    'WATER_ALERT': 'Water Supply',
-                    'ROAD_ALERT': 'Road Infrastructure',
-                    'WILDLIFE_ALERT': 'Wildlife Alert',
-                    'ROAD_BLOCK': 'Road Blockage',
-                    'UTILITY_WARNING': 'Utility Warning',
-                    'SAFETY_ALERT': 'Safety Alert'
-                };
-                return map[backendType] || 'General Alert';
-            };
+const writeCachedAlerts = (items) => {
+  localStorage.setItem(
+    ALERT_CACHE_KEY,
+    JSON.stringify({
+      version: ALERT_CACHE_VERSION,
+      items,
+    }),
+  );
+};
 
-            // Map backend broadcasts to frontend alerts structure
-            const mappedAlerts = broadcasts.map(b => ({
-                id: b._id,
-                severity: b.severity === 'High' ? 'critical' : b.severity === 'Medium' ? 'warning' : 'info',
-                title: b.title || b.type,
-                message: b.message,
-                location: b.location,
-                time: b.createdAt,
-                icon: b.severity === 'High' ? 'AlertTriangle' : b.severity === 'Medium' ? 'Zap' : 'Info',
-                isAuthority: b.isAuthority,
-                backendType: b.type,
-                category: getCategory(b.type),
-                type: b.severity === 'High' ? 'critical' : b.severity === 'Medium' ? 'warning' : 'info', // Keep for compatibility
-            }));
+export const AlertProvider = ({ children }) => {
+  const [alerts, setAlerts] = useState(readCachedAlerts);
+  const [loading, setLoading] = useState(readCachedAlerts().length === 0);
+  const { user, logout } = useUser();
 
-            setAlerts(mappedAlerts);
-            localStorage.setItem('rise_alerts', JSON.stringify(mappedAlerts)); // Cache for instant loads
-        } catch (error) {
-            console.error("Failed to fetch alerts:", error);
-        } finally {
-            setLoading(false);
+  const fetchAlerts = useCallback(async () => {
+    try {
+      const config = user?.token
+        ? {
+            headers: { Authorization: `Bearer ${user.token}` },
+          }
+        : {};
+
+      const { data: response } = await axios.get("/api/v1/broadcasts", config);
+      const broadcasts = response.data || [];
+      const mappedAlerts = sortAlertsByNewest(broadcasts.map(mapBroadcastToAlert));
+
+      setAlerts(mappedAlerts);
+      writeCachedAlerts(mappedAlerts);
+    } catch (error) {
+      console.error("Failed to fetch alerts:", error);
+      if (error.response?.status === 401 && logout) {
+        logout();
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [logout, user?.token]);
+
+  useEffect(() => {
+    setLoading(alerts.length === 0);
+    fetchAlerts();
+  }, [fetchAlerts]);
+
+  const addAlert = useCallback(
+    async (alertData) => {
+      try {
+        if (!user?.token) {
+          throw new Error("User not authenticated");
         }
-    };
 
-    useEffect(() => {
-        fetchAlerts();
-    }, [user?.token]);
+        const config = {
+          headers: {
+            Authorization: `Bearer ${user.token}`,
+          },
+        };
 
-    const addAlert = async (alertData) => {
-        try {
-            if (!user?.token) {
-                throw new Error("User not authenticated");
-            }
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${user.token}`,
-                },
-            };
+        const payload = {
+          title: alertData.title,
+          type: alertData.category || alertData.type || "SAFETY_ALERT",
+          severity: alertData.severity || severityToneToLevel(alertData.type),
+          location: alertData.location || "Township Area",
+          message: alertData.message,
+        };
 
-            // Map frontend Alert fields to Backend Broadcast fields
-            // The broadcast model's `type` requires specific enum values
-            // The user's title goes into the message since `type` is an enum
-            const dataToPost = {
-                type: 'SAFETY_ALERT', // Default enum value; can be extended with a selector
-                severity: alertData.type === 'critical' ? 'High' : alertData.type === 'warning' ? 'Medium' : 'Low',
-                location: alertData.location || 'Unknown',
-                message: alertData.title + (alertData.message ? ': ' + alertData.message : ''),
-            };
+        const { data: response } = await axios.post("/api/v1/broadcasts", payload, config);
+        const createdAlert = response?.data ? mapBroadcastToAlert(response.data) : null;
 
-            await axios.post('/api/v1/broadcasts', dataToPost, config);
-            await fetchAlerts();
-        } catch (error) {
-            console.error("Failed to post alert:", error);
-            if (error.response?.status === 401 && logout) {
-                logout();
-            }
-            throw error;
+        if (createdAlert) {
+          setAlerts((previousAlerts) => {
+            const nextAlerts = sortAlertsByNewest([
+              createdAlert,
+              ...previousAlerts.filter((alert) => alert.id !== createdAlert.id),
+            ]);
+            writeCachedAlerts(nextAlerts);
+            return nextAlerts;
+          });
+        } else {
+          await fetchAlerts();
         }
-    };
 
-    return (
-        <AlertContext.Provider value={{ alerts, addAlert, loading, refreshAlerts: fetchAlerts }}>
-            {children}
-        </AlertContext.Provider>
-    );
+        return { success: true, data: createdAlert };
+      } catch (error) {
+        console.error("Failed to post alert:", error);
+        if (error.response?.status === 401 && logout) {
+          logout();
+        }
+        throw error;
+      }
+    },
+    [fetchAlerts, logout, user?.token],
+  );
+
+  return (
+    <AlertContext.Provider value={{ alerts, addAlert, loading, refreshAlerts: fetchAlerts }}>
+      {children}
+    </AlertContext.Provider>
+  );
 };

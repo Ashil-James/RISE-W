@@ -1,6 +1,8 @@
+import { Broadcast } from "../models/broadcast.model.js";
 import { Notification } from "../models/notification.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { serializeBroadcast } from "../utils/broadcastPresentation.js";
 
 // Fetch notifications for the logged-in user
 export const getUserNotifications = asyncHandler(async (req, res) => {
@@ -20,6 +22,18 @@ export const getUserNotifications = asyncHandler(async (req, res) => {
         ]
     }).sort({ createdAt: -1 }).limit(50);
 
+    const broadcastIds = notifications
+        .filter((notif) => notif.type === "BROADCAST" && notif.relatedId)
+        .map((notif) => notif.relatedId);
+
+    let broadcastMetaMap = new Map();
+    if (broadcastIds.length > 0) {
+        const broadcasts = await Broadcast.find({ _id: { $in: broadcastIds } });
+        broadcastMetaMap = new Map(
+            broadcasts.map((broadcast) => [broadcast._id.toString(), serializeBroadcast(broadcast)]),
+        );
+    }
+
     // Add a dynamic field indicating if this user has read it
     const formattedNotifications = notifications.map(notif => {
         let read = false;
@@ -32,7 +46,19 @@ export const getUserNotifications = asyncHandler(async (req, res) => {
 
         return {
             ...notif.toObject(),
-            userReadStatus: read
+            userReadStatus: read,
+            actionTarget:
+                notif.type === "BROADCAST"
+                    ? broadcastMetaMap.get(notif.relatedId?.toString())?.actionTarget || null
+                    : null,
+            sourceType:
+                notif.type === "BROADCAST"
+                    ? broadcastMetaMap.get(notif.relatedId?.toString())?.sourceType || null
+                    : null,
+            categoryLabel:
+                notif.type === "BROADCAST"
+                    ? broadcastMetaMap.get(notif.relatedId?.toString())?.categoryLabel || null
+                    : null,
         };
     });
 

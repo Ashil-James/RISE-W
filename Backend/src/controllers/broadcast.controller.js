@@ -3,6 +3,12 @@ import { Notification } from "../models/notification.model.js";
 import { User } from "../models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import {
+    buildBroadcastNotificationContent,
+    normalizeBroadcastInput,
+    serializeBroadcast,
+    serializeBroadcastCollection,
+} from "../utils/broadcastPresentation.js";
 
 export const getAllBroadcasts = asyncHandler(async (req, res) => {
     // 1. Fetch direct notifications meant for this user (targeted or global)
@@ -53,60 +59,32 @@ export const getAllBroadcasts = asyncHandler(async (req, res) => {
         .map(id => allBroadcasts.find(b => b._id.toString() === id))
         .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    return res.status(200).json(new ApiResponse(200, uniqueBroadcasts, "Broadcasts fetched successfully"));
+    return res.status(200).json(
+        new ApiResponse(200, serializeBroadcastCollection(uniqueBroadcasts), "Broadcasts fetched successfully"),
+    );
 });
 
 export const createBroadcast = asyncHandler(async (req, res) => {
-    const { title, type, severity, location, message, targetArea } = req.body;
-
-    const typeMap = {
-        'WILDLIFE_ALERT': 'WILDLIFE_ALERT',
-        'ROAD_BLOCK': 'ROAD_BLOCK',
-        'UTILITY_WARNING': 'UTILITY_WARNING',
-        'SAFETY_ALERT': 'SAFETY_ALERT',
-        'POWER_ALERT': 'POWER_ALERT',
-        'WATER_ALERT': 'WATER_ALERT',
-        'ROAD_ALERT': 'ROAD_ALERT',
-
-        // Power Authority Titles
-        'Power Outage': 'POWER_ALERT',
-        'Power Outage Alert': 'POWER_ALERT',
-        'Transformer Maintenance': 'POWER_ALERT',
-        'Grid Failure Warning': 'POWER_ALERT',
-        'High Voltage Safety Alert': 'POWER_ALERT',
-
-        // Water Authority Titles
-        'Water Supply': 'WATER_ALERT',
-        'Water Supply Interruption': 'WATER_ALERT',
-        'Pipeline Repair': 'WATER_ALERT',
-        'Muddy Water Warning': 'WATER_ALERT',
-        'Water Shortage Alert': 'WATER_ALERT',
-
-        // Road Authority Titles
-        'Road Blockage': 'ROAD_BLOCK',
-        'Road Repair Notice': 'ROAD_ALERT',
-        'Traffic Diversion': 'ROAD_ALERT',
-        'Fallen Tree': 'ROAD_ALERT',
-        'Wildlife Alert': 'WILDLIFE_ALERT',
-
-        // Admin Titles
-        'Public Safety': 'SAFETY_ALERT',
-    };
-    const mappedType = typeMap[type] || 'SAFETY_ALERT';
+    const normalized = normalizeBroadcastInput({ user: req.user, body: req.body });
 
     const broadcast = await Broadcast.create({
-        title: title || type || "Broadcast Alert",
-        type: mappedType,
-        severity,
-        location,
-        message,
-        isAuthority: req.user.role === 'admin' || req.user.role === 'authority' || req.user.role.includes('authority'),
+        title: normalized.title,
+        type: normalized.type,
+        severity: normalized.severity,
+        location: normalized.location,
+        message: normalized.message,
+        isAuthority: normalized.isAuthority,
+        sourceType: normalized.sourceType,
+        actionTarget: normalized.actionTarget,
+        expiresAt: normalized.expiresAt,
         createdBy: req.user._id,
     });
 
-    if (targetArea && targetArea.center && targetArea.radiusKm) {
+    const notificationContent = buildBroadcastNotificationContent(broadcast);
+
+    if (normalized.targetArea && normalized.targetArea.center && normalized.targetArea.radiusKm) {
         // Targeted Proximity Broadcast
-        const { center, radiusKm } = targetArea;
+        const { center, radiusKm } = normalized.targetArea;
         // Divide by equatorial radius of earth (6378.1 km) to get radians
         const radiusRadian = radiusKm / 6378.1;
 
@@ -122,8 +100,8 @@ export const createBroadcast = asyncHandler(async (req, res) => {
         if (usersInArea.length > 0) {
             const notifications = usersInArea.map(u => ({
                 recipient: u._id,
-                title: "Targeted Proximity Alert",
-                message: `${broadcast.title}: ${message}`,
+                title: notificationContent.title,
+                message: notificationContent.message,
                 type: "BROADCAST",
                 relatedId: broadcast._id,
             }));
@@ -133,12 +111,14 @@ export const createBroadcast = asyncHandler(async (req, res) => {
         // Global Broadcast
         await Notification.create({
             recipient: null,
-            title: "New Broadcast Alert",
-            message: `${broadcast.title}: ${message}`,
+            title: notificationContent.title,
+            message: notificationContent.message,
             type: "BROADCAST",
             relatedId: broadcast._id,
         });
     }
 
-    return res.status(201).json(new ApiResponse(201, broadcast, "Broadcast created successfully"));
+    return res.status(201).json(
+        new ApiResponse(201, serializeBroadcast(broadcast), "Broadcast created successfully"),
+    );
 });

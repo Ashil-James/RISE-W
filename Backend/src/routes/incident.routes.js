@@ -27,8 +27,8 @@ router.route("/check-nearby").post(verifyJWT, checkNearbyIncidents);
 router.route("/:id/upvote").post(verifyJWT, upvoteIncident);
 router.route("/:id/revoke").patch(verifyJWT, revokeIncident);
 router.route("/:id/resolution-response").patch(verifyJWT, respondToIncidentResolution);
-router.route("/:id").get(getIncidentById);
-router.route("/:id").patch(updateIncident);
-router.route("/:id").delete(deleteIncident);
+router.route("/:id").get(verifyJWT, getIncidentById);
+router.route("/:id").patch(verifyJWT, updateIncident);
+router.route("/:id").delete(verifyJWT, deleteIncident);
 
 export default router;

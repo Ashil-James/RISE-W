@@ -10,6 +10,10 @@ const normalizeNotification = (notification) => ({
     message: notification.message,
     type: notification.type,
     createdAt: notification.createdAt,
+    relatedId: notification.relatedId || null,
+    actionTarget: notification.actionTarget || null,
+    sourceType: notification.sourceType || null,
+    categoryLabel: notification.categoryLabel || null,
     unread: !notification.userReadStatus,
 });
 
@@ -126,7 +130,7 @@ export const useNotificationFeed = ({
 
     const markAsRead = useCallback(async (notificationId) => {
         if (!token) {
-            return;
+            return false;
         }
 
         try {
@@ -140,8 +144,10 @@ export const useNotificationFeed = ({
                         : notification
                 )
             );
+            return true;
         } catch (error) {
             console.error("Failed to mark notification as read:", error);
+            return false;
         }
     }, [dismissToast, token]);
 

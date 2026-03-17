@@ -4,6 +4,12 @@ import { User } from "../models/user.model.js";
 import { Notification } from "../models/notification.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import {
+    buildBroadcastNotificationContent,
+    normalizeBroadcastInput,
+    serializeBroadcast,
+    serializeBroadcastCollection,
+} from "../utils/broadcastPresentation.js";
 
 export const getAllIncidents = asyncHandler(async (req, res) => {
     const incidents = await Incident.find()
@@ -61,34 +67,40 @@ export const getAllBroadcasts = asyncHandler(async (req, res) => {
     return res
         .status(200)
         .json(
-            new ApiResponse(200, broadcasts, "Broadcasts retrieved successfully")
+            new ApiResponse(200, serializeBroadcastCollection(broadcasts), "Broadcasts retrieved successfully")
         );
 });
 
 export const createBroadcast = asyncHandler(async (req, res) => {
-    const { type, severity, location, message } = req.body;
+    const normalized = normalizeBroadcastInput({ user: req.user, body: req.body });
 
     const broadcast = await Broadcast.create({
-        type,
-        severity,
-        location,
-        message,
+        title: normalized.title,
+        type: normalized.type,
+        severity: normalized.severity,
+        location: normalized.location,
+        message: normalized.message,
+        sourceType: normalized.sourceType,
+        actionTarget: normalized.actionTarget,
+        expiresAt: normalized.expiresAt,
         createdBy: req.user._id,
-        isAuthority: true,
+        isAuthority: normalized.isAuthority,
     });
+
+    const notificationContent = buildBroadcastNotificationContent(broadcast);
 
     // Trigger global notification
     await Notification.create({
         recipient: null,
-        title: "New Broadcast Alert",
-        message: `${type.replace(/_/g, ' ')}: ${message}`,
+        title: notificationContent.title,
+        message: notificationContent.message,
         type: "BROADCAST",
         relatedId: broadcast._id,
     });
 
     return res
         .status(201)
-        .json(new ApiResponse(201, broadcast, "Broadcast created successfully"));
+        .json(new ApiResponse(201, serializeBroadcast(broadcast), "Broadcast created successfully"));
 });
 
 export const getAllUsers = asyncHandler(async (req, res) => {
