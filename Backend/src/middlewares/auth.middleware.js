@@ -41,3 +41,22 @@ export const optionalVerifyJWT = asyncHandler(async (req, res, next) => {
     }
     next();
 });
+
+export const requireAuthorityDepartment = (department) => {
+    return (req, _, next) => {
+        if (!req.user) {
+            throw new ApiError(401, "Unauthorized request");
+        }
+
+        if (!["authority", "admin"].includes(req.user.role)) {
+            throw new ApiError(403, "Authority access required");
+        }
+
+        if (req.user.role !== "admin" && req.user.department !== department) {
+            throw new ApiError(403, "You are not authorized to access this authority portal");
+        }
+
+        req.authorityDepartment = department;
+        next();
+    };
+};

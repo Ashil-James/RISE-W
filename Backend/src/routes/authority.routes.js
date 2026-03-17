@@ -11,28 +11,29 @@ import {
     getRoadReportAnalytics,
     updateIncidentStatus
 } from "../controllers/authority.controller.js";
-import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { requireAuthorityDepartment, verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
 router.use(verifyJWT); // Secure all authority routes
 
 // Water Authority routes
-router.route("/water/incidents").get(getWaterIncidents);
-router.route("/water/incidents/:id/status").patch(updateIncidentStatus);
+router.route("/water/incidents").get(requireAuthorityDepartment("WATER"), getWaterIncidents);
+router.route("/water/incidents/:id/status").patch(requireAuthorityDepartment("WATER"), updateIncidentStatus);
 
 // Power Authority routes
-router.route("/power/incidents").get(getPowerIncidents);
-router.route("/power/stats").get(getPowerDashboardStats);
-router.route("/power/critical").get(getPowerCriticalIncidents);
-router.route("/power/analytics").get(getPowerReportAnalytics);
+router.route("/power/incidents").get(requireAuthorityDepartment("ELECTRICITY"), getPowerIncidents);
+router.route("/power/incidents/:id/status").patch(requireAuthorityDepartment("ELECTRICITY"), updateIncidentStatus);
+router.route("/power/stats").get(requireAuthorityDepartment("ELECTRICITY"), getPowerDashboardStats);
+router.route("/power/critical").get(requireAuthorityDepartment("ELECTRICITY"), getPowerCriticalIncidents);
+router.route("/power/analytics").get(requireAuthorityDepartment("ELECTRICITY"), getPowerReportAnalytics);
 
 // Road Authority routes
-router.route("/road/incidents").get(getRoadIncidents);
-router.route("/road/incidents/:id/status").patch(updateIncidentStatus);
-router.route("/road/stats").get(getRoadDashboardStats);
-router.route("/road/critical").get(getRoadCriticalIncidents);
-router.route("/road/analytics").get(getRoadReportAnalytics);
+router.route("/road/incidents").get(requireAuthorityDepartment("CIVIL"), getRoadIncidents);
+router.route("/road/incidents/:id/status").patch(requireAuthorityDepartment("CIVIL"), updateIncidentStatus);
+router.route("/road/stats").get(requireAuthorityDepartment("CIVIL"), getRoadDashboardStats);
+router.route("/road/critical").get(requireAuthorityDepartment("CIVIL"), getRoadCriticalIncidents);
+router.route("/road/analytics").get(requireAuthorityDepartment("CIVIL"), getRoadReportAnalytics);
 
 export default router;
 

@@ -13,18 +13,11 @@ const TABS = [
     "Assessment",
     "Resolved",
     "Reopened",
+    "Rejected",
     "Revoked",
 ];
 
 const URGENCY_LEVELS = ["Any Urgency", "Critical (75+)", "High (50-74)", "Low (0-49)"];
-
-const MOCK_REGISTRY = [
-    { ref: "#POW-1021", category: "Grid Failure", subtype: "Main Transformer Burst", loc: "Sector G", urg: 92, lifecycle: "New", duration: "1 Days", protocol: "View Case" },
-    { ref: "#POW-5502", category: "Infrastructure", subtype: "Meter Issue", loc: "Block C", urg: 12, lifecycle: "Resolved", duration: "5 Days", protocol: "View Case" },
-    { ref: "#POW-8821", category: "Safety", subtype: "Live Wire Exposure", loc: "Sector A", urg: 95, lifecycle: "Accepted", duration: "2 Hrs", protocol: "View Case" },
-    { ref: "#POW-3304", category: "Maintenance", subtype: "Street Light Out", loc: "Sector D", urg: 45, lifecycle: "Active Ops", duration: "3 Days", protocol: "View Case" },
-    { ref: "#POW-1992", category: "Distribution", subtype: "Voltage Fluctuation", loc: "Sector F", urg: 28, lifecycle: "Assessment", duration: "4 Days", protocol: "View Case" },
-];
 
 const lifecycleColor = (status) => {
     const map = {
@@ -32,14 +25,17 @@ const lifecycleColor = (status) => {
         Accepted: "text-blue-400 bg-blue-500/10 border-blue-500/20",
         "Active Ops": "text-amber-400 bg-amber-500/10 border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]",
         Assessment: "text-amber-400 bg-amber-500/10 border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.1)]",
+        "Work Completed": "text-green-400 bg-green-500/10 border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.1)]",
         Resolved: "text-green-400 bg-green-500/10 border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.1)]",
         Reopened: "text-red-400 bg-red-500/10 border-red-500/20 animate-pulse",
+        Rejected: "text-red-400 bg-red-500/10 border-red-500/20",
         Revoked: "text-gray-300 bg-gray-500/10 border-gray-500/20",
     };
     return map[status] || "text-gray-400 bg-white/5 border-white/10";
 };
 
 const AuthorityPowerMatrix = () => {
+    const navigate = useNavigate();
     const { user } = useAuth();
     const [activeTab, setActiveTab] = useState("Registry");
     const [search, setSearch] = useState("");
@@ -55,14 +51,15 @@ const AuthorityPowerMatrix = () => {
             case "OPEN": return "New";
             case "ACCEPTED": return "Accepted";
             case "IN_PROGRESS": return "Active Ops";
-        case "VERIFIED": return "Assessment";
-        case "RESOLVED": return "Resolved";
-        case "CLOSED": return "Resolved";
-        case "REOPENED": return "Reopened";
-        case "REVOKED": return "Revoked";
-        default: return "New";
-    }
-};
+            case "VERIFIED": return "Assessment";
+            case "RESOLVED": return "Resolved";
+            case "CLOSED": return "Work Completed";
+            case "REOPENED": return "Reopened";
+            case "REJECTED": return "Rejected";
+            case "REVOKED": return "Revoked";
+            default: return "New";
+        }
+    };
 
     const getDuration = (dateString) => {
         if (!dateString) return "Just now";
@@ -117,7 +114,9 @@ const AuthorityPowerMatrix = () => {
 
     // Filtering
     const filteredData = incidents.filter((row) => {
-        if (activeTab !== "Registry" && row.lifecycle !== activeTab) return false;
+        if (activeTab !== "Registry" && row.lifecycle !== activeTab && !(activeTab === "Resolved" && row.lifecycle === "Work Completed")) {
+            return false;
+        }
         if (search && !row.ref.toLowerCase().includes(search.toLowerCase())) return false;
         if (urgencyFilter === "Critical (75+)" && row.urg < 75) return false;
         if (urgencyFilter === "High (50-74)" && (row.urg < 50 || row.urg >= 75)) return false;
@@ -251,14 +250,14 @@ const AuthorityPowerMatrix = () => {
                                             <td className="px-5 py-4 text-sm text-gray-400">{row.loc}</td>
                                             <td className="px-5 py-4 text-sm font-black text-white">{row.urg}</td>
                                             <td className="px-5 py-4">
-                                                {row.urg >= 75 && row.lifecycle !== "Resolved" ? (
+                                                {row.urg >= 75 && !["Resolved", "Work Completed", "Rejected", "Revoked"].includes(row.lifecycle) ? (
                                                     <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border border-red-500/20 text-red-400 bg-red-500/10 animate-ping">
                                                         <AlertTriangle size={12} />
                                                         HIGH URGENCY
                                                     </span>
                                                 ) : (
                                                     <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${lifecycleColor(row.lifecycle)}`}>
-                                                        {row.lifecycle === "Resolved" && <CheckCircle size={12} />}
+                                                        {(row.lifecycle === "Resolved" || row.lifecycle === "Work Completed") && <CheckCircle size={12} />}
                                                         {row.lifecycle}
                                                     </span>
                                                 )}

@@ -46,8 +46,11 @@ const STATUS_STYLES = {
     New: "bg-blue-500/10 text-blue-400 border-blue-500/20 animate-pulse",
     Accepted: "bg-blue-500/10 text-blue-400 border-blue-500/20",
     "In Progress": "bg-orange-500/10 text-orange-400 border-orange-500/20 shadow-[0_0_15px_rgba(249,115,22,0.1)]",
+    Assessment: "bg-orange-500/10 text-orange-400 border-orange-500/20 shadow-[0_0_15px_rgba(249,115,22,0.1)]",
     Resolved: "bg-green-500/10 text-green-400 border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.1)]",
+    "Work Completed": "bg-green-500/10 text-green-400 border-green-500/20",
     Rejected: "bg-red-500/10 text-red-400 border-red-500/20",
+    Reopened: "bg-red-500/10 text-red-400 border-red-500/20 animate-pulse",
     Revoked: "bg-gray-500/10 text-gray-300 border-gray-500/20",
     "High Urgency": "bg-red-500/10 text-red-400 border-red-500/20 animate-ping",
 };
@@ -66,10 +69,11 @@ const AuthorityRoadDashboard = () => {
             case "OPEN": return "New";
             case "ACCEPTED": return "Accepted";
             case "IN_PROGRESS": return "In Progress";
-            case "VERIFIED": return "Resolved";
+            case "VERIFIED": return "Assessment";
             case "RESOLVED": return "Resolved";
-            case "CLOSED": return "Resolved";
-            case "REOPENED": return "New";
+            case "CLOSED": return "Work Completed";
+            case "REOPENED": return "Reopened";
+            case "REJECTED": return "Rejected";
             case "REVOKED": return "Revoked";
             default: return "New";
         }

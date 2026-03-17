@@ -65,7 +65,7 @@ const AuthorityReports = () => {
         };
 
         fetchAnalytics();
-    }, [user, isPower]);
+    }, [user, isPower, isRoad]);
 
     const themeColor = isPower ? "#F59E0B" : isRoad ? "#F97316" : "#0EA5E9";
     const themeAccent = isPower ? "text-amber-400" : isRoad ? "text-orange-400" : "text-sky-400";
