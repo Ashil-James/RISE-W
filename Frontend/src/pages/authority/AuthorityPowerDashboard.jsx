@@ -94,7 +94,7 @@ const AuthorityPowerDashboard = () => {
                         category: item.category || "Power Issue",
                         subtype: item.title || "Undisclosed Issue",
                         loc: item.address || "Location Unavailable",
-                        urg: item.urgencyScore || 0,
+                        urg: Math.min(100, (item.urgencyScore || 10) + (item.upvotes || 0)),
                         status: item.status,
                         days: Math.floor((new Date() - new Date(item.createdAt)) / (1000 * 60 * 60 * 24))
                     }));

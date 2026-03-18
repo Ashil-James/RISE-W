@@ -51,13 +51,13 @@ const AuthorityRoadMatrix = () => {
             case "IN_PROGRESS": return "Active Ops";
             case "VERIFIED": return "Assessment";
             case "RESOLVED": return "Resolved";
-        case "CLOSED": return "Resolved";
-        case "REOPENED": return "Reopened";
-        case "REJECTED": return "Rejected";
-        case "REVOKED": return "Revoked";
-        default: return "New";
-    }
-};
+            case "CLOSED": return "Resolved";
+            case "REOPENED": return "Reopened";
+            case "REJECTED": return "Rejected";
+            case "REVOKED": return "Revoked";
+            default: return "New";
+        }
+    };
 
     const getDuration = (dateString) => {
         if (!dateString) return "Just now";
@@ -92,7 +92,7 @@ const AuthorityRoadMatrix = () => {
                         category: item.category || "Infrastructure",
                         subtype: item.title || "Undisclosed Issue",
                         loc: item.address || "Location Unavailable",
-                        urg: item.urgencyScore || 10,
+                        urg: Math.min(100, (item.urgencyScore || 10) + (item.upvotes || 0)),
                         lifecycle: mapStatusToLifecycle(item.status),
                         duration: getDuration(item.createdAt),
                         protocol: "View Case"

@@ -109,7 +109,7 @@ const AuthorityRoadDashboard = () => {
                         category: item.category || "Infrastructure",
                         subtype: item.title,
                         loc: item.address || "Unknown",
-                        urg: item.urgencyScore,
+                        urg: Math.min(100, (item.urgencyScore || 10) + (item.upvotes || 0)),
                         status: mapStatusToLifecycle(item.status),
                         days: getDaysOpen(item.createdAt)
                     })));

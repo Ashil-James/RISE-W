@@ -94,7 +94,7 @@ const AuthorityPowerMatrix = () => {
                         category: item.category || "Power Issue",
                         subtype: item.title || "Undisclosed Issue",
                         loc: item.address || "Location Unavailable",
-                        urg: item.urgencyScore || 10,
+                        urg: Math.min(100, (item.urgencyScore || 10) + (item.upvotes || 0)),
                         lifecycle: mapStatusToLifecycle(item.status),
                         duration: getDuration(item.createdAt),
                         protocol: "View Case"

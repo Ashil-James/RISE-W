@@ -92,6 +92,28 @@ const CATEGORY_TO_AUTHORITY = {
     "Wildlife Intrusion": "CIVIL",
 };
 
+const calculateInitialUrgency = (title, category) => {
+    let score = 30; // base score
+
+    // Adjust by category if needed
+    if (category === "Power Issue" || category === "Water & Sanitation") {
+        score += 10;
+    }
+
+    const titleLower = (title || "").toLowerCase();
+
+    // Overrides based on severity keywords
+    if (titleLower.includes("critical emergency")) {
+        score = 85 + Math.floor(Math.random() * 10); // 85-94
+    } else if (titleLower.includes("general failure")) {
+        score = 50 + Math.floor(Math.random() * 15); // 50-64
+    } else {
+        score += Math.floor(Math.random() * 10); // Add a little randomness
+    }
+
+    return Math.min(100, Math.max(1, score));
+};
+
 export const createIncident = asyncHandler(async (req, res) => {
     let locationData = undefined;
     if (req.body.latitude && req.body.longitude) {
@@ -109,6 +131,7 @@ export const createIncident = asyncHandler(async (req, res) => {
         image: req.body.image,
         reportedBy: req.user._id,
         status: 'OPEN',
+        urgencyScore: calculateInitialUrgency(req.body.title, req.body.category),
         assignedAuthority: CATEGORY_TO_AUTHORITY[req.body.category] || "CIVIL",
         statusHistory: [
             createStatusHistoryEntry({
@@ -254,6 +277,13 @@ export const respondToIncidentResolution = asyncHandler(async (req, res) => {
 
     incident.status = targetStatus;
     incident.verifiedByUser = confirmingResolution;
+
+    if (!confirmingResolution) {
+        // Clear old resolution data so the authority can submit fresh proof
+        incident.resolutionImage = "";
+        incident.authorityMessage = "";
+    }
+
     appendStatusHistory(incident, {
         status: targetStatus,
         actorRole: "USER",
@@ -323,6 +353,7 @@ export const batchCreateIncidents = asyncHandler(async (req, res) => {
             address: address || "From Post-Storm Survey",
             reportedBy: req.user._id,
             status: 'OPEN',
+            urgencyScore: calculateInitialUrgency(report.title, report.category),
             assignedAuthority: CATEGORY_TO_AUTHORITY[report.category] || "CIVIL",
             statusHistory: [
                 createStatusHistoryEntry({

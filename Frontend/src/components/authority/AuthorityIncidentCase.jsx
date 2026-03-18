@@ -187,7 +187,11 @@ const AuthorityIncidentCase = ({
 
                 setIncident(result.data);
                 setStatus(mapDBStatusToUI(result.data.status));
-                setResolutionProof(result.data.resolutionImage || null);
+                setResolutionProof(
+                    ["Resolved", "Work Completed", "Assessment"].includes(mapDBStatusToUI(result.data.status))
+                        ? (result.data.resolutionImage || null)
+                        : null
+                );
             } catch (fetchError) {
                 console.error(fetchError);
                 setError(fetchError.message);
@@ -238,7 +242,11 @@ const AuthorityIncidentCase = ({
 
             setIncident(result.data);
             setStatus(mapDBStatusToUI(result.data.status));
-            setResolutionProof(result.data.resolutionImage || nextResolutionProof || null);
+            setResolutionProof(
+                ["Resolved", "Work Completed", "Assessment"].includes(mapDBStatusToUI(result.data.status))
+                    ? (result.data.resolutionImage || nextResolutionProof || null)
+                    : null
+            );
             return true;
         } catch (updateError) {
             console.error(updateError);
@@ -268,6 +276,15 @@ const AuthorityIncidentCase = ({
     const handleStatusSelectChange = (event) => {
         const selected = event.target.value;
         if (selected === "Reopened") return;
+        if (selected === "Resolved") {
+            // Show upload UI locally — backend update happens only after proof is uploaded
+            setStatus("Resolved");
+            setResolutionProof(null);
+            setUploadFile(null);
+            return;
+        }
+        // For Accepted or In Progress, clear the resolution proof locally too
+        setResolutionProof(null);
         updateDBStatus(selected);
     };
 
@@ -565,7 +582,7 @@ const AuthorityIncidentCase = ({
                                                 className="w-full py-3.5 mt-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-white/5 disabled:text-gray-600 text-white rounded-xl font-bold transition-all shadow-lg shadow-emerald-500/25 flex justify-center items-center gap-2"
                                             >
                                                 {saving ? <Loader2 size={18} className="animate-spin" /> : null}
-                                                Save Resolution Proof
+                                                Send Resolution Proof
                                             </button>
                                         </div>
                                     </motion.div>
@@ -573,7 +590,7 @@ const AuthorityIncidentCase = ({
                             </div>
                         )}
 
-                        {resolutionProof && (
+                        {resolutionProof && ["Resolved", "Work Completed", "Assessment"].includes(status) && (
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.95 }}
                                 animate={{ opacity: 1, scale: 1 }}
