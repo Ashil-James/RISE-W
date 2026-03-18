@@ -29,6 +29,154 @@ export const getWaterIncidents = asyncHandler(async (req, res) => {
     res.json(new ApiResponse(200, incidents, "Water incidents retrieved successfully"));
 });
 
+export const getWaterDashboardStats = asyncHandler(async (req, res) => {
+    const stats = await Incident.aggregate([
+        {
+            $match: WATER_INCIDENT_FILTER
+        },
+        {
+            $group: {
+                _id: "$status",
+                count: { $sum: 1 }
+            }
+        }
+    ]);
+
+    const result = {
+        new: 0,
+        inProgress: 0,
+        completed: 0,
+        highUrgency: 0
+    };
+
+    stats.forEach(s => {
+        if (["OPEN", "REOPENED"].includes(s._id)) result.new += s.count;
+        if (["ACCEPTED", "IN_PROGRESS"].includes(s._id)) result.inProgress += s.count;
+        if (COMPLETED_STATUSES.includes(s._id)) result.completed += s.count;
+    });
+
+    result.highUrgency = await Incident.countDocuments({
+        ...WATER_INCIDENT_FILTER,
+        urgencyScore: { $gte: 75 },
+        status: { $nin: INACTIVE_HIGH_URGENCY_STATUSES }
+    });
+
+    res.json(new ApiResponse(200, result, "Water dashboard stats retrieved successfully"));
+});
+
+export const getWaterCriticalIncidents = asyncHandler(async (req, res) => {
+    const incidents = await Incident.find({
+        ...WATER_INCIDENT_FILTER,
+        urgencyScore: { $gte: 75 },
+        status: { $nin: INACTIVE_HIGH_URGENCY_STATUSES }
+    })
+        .populate("reportedBy", "name email")
+        .sort({ urgencyScore: -1, createdAt: -1 });
+
+    res.json(new ApiResponse(200, incidents, "Water critical incidents retrieved successfully"));
+});
+
+export const getWaterReportAnalytics = asyncHandler(async (req, res) => {
+    const totalComplaints = await Incident.countDocuments(WATER_INCIDENT_FILTER);
+
+    const resolvedIncidents = await Incident.find({
+        ...WATER_INCIDENT_FILTER,
+        status: { $in: COMPLETED_STATUSES }
+    });
+
+    const resolvedCount = resolvedIncidents.length;
+
+    let totalResolutionTime = 0;
+    resolvedIncidents.forEach(inc => {
+        const start = new Date(inc.createdAt);
+        const end = new Date(inc.updatedAt);
+        totalResolutionTime += Math.abs(end - start);
+    });
+
+    const avgResolutionHours = resolvedCount > 0
+        ? (totalResolutionTime / resolvedCount / (1000 * 60 * 60)).toFixed(1)
+        : 0;
+
+    const resolutionRate = totalComplaints > 0
+        ? Math.round((resolvedCount / totalComplaints) * 100)
+        : 0;
+
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+
+    const weeklyTrend = await Incident.aggregate([
+        {
+            $match: {
+                ...WATER_INCIDENT_FILTER,
+                createdAt: { $gte: sevenDaysAgo }
+            }
+        },
+        {
+            $group: {
+                _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                count: { $sum: 1 }
+            }
+        },
+        { $sort: { _id: 1 } }
+    ]);
+
+    const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    const last7Days = [];
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        const match = weeklyTrend.find(w => w._id === dateStr);
+        last7Days.push({
+            name: dayNames[d.getDay()],
+            count: match ? match.count : 0
+        });
+    }
+
+    const categories = await Incident.aggregate([
+        { $match: WATER_INCIDENT_FILTER },
+        {
+            $group: {
+                _id: "$title",
+                value: { $sum: 1 }
+            }
+        },
+        { $sort: { value: -1 } },
+        { $limit: 4 }
+    ]);
+
+    const formattedCategories = categories.map(c => ({
+        name: c._id || "Undisclosed",
+        value: c.value
+    }));
+
+    const allIncidentsForSectors = await Incident.find(WATER_INCIDENT_FILTER, "address");
+    const sectorMap = {};
+    allIncidentsForSectors.forEach(inc => {
+        let sec = (inc.address || "Unknown Loc").split(',')[0].trim();
+        if (sec.length > 15) sec = sec.substring(0, 15) + "...";
+        sectorMap[sec] = (sectorMap[sec] || 0) + 1;
+    });
+
+    const sectorData = Object.keys(sectorMap)
+        .map(key => ({ name: key, count: sectorMap[key] }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+
+    res.json(new ApiResponse(200, {
+        stats: {
+            total: totalComplaints,
+            resolved: resolvedCount,
+            avgTime: avgResolutionHours,
+            rate: resolutionRate
+        },
+        weeklyTrend: last7Days,
+        categories: formattedCategories,
+        sectors: sectorData
+    }, "Water analytics retrieved successfully"));
+});
+
 export const getPowerIncidents = asyncHandler(async (req, res) => {
     // Fetch all incidents assigned to the Power Authority (ELECTRICITY)
     const incidents = await Incident.find({

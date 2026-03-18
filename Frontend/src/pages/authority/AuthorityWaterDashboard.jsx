@@ -89,20 +89,31 @@ const AuthorityWaterDashboard = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchIncidents = async () => {
+        const fetchDashboardData = async () => {
             try {
                 const token = user?.token || localStorage.getItem("token") || (user && user.accessToken ? user.accessToken : null);
                 const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
 
-                const res = await fetch("/api/v1/authority/water/incidents", {
+                // Fetch Stats
+                const statsRes = await fetch("/api/v1/authority/water/stats", {
                     headers: authHeader,
                 });
+                if (statsRes.ok) {
+                    const statsResult = await statsRes.json();
+                    if (statsResult.success) {
+                        setStats(statsResult.data);
+                    }
+                }
 
-                if (!res.ok) throw new Error("Failed to fetch dashboard data");
-                const result = await res.json();
+                // Fetch Critical Incidents
+                const criticalRes = await fetch("/api/v1/authority/water/critical", {
+                    headers: authHeader,
+                });
+                if (!criticalRes.ok) throw new Error("Failed to fetch critical items");
+                const criticalResult = await criticalRes.json();
 
-                if (result.success) {
-                    const formatted = result.data.map(item => ({
+                if (criticalResult.success) {
+                    const formatted = criticalResult.data.map(item => ({
                         id: item._id,
                         ref: item.reportId || `#REQ-${item._id.substring(item._id.length - 4).toUpperCase()}`,
                         category: item.category || "Water Supply",
@@ -114,24 +125,16 @@ const AuthorityWaterDashboard = () => {
                     }));
 
                     setIncidents(formatted);
-
-                    // Compute stats
-                    const newCount = formatted.filter(i => i.status === "New").length;
-                    const inProgCount = formatted.filter(i => i.status === "In Progress" || i.status === "Accepted" || i.status === "Assessment").length;
-                    const compCount = formatted.filter(i => i.status === "Resolved" || i.status === "Work Completed").length;
-                    const urgCount = formatted.filter(i => i.urg >= 75 && i.status !== "Resolved" && i.status !== "Work Completed" && i.status !== "Revoked").length;
-
-                    setStats({ new: newCount, inProgress: inProgCount, completed: compCount, highUrgency: urgCount });
                 }
             } catch (err) {
-                console.error("Error fetching authority dashboard stats:", err);
+                console.error("Error fetching authority dashboard data:", err);
                 setError(err.message);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchIncidents();
+        fetchDashboardData();
     }, [user]);
 
     const getGreeting = () => {
@@ -142,9 +145,7 @@ const AuthorityWaterDashboard = () => {
         return "System Monitoring Active";
     };
 
-    const criticalItems = incidents.filter(i => i.urg >= 50 && i.status !== "Resolved" && i.status !== "Work Completed" && i.status !== "Revoked")
-        .sort((a, b) => b.urg - a.urg)
-        .slice(0, 5); // top 5 critical items
+    const criticalItems = incidents.slice(0, 5); // already sorted by urgency in backend
 
     return (
         <div className="space-y-8 pb-12">

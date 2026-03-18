@@ -43,7 +43,7 @@ const AuthorityReports = () => {
                     ? "/api/v1/authority/power/analytics"
                     : isRoad
                         ? "/api/v1/authority/road/analytics"
-                        : "/api/v1/authority/water/incidents";
+                        : "/api/v1/authority/water/analytics";
 
                 const res = await fetch(endpoint, {
                     headers: authHeader,
@@ -53,9 +53,7 @@ const AuthorityReports = () => {
                 const result = await res.json();
 
                 if (result.success) {
-                    if (isPower || isRoad) {
-                        setAnalytics(result.data);
-                    }
+                    setAnalytics(result.data);
                 }
             } catch (err) {
                 console.error("Error fetching authority reports stats:", err);

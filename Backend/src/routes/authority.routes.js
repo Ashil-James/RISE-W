@@ -1,6 +1,9 @@
 import { Router } from "express";
 import {
     getWaterIncidents,
+    getWaterDashboardStats,
+    getWaterCriticalIncidents,
+    getWaterReportAnalytics,
     getPowerIncidents,
     getPowerDashboardStats,
     getPowerCriticalIncidents,
@@ -20,6 +23,9 @@ router.use(verifyJWT); // Secure all authority routes
 // Water Authority routes
 router.route("/water/incidents").get(requireAuthorityDepartment("WATER"), getWaterIncidents);
 router.route("/water/incidents/:id/status").patch(requireAuthorityDepartment("WATER"), updateIncidentStatus);
+router.route("/water/stats").get(requireAuthorityDepartment("WATER"), getWaterDashboardStats);
+router.route("/water/critical").get(requireAuthorityDepartment("WATER"), getWaterCriticalIncidents);
+router.route("/water/analytics").get(requireAuthorityDepartment("WATER"), getWaterReportAnalytics);
 
 // Power Authority routes
 router.route("/power/incidents").get(requireAuthorityDepartment("ELECTRICITY"), getPowerIncidents);
