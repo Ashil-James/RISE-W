@@ -1,797 +1,349 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Activity,
   AlertTriangle,
-  CheckCircle,
+  CheckCircle2,
+  Radio,
+  ShieldAlert,
   Users,
-  Search,
-  ArrowUpRight,
-  Clock,
-  MapPin,
-  TrendingUp,
-  Sparkles,
 } from "lucide-react";
-import { motion, AnimatePresence, useInView } from "framer-motion";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import {
+  AdminActionButton,
+  AdminAuthorityBadge,
+  AdminEmptyState,
+  AdminPageHeader,
+  AdminRowLink,
+  AdminStatCard,
+  AdminStatusBadge,
+  AdminSurface,
+  AdminUrgencyBadge,
+} from "../../components/admin/AdminUI";
 import { useUser } from "../../context/UserContext";
-
-// --- ANIMATED COUNTER HOOK ---
-const useAnimatedCounter = (target, duration = 1800) => {
-  const [count, setCount] = useState(0);
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
-
-  useEffect(() => {
-    if (!isInView || target === 0) return;
-    const startTime = performance.now();
-    const animate = (currentTime) => {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setCount(Math.round(eased * target));
-      if (progress < 1) requestAnimationFrame(animate);
-    };
-    requestAnimationFrame(animate);
-  }, [target, duration, isInView]);
-
-  return { count, ref };
-};
-
-// --- SHIMMER SKELETON ---
-const ShimmerSkeleton = () => (
-  <div className="space-y-8 pb-10">
-    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-      <div>
-        <div className="h-10 w-64 rounded-2xl mb-3 bg-gradient-to-r from-white/[0.03] via-white/[0.06] to-white/[0.03] animate-pulse"></div>
-        <div className="h-4 w-48 rounded-lg bg-gradient-to-r from-white/[0.03] via-white/[0.06] to-white/[0.03] animate-pulse"></div>
-      </div>
-    </div>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {[...Array(4)].map((_, i) => (
-        <div
-          key={i}
-          className="rounded-[2rem] p-6 h-40 animate-pulse"
-          style={{
-            background:
-              "linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))",
-            border: "1px solid rgba(255,255,255,0.03)",
-          }}
-        ></div>
-      ))}
-    </div>
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      <div
-        className="lg:col-span-2 rounded-[2.5rem] p-8 h-72 animate-pulse"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))",
-          border: "1px solid rgba(255,255,255,0.03)",
-        }}
-      ></div>
-      <div
-        className="rounded-3xl p-6 h-72 animate-pulse"
-        style={{
-          background:
-            "linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))",
-          border: "1px solid rgba(255,255,255,0.03)",
-        }}
-      ></div>
-    </div>
-  </div>
-);
-
-// --- LIQUID GLASS CARD WRAPPER ---
-const GlassCard = ({ children, className = "", ...props }) => (
-  <motion.div
-    className={`relative overflow-hidden ${className}`}
-    style={{
-      background:
-        "linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))",
-      backdropFilter: "blur(20px) saturate(1.5)",
-      WebkitBackdropFilter: "blur(20px) saturate(1.5)",
-      border: "1px solid rgba(255,255,255,0.06)",
-      boxShadow:
-        "0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)",
-    }}
-    {...props}
-  >
-    <div className="absolute top-0 left-8 right-8 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
-    {children}
-  </motion.div>
-);
-
-const formatIncidentStatus = (status) => {
-  switch (status) {
-    case "OPEN":
-      return "Open";
-    case "ACCEPTED":
-      return "Accepted";
-    case "IN_PROGRESS":
-      return "In Progress";
-    case "RESOLVED":
-      return "Resolved";
-    case "VERIFIED":
-      return "Verified";
-    case "CLOSED":
-      return "Closed";
-    case "REOPENED":
-      return "Reopened";
-    case "REJECTED":
-      return "Rejected";
-    case "REVOKED":
-      return "Revoked";
-    default:
-      return status;
-  }
-};
+import {
+  formatAdminDateTime,
+  formatAdminRelativeTime,
+  getCommunitySupportLabel,
+} from "../../utils/adminPortal";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { user } = useUser();
   const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState({
-    total: 0,
-    pending: 0,
-    resolved: 0,
-    users: 0,
-    rejected: 0,
-  });
-  const [reports, setReports] = useState([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [error, setError] = useState("");
+  const [stats, setStats] = useState(null);
+  const [queue, setQueue] = useState([]);
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
+    const fetchDashboard = async () => {
       try {
         setLoading(true);
+        setError("");
         const config = { headers: { Authorization: `Bearer ${user?.token}` } };
-        const [statsRes, incidentsRes] = await Promise.all([
+        const [statsResponse, queueResponse] = await Promise.all([
           axios.get("/api/v1/admin/stats", config),
-          axios.get("/api/v1/admin/incident", config),
+          axios.get("/api/v1/admin/incident", {
+            ...config,
+            params: { bucket: "needs_attention", sort: "highest_urgency", limit: 5 },
+          }),
         ]);
 
-        if (statsRes.data.success) {
-          const s = statsRes.data.data;
-          setStats({
-            total: s.totalIncidents,
-            pending: s.openIncidents,
-            resolved: s.resolvedIncidents,
-            users: s.totalUsers,
-            rejected: s.rejectedIncidents || 0,
-          });
+        if (statsResponse.data.success) {
+          setStats(statsResponse.data.data);
         }
 
-        if (incidentsRes.data.success) {
-          const allIncidents = incidentsRes.data.data.map((inc) => ({
-            id: inc.reportId || inc._id,
-            type: inc.title,
-            reporter: inc.reportedBy?.name || "Anonymous",
-            loc: inc.address || "Unknown Location",
-            date: new Date(inc.createdAt).toLocaleDateString(),
-            status: formatIncidentStatus(inc.status),
-            priority: inc.priority || "Medium",
-            upvotes: inc.upvotes || 0,
-            urgencyScore: inc.urgencyScore || 1,
-          }));
-          // Sort by urgency: upvotes (community impact) + urgencyScore, highest first
-          allIncidents.sort((a, b) => {
-            const urgencyA = a.upvotes + a.urgencyScore;
-            const urgencyB = b.upvotes + b.urgencyScore;
-            return urgencyB - urgencyA;
-          });
-          setReports(allIncidents.slice(0, 5));
+        if (queueResponse.data.success) {
+          setQueue(queueResponse.data.data.items || []);
         }
-      } catch (error) {
-        console.error("Error fetching admin dashboard data:", error);
+      } catch (fetchError) {
+        console.error(fetchError);
+        setError(fetchError.response?.data?.message || "Failed to load admin dashboard.");
       } finally {
         setLoading(false);
       }
     };
-    if (user?.token) fetchDashboardData();
+
+    if (user?.token) {
+      fetchDashboard();
+    }
   }, [user?.token]);
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.08, delayChildren: 0.1 },
-    },
+  const overview = stats?.overview || {};
+  const workload = stats?.authorityWorkload || [];
+  const broadcasts = stats?.broadcasts || {};
+  const resolutionRate = useMemo(() => {
+    const total = overview.totalIncidents || 0;
+    if (!total) return 0;
+    return Math.round((((overview.closed || 0) + (overview.awaitingCitizen || 0)) / total) * 100);
+  }, [overview.awaitingCitizen, overview.closed, overview.totalIncidents]);
+
+  const openWorkspace = (params = {}) => {
+    const search = new URLSearchParams(params);
+    navigate(`/admin/incidents${search.toString() ? `?${search.toString()}` : ""}`);
   };
-
-  const itemVariants = {
-    hidden: { y: 30, opacity: 0, scale: 0.95 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      scale: 1,
-      transition: { type: "spring", stiffness: 100, damping: 15 },
-    },
-  };
-
-  const rowVariants = {
-    hidden: { opacity: 0, x: -20 },
-    visible: (i) => ({
-      opacity: 1,
-      x: 0,
-      transition: {
-        delay: i * 0.08,
-        type: "spring",
-        stiffness: 120,
-        damping: 14,
-      },
-    }),
-  };
-
-  if (loading) return <ShimmerSkeleton />;
-
-  const resolutionRate =
-    stats.total > 0 ? Math.round((stats.resolved / stats.total) * 100) : 0;
-  const pendingRate =
-    stats.total > 0 ? Math.round((stats.pending / stats.total) * 100) : 0;
 
   return (
-    <motion.div
-      className="space-y-8 pb-10"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      {/* --- HEADER --- */}
-      <motion.div
-        className="flex flex-col md:flex-row md:items-end justify-between gap-4"
-        variants={itemVariants}
-      >
-        <div>
-          <h1 className="text-4xl font-bold text-white mb-2 tracking-tight flex items-center gap-3">
-            Admin Dashboard
-            <Sparkles size={28} className="text-emerald-400" />
-          </h1>
-          <p className="text-gray-400 flex items-center gap-2">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span
-                className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"
-                style={{ boxShadow: "0 0 8px rgba(16,185,129,0.6)" }}
-              ></span>
-            </span>
-            System Operational • {new Date().toLocaleDateString()}
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <motion.button
-            whileHover={{ scale: 1.05, y: -2 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => navigate("/admin/broadcasts")}
-            className="px-5 py-2.5 text-white rounded-xl font-medium transition-all flex items-center gap-2"
-            style={{
-              background:
-                "linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))",
-              backdropFilter: "blur(10px)",
-              border: "1px solid rgba(255,255,255,0.08)",
-            }}
-          >
-            <AlertTriangle size={18} /> Broadcast Alert
-          </motion.button>
-          <motion.button
-            whileHover={{
-              scale: 1.05,
-              y: -2,
-              boxShadow: "0 20px 50px -15px rgba(16,185,129,0.5)",
-            }}
-            whileTap={{ scale: 0.97 }}
-            className="px-5 py-2.5 text-white rounded-xl font-bold transition-all flex items-center gap-2"
-            style={{
-              background: "linear-gradient(135deg, #10b981, #06b6d4)",
-              boxShadow: "0 8px 30px -5px rgba(16,185,129,0.4)",
-            }}
-          >
-            <ArrowUpRight size={18} /> Generate Report
-          </motion.button>
-        </div>
-      </motion.div>
+    <div className="pb-16">
+      <AdminPageHeader
+        title="Admin Dashboard"
+        description="Use the control center to jump straight into the queues, authority teams, and broadcasts that need attention right now."
+        actions={
+          <>
+            <AdminActionButton variant="secondary" onClick={() => navigate("/admin/broadcasts")}>
+              Open Broadcast Center
+            </AdminActionButton>
+            <AdminActionButton onClick={() => openWorkspace({ bucket: "needs_attention" })}>
+              Open Incident Workspace
+            </AdminActionButton>
+          </>
+        }
+      />
 
-      {/* --- STATS GRID --- */}
-      <motion.div
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
-        variants={itemVariants}
-      >
-        <StatsCard
-          title="Total Reports"
-          value={stats.total}
-          trend="+12%"
-          icon={Activity}
-          color="blue"
+      {loading ? (
+        <div className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <AdminSurface key={index} className="h-36 animate-pulse" />
+            ))}
+          </div>
+          <div className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
+            <AdminSurface className="h-96 animate-pulse" />
+            <AdminSurface className="h-96 animate-pulse" />
+          </div>
+        </div>
+      ) : error ? (
+        <AdminEmptyState
+          icon={ShieldAlert}
+          title="Dashboard unavailable"
+          description={error}
+          action={<AdminActionButton onClick={() => window.location.reload()}>Reload</AdminActionButton>}
         />
-        <StatsCard
-          title="Pending Review"
-          value={stats.pending}
-          trend="+4"
-          icon={Clock}
-          color="amber"
-          isAlert
-        />
-        <StatsCard
-          title="Resolved"
-          value={stats.resolved}
-          trend="+8%"
-          icon={CheckCircle}
-          color="emerald"
-        />
-        <StatsCard
-          title="Active Users"
-          value={stats.users}
-          trend="+24"
-          icon={Users}
-          color="purple"
-        />
-        <StatsCard
-          title="Rejected"
-          value={stats.rejected}
-          trend="-2%"
-          icon={AlertTriangle}
-          color="rose"
-        />
-      </motion.div>
-
-      {/* --- MAIN CONTENT --- */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* LEFT: INCIDENT TABLE */}
-        <GlassCard
-          className="lg:col-span-2 rounded-[2.5rem]"
-          variants={itemVariants}
-        >
-          <div className="p-8 border-b border-white/5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h3 className="text-xl font-black text-white flex items-center gap-3">
-              <span className="relative flex h-3 w-3">
-                <span className="animate-ping absolute h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span
-                  className="relative rounded-full h-3 w-3 bg-emerald-500"
-                  style={{ boxShadow: "0 0 12px rgba(16,185,129,1)" }}
-                ></span>
-              </span>
-              Live Incident Feed
-            </h3>
-            <div className="relative group">
-              <Search
-                className="absolute left-3 top-2.5 text-gray-500 group-focus-within:text-emerald-500 transition-colors"
-                size={16}
-              />
-              <input
-                type="text"
-                placeholder="Search ID or Type..."
-                className="border text-white text-sm rounded-xl pl-9 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 w-48 hover:w-56 focus:w-64 transition-all duration-300"
-                style={{
-                  background: "rgba(0,0,0,0.3)",
-                  borderColor: "rgba(255,255,255,0.08)",
-                  backdropFilter: "blur(10px)",
-                }}
-              />
-            </div>
+      ) : (
+        <>
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5 mb-6">
+            <AdminStatCard
+              title="Total Incidents"
+              value={overview.totalIncidents || 0}
+              description="All reported cases in the system."
+              icon={Activity}
+              tone="sky"
+              onClick={() => openWorkspace()}
+            />
+            <AdminStatCard
+              title="Needs Attention"
+              value={overview.needsAttention || 0}
+              description="Open or reopened cases requiring intervention."
+              icon={AlertTriangle}
+              tone="amber"
+              onClick={() => openWorkspace({ bucket: "needs_attention" })}
+            />
+            <AdminStatCard
+              title="With Authority"
+              value={overview.withAuthority || 0}
+              description="Accepted or in-progress authority work."
+              icon={ShieldAlert}
+              tone="emerald"
+              onClick={() => openWorkspace({ bucket: "with_authority" })}
+            />
+            <AdminStatCard
+              title="Awaiting Citizen"
+              value={overview.awaitingCitizen || 0}
+              description="Resolved cases waiting for citizen confirmation."
+              icon={CheckCircle2}
+              tone="sky"
+              onClick={() => openWorkspace({ bucket: "awaiting_citizen" })}
+            />
+            <AdminStatCard
+              title="Residents"
+              value={overview.totalResidents || 0}
+              description={`${resolutionRate}% resolution coverage across the incident portfolio.`}
+              icon={Users}
+              tone="slate"
+              onClick={() => navigate("/admin/users")}
+            />
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr style={{ background: "rgba(255,255,255,0.02)" }}>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
-                    Issue Details
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
-                    Location
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
-                    Urgency
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">
-                    Action
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/[0.03]">
-                <AnimatePresence>
-                  {reports.length > 0 ? (
-                    reports.map((report, index) => (
-                      <motion.tr
-                        key={report.id}
-                        custom={index}
-                        variants={rowVariants}
-                        initial="hidden"
-                        animate="visible"
-                        className="group cursor-pointer transition-all duration-300"
-                        style={{ background: "transparent" }}
-                        onClick={() => navigate(`/admin/incident/${report.id}`)}
-                        whileHover={{
-                          backgroundColor: "rgba(16,185,129,0.03)",
-                        }}
-                      >
-                        <td className="px-6 py-4">
-                          <div className="flex flex-col">
-                            <span className="text-white font-bold text-sm group-hover:text-emerald-300 transition-colors">
-                              {report.type}
-                            </span>
-                            <span className="text-xs text-gray-500 font-mono">
-                              {report.reporter} • {report.date} • {report.id}
-                            </span>
+          <div className="grid gap-4 xl:grid-cols-[1.45fr_1fr]">
+            <AdminSurface className="overflow-hidden">
+              <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-5 md:px-6">
+                <div>
+                  <p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300/75">
+                    Needs Attention
+                  </p>
+                  <h2 className="mt-2 text-2xl font-black text-white">Priority Queue</h2>
+                </div>
+                <AdminActionButton variant="subtle" onClick={() => openWorkspace({ bucket: "needs_attention" })}>
+                  View All
+                </AdminActionButton>
+              </div>
+
+              {queue.length === 0 ? (
+                <div className="p-6">
+                  <AdminEmptyState
+                    icon={CheckCircle2}
+                    title="No urgent admin queue"
+                    description="Open and reopened incidents will appear here once they need admin attention."
+                  />
+                </div>
+              ) : (
+                <div className="divide-y divide-white/6">
+                  {queue.map((incident) => (
+                    <button
+                      key={incident.id}
+                      type="button"
+                      onClick={() => navigate(`/admin/incident/${incident.displayId}`)}
+                      className="w-full px-5 py-5 text-left transition-colors hover:bg-white/[0.03] md:px-6"
+                    >
+                      <div className="flex flex-wrap items-center gap-2 mb-3">
+                        <span className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-300">
+                          {incident.displayId}
+                        </span>
+                        <AdminStatusBadge status={incident.status} />
+                        <AdminUrgencyBadge urgency={incident.urgencyLevel} />
+                      </div>
+
+                      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                        <div className="min-w-0">
+                          <p className="text-lg font-black text-white">{incident.title}</p>
+                          <p className="mt-2 text-sm text-slate-300/75">
+                            {incident.address || "Location unavailable"}
+                          </p>
+                          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                            <span>{incident.reporterName}</span>
+                            <span>·</span>
+                            <span>{getCommunitySupportLabel(incident.supportCount)}</span>
+                            <span>·</span>
+                            <span>{formatAdminDateTime(incident.createdAt)}</span>
                           </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-2 text-gray-300 text-sm">
-                            <MapPin
-                              size={14}
-                              className="text-gray-500 group-hover:text-emerald-500 transition-colors"
-                            />
-                            <span className="max-w-[180px] truncate">
-                              {report.loc}
-                            </span>
+                        </div>
+
+                        <div className="shrink-0 text-left lg:text-right">
+                          <div className="mb-2 flex justify-start lg:justify-end">
+                            <AdminAuthorityBadge authority={incident.assignedAuthority} />
                           </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          {(() => {
-                            const score = report.upvotes + report.urgencyScore;
-                            const level = score >= 10 ? "critical" : score >= 5 ? "high" : score >= 2 ? "medium" : "low";
-                            const styles = {
-                              critical: { bg: "rgba(239,68,68,0.1)", color: "#ef4444", border: "rgba(239,68,68,0.2)", label: "CRITICAL" },
-                              high: { bg: "rgba(245,158,11,0.1)", color: "#f59e0b", border: "rgba(245,158,11,0.2)", label: "HIGH" },
-                              medium: { bg: "rgba(59,130,246,0.08)", color: "#3b82f6", border: "rgba(59,130,246,0.15)", label: "MEDIUM" },
-                              low: { bg: "rgba(107,114,128,0.08)", color: "#6b7280", border: "rgba(107,114,128,0.15)", label: "LOW" },
-                            };
-                            const s = styles[level];
-                            return (
-                              <div className="flex flex-col items-start gap-1">
-                                <span className="px-2.5 py-1 rounded-lg text-[10px] font-black tracking-wider flex items-center gap-1.5"
-                                  style={{ background: s.bg, color: s.color, border: `1px solid ${s.border}` }}>
-                                  {(level === "critical" || level === "high") && (
-                                    <span className="relative flex h-1.5 w-1.5">
-                                      <span className="animate-ping absolute h-full w-full rounded-full opacity-75" style={{ background: s.color }}></span>
-                                      <span className="relative rounded-full h-1.5 w-1.5" style={{ background: s.color }}></span>
-                                    </span>
-                                  )}
-                                  {s.label}
-                                </span>
-                                {report.upvotes > 0 && (
-                                  <span className="text-[10px] text-gray-500 font-mono">
-                                    {report.upvotes} upvote{report.upvotes !== 1 ? "s" : ""}
-                                  </span>
-                                )}
-                              </div>
-                            );
-                          })()}
-                        </td>
-                        <td className="px-6 py-4">
-                          <StatusBadge status={report.status} />
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/admin/incident/${report.id}`);
-                            }}
-                            className="p-2 rounded-lg text-gray-400 hover:text-white transition-all relative z-10"
-                            style={{ background: "rgba(255,255,255,0.03)" }}
-                          >
-                            <ArrowUpRight size={16} />
-                          </button>
-                        </td>
-                      </motion.tr>
-                    ))
+                          <p className="text-sm font-bold text-white">
+                            {formatAdminRelativeTime(incident.lastUpdatedAt)}
+                          </p>
+                          <p className="mt-1 max-w-xs text-xs text-slate-400 line-clamp-2">
+                            {incident.latestUpdate?.note || "No update note available."}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </AdminSurface>
+
+            <div className="space-y-4">
+              <AdminSurface className="p-5 md:p-6">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300/75">
+                      Authority Workload
+                    </p>
+                    <h2 className="mt-2 text-2xl font-black text-white">Department Overview</h2>
+                  </div>
+                  <AdminActionButton variant="subtle" onClick={() => navigate("/admin/authorities")}>
+                    Open Board
+                  </AdminActionButton>
+                </div>
+
+                <div className="mt-5 space-y-3">
+                  {workload.map((authority) => (
+                    <button
+                      key={authority.authority}
+                      type="button"
+                      onClick={() => openWorkspace({ authority: authority.authority })}
+                      className="w-full rounded-[1.4rem] border border-white/10 bg-white/[0.03] p-4 text-left transition-colors hover:bg-white/[0.05]"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <AdminAuthorityBadge authority={authority.authority} />
+                        <span className="text-sm font-bold text-white">
+                          {authority.activeCount} active
+                        </span>
+                      </div>
+                      <div className="mt-4 grid grid-cols-3 gap-3 text-sm">
+                        <div>
+                          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">
+                            Reopened
+                          </p>
+                          <p className="mt-2 font-bold text-white">{authority.reopenedCount}</p>
+                        </div>
+                        <div>
+                          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">
+                            Awaiting Citizen
+                          </p>
+                          <p className="mt-2 font-bold text-white">{authority.awaitingCitizenCount}</p>
+                        </div>
+                        <div>
+                          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">
+                            Oldest Pending
+                          </p>
+                          <p className="mt-2 font-bold text-white">
+                            {authority.oldestPendingCase
+                              ? authority.oldestPendingCase.reportId
+                              : "None"}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </AdminSurface>
+
+              <AdminSurface className="p-5 md:p-6">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300/75">
+                      Broadcast Status
+                    </p>
+                    <h2 className="mt-2 text-2xl font-black text-white">Official Alerts</h2>
+                  </div>
+                  <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm font-bold text-red-200">
+                    {broadcasts.activeCount || 0} active
+                  </div>
+                </div>
+
+                <div className="mt-5 rounded-[1.4rem] border border-white/10 bg-white/[0.03] p-4">
+                  <div className="flex items-center gap-2 text-sm font-bold text-white">
+                    <Radio size={16} className="text-emerald-300" />
+                    Latest dispatch
+                  </div>
+                  {broadcasts.latestOfficial ? (
+                    <>
+                      <p className="mt-3 text-lg font-black text-white">
+                        {broadcasts.latestOfficial.title}
+                      </p>
+                      <p className="mt-2 text-sm text-slate-300/80">
+                        {broadcasts.latestOfficial.targetSummary}
+                      </p>
+                      <p className="mt-2 text-xs text-slate-500">
+                        {formatAdminDateTime(broadcasts.latestOfficial.createdAt)}
+                      </p>
+                    </>
                   ) : (
-                    <tr>
-                      <td
-                        colSpan="5"
-                        className="px-6 py-12 text-center text-gray-500 italic"
-                      >
-                        No incidents found.
-                      </td>
-                    </tr>
+                    <p className="mt-3 text-sm text-slate-400">
+                      No official broadcasts have been dispatched yet.
+                    </p>
                   )}
-                </AnimatePresence>
-              </tbody>
-            </table>
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-3">
+                  <AdminActionButton variant="secondary" onClick={() => navigate("/admin/broadcasts")}>
+                    Manage Broadcasts
+                  </AdminActionButton>
+                  <AdminActionButton variant="subtle" onClick={() => openWorkspace({ community: "supported", sort: "most_supported" })}>
+                    Most Supported Cases
+                  </AdminActionButton>
+                </div>
+              </AdminSurface>
+            </div>
           </div>
-          <div className="p-4 border-t border-white/[0.03] text-center">
-            <button className="text-sm text-gray-400 hover:text-emerald-400 font-medium transition-all duration-300 hover:tracking-wider">
-              View All Activity →
-            </button>
-          </div>
-        </GlassCard>
-
-        {/* RIGHT SIDEBAR */}
-        <motion.div className="space-y-6" variants={itemVariants}>
-          {/* Active Alerts */}
-          <motion.div
-            whileHover={{ y: -4, transition: { duration: 0.3 } }}
-            className="rounded-3xl p-6 relative overflow-hidden group transition-all duration-500"
-            style={{
-              background:
-                "linear-gradient(135deg, rgba(153,27,27,0.2), rgba(10,15,25,0.6))",
-              backdropFilter: "blur(20px) saturate(1.5)",
-              border: "1px solid rgba(239,68,68,0.15)",
-              boxShadow:
-                "0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.03)",
-            }}
-          >
-            <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-red-500/20 to-transparent"></div>
-            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-25 transition-opacity duration-700">
-              <AlertTriangle size={100} className="text-red-500" />
-            </div>
-            <h3 className="text-lg font-bold text-white mb-1">Active Alerts</h3>
-            <p className="text-red-400 text-sm mb-6">System Broadcasts</p>
-
-            <div
-              className="rounded-xl p-3 border-l-4 border-red-500 flex justify-between items-center cursor-pointer transition-all hover:bg-white/[0.02]"
-              style={{
-                background: "rgba(0,0,0,0.3)",
-                backdropFilter: "blur(10px)",
-              }}
-            >
-              <div>
-                <h4 className="text-white font-bold text-sm">
-                  Emergency Protocols
-                </h4>
-                <p className="text-xs text-gray-400">
-                  Manage all system wide alerts
-                </p>
-              </div>
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                <span className="relative rounded-full h-2.5 w-2.5 bg-red-500"></span>
-              </span>
-            </div>
-
-            <motion.button
-              whileHover={{ scale: 1.02, y: -1 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate("/admin/broadcasts")}
-              className="w-full mt-6 text-red-400 py-3 rounded-xl font-bold text-sm transition-all duration-300 hover:text-white"
-              style={{
-                background:
-                  "linear-gradient(135deg, rgba(239,68,68,0.1), rgba(239,68,68,0.05))",
-                border: "1px solid rgba(239,68,68,0.2)",
-              }}
-            >
-              Manage Broadcasts
-            </motion.button>
-          </motion.div>
-
-          {/* Efficiency */}
-          <GlassCard
-            className="rounded-3xl p-6"
-            whileHover={{ y: -4, transition: { duration: 0.3 } }}
-          >
-            <h3 className="text-lg font-bold text-white mb-5 flex items-center gap-2">
-              <TrendingUp size={18} className="text-cyan-400" />
-              Efficiency
-            </h3>
-            <div className="space-y-5">
-              <div className="space-y-2.5">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Resolution Rate</span>
-                  <span className="text-white font-bold tabular-nums">
-                    {resolutionRate}%
-                  </span>
-                </div>
-                <div
-                  className="h-2.5 rounded-full overflow-hidden"
-                  style={{ background: "rgba(255,255,255,0.04)" }}
-                >
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${resolutionRate}%` }}
-                    transition={{ duration: 1.8, ease: "easeOut", delay: 0.5 }}
-                    className="h-full rounded-full"
-                    style={{
-                      background: "linear-gradient(90deg, #10b981, #06b6d4)",
-                      boxShadow: "0 0 15px rgba(16,185,129,0.4)",
-                    }}
-                  />
-                </div>
-              </div>
-              <div className="space-y-2.5">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Pending Rate</span>
-                  <span className="text-white font-bold tabular-nums">
-                    {pendingRate}%
-                  </span>
-                </div>
-                <div
-                  className="h-2.5 rounded-full overflow-hidden"
-                  style={{ background: "rgba(255,255,255,0.04)" }}
-                >
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${pendingRate}%` }}
-                    transition={{ duration: 1.8, ease: "easeOut", delay: 0.7 }}
-                    className="h-full rounded-full"
-                    style={{
-                      background: "linear-gradient(90deg, #f59e0b, #f97316)",
-                      boxShadow: "0 0 15px rgba(245,158,11,0.4)",
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          </GlassCard>
-        </motion.div>
-      </div>
-    </motion.div>
-  );
-};
-
-// --- STATS CARD ---
-const StatsCard = ({ title, value, trend, icon: Icon, color, isAlert }) => {
-  const { count, ref } = useAnimatedCounter(value);
-
-  const gradients = {
-    blue: {
-      bg: "linear-gradient(135deg, #3b82f6, #06b6d4)",
-      glow: "rgba(59,130,246,0.4)",
-      accent: "rgba(59,130,246,0.08)",
-    },
-    amber: {
-      bg: "linear-gradient(135deg, #f59e0b, #f97316)",
-      glow: "rgba(245,158,11,0.4)",
-      accent: "rgba(245,158,11,0.08)",
-    },
-    emerald: {
-      bg: "linear-gradient(135deg, #10b981, #06b6d4)",
-      glow: "rgba(16,185,129,0.4)",
-      accent: "rgba(16,185,129,0.08)",
-    },
-    purple: {
-      bg: "linear-gradient(135deg, #8b5cf6, #6366f1)",
-      glow: "rgba(139,92,246,0.4)",
-      accent: "rgba(139,92,246,0.08)",
-    },
-    rose: {
-      bg: "linear-gradient(135deg, #f43f5e, #e11d48)",
-      glow: "rgba(244,63,94,0.4)",
-      accent: "rgba(244,63,94,0.08)",
-    },
-  };
-  const g = gradients[color] || gradients.blue;
-
-  return (
-    <motion.div
-      ref={ref}
-      whileHover={{ y: -8, transition: { type: "spring", stiffness: 300 } }}
-      className="relative overflow-hidden rounded-[2rem] p-6 cursor-default group"
-      style={{
-        background: `linear-gradient(135deg, rgba(255,255,255,0.03), ${g.accent})`,
-        backdropFilter: "blur(20px) saturate(1.5)",
-        border: "1px solid rgba(255,255,255,0.06)",
-        boxShadow:
-          "0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04)",
-      }}
-    >
-      <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
-      <div
-        className="absolute -right-6 -top-6 w-36 h-36 rounded-full opacity-0 blur-3xl group-hover:opacity-30 transition-opacity duration-700"
-        style={{ background: g.bg }}
-      ></div>
-      <div
-        className="absolute -left-6 -bottom-6 w-24 h-24 rounded-full opacity-0 blur-2xl group-hover:opacity-15 transition-opacity duration-700"
-        style={{ background: g.bg }}
-      ></div>
-
-      <div className="flex justify-between items-start mb-5 relative z-10">
-        <div
-          className="p-3.5 rounded-2xl shadow-2xl group-hover:scale-110 transition-transform duration-500"
-          style={{
-            background: g.bg,
-            boxShadow: `0 8px 25px -5px ${g.glow}`,
-          }}
-        >
-          <Icon
-            size={22}
-            className="text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"
-          />
-        </div>
-        {trend && (
-          <span
-            className={`text-xs font-black px-2.5 py-1 rounded-full backdrop-blur-sm ${isAlert ? "text-red-400" : "text-emerald-400"}`}
-            style={{
-              background: "rgba(0,0,0,0.3)",
-              border: "1px solid rgba(255,255,255,0.05)",
-            }}
-          >
-            {trend}
-          </span>
-        )}
-      </div>
-
-      <div className="relative z-10">
-        <h3 className="text-3xl font-black text-white mb-1 tabular-nums tracking-tight">
-          {count}
-        </h3>
-        <p className="text-gray-400 text-sm font-medium">{title}</p>
-      </div>
-    </motion.div>
-  );
-};
-
-// --- STATUS BADGE ---
-const StatusBadge = ({ status }) => {
-  const styles = {
-    Pending: {
-      bg: "rgba(245,158,11,0.08)",
-      color: "#f59e0b",
-      border: "rgba(245,158,11,0.15)",
-    },
-    Accepted: {
-      bg: "rgba(59,130,246,0.08)",
-      color: "#3b82f6",
-      border: "rgba(59,130,246,0.15)",
-    },
-    Rejected: {
-      bg: "rgba(239,68,68,0.08)",
-      color: "#ef4444",
-      border: "rgba(239,68,68,0.15)",
-    },
-    "In progress": {
-      bg: "rgba(59,130,246,0.08)",
-      color: "#3b82f6",
-      border: "rgba(59,130,246,0.15)",
-    },
-    "In Progress": {
-      bg: "rgba(59,130,246,0.08)",
-      color: "#3b82f6",
-      border: "rgba(59,130,246,0.15)",
-    },
-    Resolved: {
-      bg: "rgba(16,185,129,0.08)",
-      color: "#10b981",
-      border: "rgba(16,185,129,0.15)",
-    },
-    Verified: {
-      bg: "rgba(59,130,246,0.08)",
-      color: "#3b82f6",
-      border: "rgba(59,130,246,0.15)",
-    },
-    Closed: {
-      bg: "rgba(107,114,128,0.08)",
-      color: "#6b7280",
-      border: "rgba(107,114,128,0.15)",
-    },
-    Reopened: {
-      bg: "rgba(239,68,68,0.08)",
-      color: "#ef4444",
-      border: "rgba(239,68,68,0.15)",
-    },
-    Revoked: {
-      bg: "rgba(107,114,128,0.08)",
-      color: "#9ca3af",
-      border: "rgba(107,114,128,0.15)",
-    },
-    Open: {
-      bg: "rgba(239,68,68,0.08)",
-      color: "#ef4444",
-      border: "rgba(239,68,68,0.15)",
-    },
-  };
-  const s = styles[status] || {
-    bg: "rgba(107,114,128,0.08)",
-    color: "#6b7280",
-    border: "rgba(107,114,128,0.15)",
-  };
-
-  return (
-    <span
-      className="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 w-fit"
-      style={{
-        background: s.bg,
-        color: s.color,
-        border: `1px solid ${s.border}`,
-      }}
-    >
-      <span
-        className={`w-1.5 h-1.5 rounded-full ${status === "Open" ? "animate-pulse" : ""}`}
-        style={{ background: s.color }}
-      ></span>
-      {status}
-    </span>
+        </>
+      )}
+    </div>
   );
 };
 

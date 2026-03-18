@@ -77,6 +77,7 @@ export const createBroadcast = asyncHandler(async (req, res) => {
         sourceType: normalized.sourceType,
         actionTarget: normalized.actionTarget,
         expiresAt: normalized.expiresAt,
+        targetArea: normalized.targetArea,
         createdBy: req.user._id,
     });
 

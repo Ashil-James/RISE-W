@@ -26,6 +26,7 @@ import Profile from "./pages/Profile";
 // --- ADMIN PAGES [NEW] ---
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminIncidents from "./pages/admin/AdminIncidents";
 import Broadcasts from "./pages/admin/Broadcasts";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminAuthorities from "./pages/admin/AdminAuthorities";
@@ -93,6 +94,7 @@ function App() {
                   <Route index element={<Navigate to="dashboard" replace />} />
 
                   <Route path="dashboard" element={<AdminDashboard />} />
+                  <Route path="incidents" element={<AdminIncidents />} />
                   <Route path="broadcasts" element={<Broadcasts />} />
                   <Route path="users" element={<AdminUsers />} />
                   <Route path="authorities" element={<AdminAuthorities />} />

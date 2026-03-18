@@ -38,6 +38,19 @@ const broadcastSchema = new mongoose.Schema(
         expiresAt: {
             type: Date,
         },
+        targetArea: {
+            center: {
+                lat: {
+                    type: Number,
+                },
+                lng: {
+                    type: Number,
+                },
+            },
+            radiusKm: {
+                type: Number,
+            },
+        },
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",

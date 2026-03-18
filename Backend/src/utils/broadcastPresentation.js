@@ -62,6 +62,25 @@ const toDate = (value) => {
     return Number.isNaN(date.getTime()) ? null : date;
 };
 
+const normalizeTargetArea = (targetArea) => {
+    if (!targetArea || typeof targetArea !== "object") {
+        return null;
+    }
+
+    const lat = Number(targetArea.center?.lat);
+    const lng = Number(targetArea.center?.lng);
+    const radiusKm = Number(targetArea.radiusKm);
+
+    if (!Number.isFinite(lat) || !Number.isFinite(lng) || !Number.isFinite(radiusKm) || radiusKm <= 0) {
+        return null;
+    }
+
+    return {
+        center: { lat, lng },
+        radiusKm,
+    };
+};
+
 export const isOfficialBroadcaster = (user) => ["admin", "authority"].includes(user?.role);
 
 export const getBroadcastCategoryLabel = (type) => TYPE_LABELS[type] || "General Alert";
@@ -135,6 +154,11 @@ export const serializeBroadcast = (broadcastInput) => {
         actionTarget: broadcast.actionTarget,
     });
     const expiresAt = getBroadcastExpiry(broadcast);
+    const targetArea = normalizeTargetArea(broadcast.targetArea);
+    const targetScope = targetArea ? "TARGETED" : "GLOBAL";
+    const targetSummary = targetArea
+        ? `Within ${targetArea.radiusKm} km of ${targetArea.center.lat.toFixed(3)}, ${targetArea.center.lng.toFixed(3)}`
+        : "Global broadcast";
 
     return {
         ...broadcast,
@@ -143,6 +167,9 @@ export const serializeBroadcast = (broadcastInput) => {
         categoryLabel,
         actionTarget,
         expiresAt,
+        targetArea,
+        targetScope,
+        targetSummary,
         isActive: expiresAt.getTime() > Date.now(),
     };
 };
@@ -182,6 +209,7 @@ export const normalizeBroadcastInput = ({ user, body }) => {
         })
         : null;
     const explicitExpiry = officialSource ? toDate(body.expiresAt) : null;
+    const targetArea = officialSource ? normalizeTargetArea(body.targetArea) : null;
 
     return {
         title,
@@ -193,6 +221,6 @@ export const normalizeBroadcastInput = ({ user, body }) => {
         isAuthority: officialSource,
         actionTarget,
         expiresAt: explicitExpiry,
-        targetArea: officialSource ? body.targetArea || null : null,
+        targetArea,
     };
 };
