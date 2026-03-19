@@ -14,7 +14,6 @@ import {
     HelpCircle,
     Zap,
     Construction,
-    BarChart3,
     Megaphone
 } from "lucide-react";
 
@@ -231,17 +230,12 @@ const AuthorityLayout = () => {
                                         <NavItem
                                             to={`/authority/${theme.short.toLowerCase()}/dashboard`}
                                             icon={LayoutDashboard}
-                                            label="Executive Dashboard"
+                                            label="Dashboard"
                                         />
                                         <NavItem
                                             to={`/authority/${theme.short.toLowerCase()}/matrix`}
                                             icon={TableProperties}
                                             label="Complaint Matrix"
-                                        />
-                                        <NavItem
-                                            to={`/authority/${theme.short.toLowerCase()}/reports`}
-                                            icon={BarChart3}
-                                            label="Reports & Analytics"
                                         />
                                         <NavItem
                                             to={`/authority/${theme.short.toLowerCase()}/broadcasts`}

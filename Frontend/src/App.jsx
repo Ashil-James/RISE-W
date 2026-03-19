@@ -46,7 +46,6 @@ import AuthorityRoadCase from "./pages/authority/AuthorityRoadCase";
 import AuthorityProfile from "./pages/authority/AuthorityProfile";
 import AuthoritySettings from "./pages/authority/AuthoritySettings";
 import AuthorityHelp from "./pages/authority/AuthorityHelp";
-import AuthorityReports from "./pages/authority/AuthorityReports";
 import AuthorityBroadcastAlerts from "./pages/authority/AuthorityBroadcastAlerts";
 
 
@@ -121,7 +120,6 @@ function App() {
                   <Route path="water/profile" element={<AuthorityProfile />} />
                   <Route path="water/settings" element={<AuthoritySettings />} />
                   <Route path="water/help" element={<AuthorityHelp />} />
-                  <Route path="water/reports" element={<AuthorityReports />} />
                   <Route path="water/broadcasts" element={<AuthorityBroadcastAlerts />} />
 
 
@@ -132,7 +130,6 @@ function App() {
                   <Route path="power/profile" element={<AuthorityProfile />} />
                   <Route path="power/settings" element={<AuthoritySettings />} />
                   <Route path="power/help" element={<AuthorityHelp />} />
-                  <Route path="power/reports" element={<AuthorityReports />} />
                   <Route path="power/broadcasts" element={<AuthorityBroadcastAlerts />} />
 
 
@@ -143,7 +140,6 @@ function App() {
                   <Route path="road/profile" element={<AuthorityProfile />} />
                   <Route path="road/settings" element={<AuthoritySettings />} />
                   <Route path="road/help" element={<AuthorityHelp />} />
-                  <Route path="road/reports" element={<AuthorityReports />} />
                   <Route path="road/broadcasts" element={<AuthorityBroadcastAlerts />} />
 
                 </Route>
