@@ -1,5 +1,5 @@
 import React, { useDeferredValue, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -37,103 +37,79 @@ const SEVERITY_FILTERS = [
   { id: "info", label: "Info" },
 ];
 
-const getAccent = (tone) => {
+const getStatusColor = (tone) => {
   switch (tone) {
-    case "critical":
-      return {
-        border: "rgba(239,68,68,0.26)",
-        bg: "rgba(239,68,68,0.08)",
-        soft: "bg-red-500/10",
-        text: "text-red-400",
-      };
-    case "warning":
-      return {
-        border: "rgba(245,158,11,0.24)",
-        bg: "rgba(245,158,11,0.08)",
-        soft: "bg-amber-500/10",
-        text: "text-amber-400",
-      };
-    default:
-      return {
-        border: "rgba(59,130,246,0.24)",
-        bg: "rgba(59,130,246,0.08)",
-        soft: "bg-sky-500/10",
-        text: "text-sky-400",
-      };
+    case "critical": return "bg-red-500 text-red-500";
+    case "warning": return "bg-orange-500 text-orange-500";
+    default: return "bg-blue-500 text-blue-500";
   }
 };
 
 const AlertCard = ({ alert, onOpen }) => {
   const Icon = ICONS[alert.icon] || Info;
-  const accent = getAccent(alert.type);
+  const statusColorCombo = getStatusColor(alert.type);
+  const statusBg = statusColorCombo.split(' ')[0];
+  const statusText = statusColorCombo.split(' ')[1];
   const interactive = typeof onOpen === "function" && Boolean(alert.actionTarget);
 
   return (
     <motion.button
-      whileHover={{ y: -2 }}
+      whileHover={{ scale: interactive ? 1.002 : 1, y: interactive ? -2 : 0 }}
       onClick={interactive ? () => onOpen(alert) : undefined}
-      className={`w-full text-left rounded-[1.7rem] border p-5 relative overflow-hidden transition-colors ${
-        interactive ? "cursor-pointer hover:border-emerald-500/30" : ""
+      className={`w-full text-left rounded-[1.5rem] p-6 lg:p-8 relative overflow-hidden transition-all duration-300 group border border-black/10 dark:border-white/10 bg-white dark:bg-[#0a0a0a] hover:border-black/20 dark:hover:border-white/20 hover:shadow-sm ${
+        interactive ? "cursor-pointer" : ""
       }`}
-      style={{
-        background: "rgba(255,255,255,0.03)",
-        borderColor: accent.border,
-      }}
     >
-      <div className="flex items-start gap-4">
-        <div
-          className={`mt-1 p-3 rounded-2xl ${accent.text}`}
-          style={{ background: accent.bg }}
-        >
-          <Icon size={20} />
+      <div className="flex flex-col md:flex-row gap-6 md:items-start w-full">
+        
+        <div className={`p-4 rounded-xl flex-shrink-0 bg-neutral-100 dark:bg-[#111] border border-black/5 dark:border-white/5`}>
+          <Icon size={24} className="text-black dark:text-white" />
         </div>
 
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            <span className={`text-[10px] font-black uppercase tracking-[0.18em] px-2.5 py-1 rounded-full ${accent.soft} ${accent.text}`}>
-              {alert.severityLabel}
-            </span>
-            <span
-              className={`text-[10px] font-black uppercase tracking-[0.18em] px-2.5 py-1 rounded-full ${
-                alert.isOfficial
-                  ? "bg-emerald-500/10 text-emerald-400"
-                  : "bg-cyan-500/10 text-cyan-400"
-              }`}
-            >
+        <div className="flex-1 min-w-0 w-full space-y-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${statusBg}`}></div>
+              <span className={`text-[10px] md:text-xs font-bold uppercase tracking-[0.1em] text-neutral-900 dark:text-neutral-100`}>
+                {alert.severityLabel}
+              </span>
+            </div>
+            <span className="text-neutral-300 dark:text-neutral-700">/</span>
+            <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.1em] text-neutral-500 dark:text-neutral-400 border border-black/10 dark:border-white/10 px-2 py-0.5 rounded-md">
               {alert.sourceLabel}
             </span>
-            <span className="text-[10px] font-black uppercase tracking-[0.18em] px-2.5 py-1 rounded-full bg-white/5 text-wayanad-muted">
+            <span className="text-[10px] md:text-xs font-bold uppercase tracking-[0.1em] text-neutral-500 dark:text-neutral-400 bg-neutral-100 dark:bg-[#111] px-2 py-0.5 rounded-md">
               {alert.categoryLabel}
             </span>
           </div>
 
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
-            <div className="min-w-0">
-              <h3 className="text-lg font-black text-wayanad-text tracking-tight">
+          <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-4">
+            <div className="min-w-0 pr-4">
+              <h3 className="text-xl md:text-2xl font-semibold text-black dark:text-white tracking-tight mb-2 line-clamp-2">
                 {alert.title}
               </h3>
-              <p className="text-sm text-wayanad-text/80 mt-2 leading-relaxed">
+              <p className="text-sm md:text-base text-neutral-600 dark:text-neutral-400 leading-relaxed font-medium line-clamp-3 max-w-2xl">
                 {alert.message}
               </p>
             </div>
 
-            <div className="text-left lg:text-right shrink-0">
-              <p className="text-sm font-bold text-wayanad-text">{alert.relativeTime}</p>
-              <p className="text-xs text-wayanad-muted mt-1">{alert.createdAtLabel}</p>
+            <div className="text-left xl:text-right flex-shrink-0 mt-2 xl:mt-0 xl:min-w-[120px]">
+              <p className="text-sm font-semibold text-black dark:text-white">{alert.relativeTime}</p>
+              <p className="text-[10px] md:text-xs text-neutral-500 dark:text-neutral-500 mt-1 font-bold tracking-[0.1em] uppercase">{alert.createdAtLabel}</p>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3 mt-4">
-            <p className="text-xs font-bold text-wayanad-muted flex items-center gap-1.5">
-              <MapPin size={12} />
-              {alert.location}
+          <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-black/5 dark:border-white/5">
+            <p className="text-xs md:text-sm font-medium text-neutral-600 dark:text-neutral-400 flex items-center gap-2">
+              <MapPin size={16} className="text-neutral-400" />
+              <span className="line-clamp-1">{alert.location}</span>
             </p>
 
             {alert.actionTarget && (
-              <span className="text-sm font-bold text-emerald-500 flex items-center gap-1">
+              <div className="text-xs md:text-sm font-semibold flex items-center gap-1.5 px-4 py-2 rounded-lg transition-colors text-black dark:text-white bg-neutral-100 dark:bg-[#111] group-hover:bg-neutral-200 dark:group-hover:bg-[#1a1a1a]">
                 {alert.actionLabel}
-                <ChevronRight size={15} />
-              </span>
+                <ChevronRight size={16} className="text-neutral-400 group-hover:text-black dark:group-hover:text-white transition-colors group-hover:translate-x-0.5 transform" />
+              </div>
             )}
           </div>
         </div>
@@ -182,237 +158,113 @@ const Alerts = () => {
   const activeAlerts = filteredAlerts.filter((alert) => alert.id !== featuredAlertId && alert.isActive);
   const olderAlerts = filteredAlerts.filter((alert) => alert.id !== featuredAlertId && !alert.isActive);
 
-  const statCards = [
-    { label: "Active", value: alerts.filter((alert) => alert.isActive).length, icon: ShieldAlert },
-    { label: "Official", value: alerts.filter((alert) => alert.isOfficial).length, icon: AlertTriangle },
-    { label: "Community", value: alerts.filter((alert) => alert.isCommunity).length, icon: Users },
-  ];
-
   const openAlertAction = (alert) => {
     if (!alert.actionTarget) return;
     navigate(alert.actionTarget);
   };
 
   const fadeUp = {
-    hidden: { y: 18, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { type: "spring", stiffness: 110, damping: 18 } },
+    hidden: { y: 15, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] } },
   };
 
   return (
     <motion.div
-      className="w-full max-w-6xl mx-auto relative pb-24 space-y-6"
+      className="w-full max-w-5xl mx-auto relative pb-24 space-y-8 lg:pt-12"
       initial="hidden"
       animate="visible"
       variants={{ visible: { transition: { staggerChildren: 0.05 } } }}
     >
-      <motion.div variants={fadeUp} className="flex flex-col md:flex-row md:items-start md:justify-between gap-5">
-        <div className="flex items-center gap-4">
-          <motion.button
-            onClick={() => navigate(-1)}
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.94 }}
-            className="p-2.5 -ml-2 rounded-xl glass-card text-wayanad-muted hover:text-wayanad-text transition-colors"
-          >
-            <ArrowLeft size={20} />
-          </motion.button>
-          <div>
-            <h1 className="text-3xl font-black text-wayanad-text tracking-tight">Alert Dashboard</h1>
-            <p className="text-sm text-wayanad-muted">
-              Official warnings and community updates, clearly separated in one place.
-            </p>
-          </div>
-        </div>
-
-        <button
-          onClick={refreshAlerts}
-          className="inline-flex items-center gap-2 rounded-2xl px-4 py-2 glass-card text-sm font-bold text-wayanad-muted hover:text-wayanad-text transition-colors"
-        >
-          <RefreshCw size={15} />
-          Refresh
-        </button>
-      </motion.div>
-
-      <motion.div variants={fadeUp} className="grid xl:grid-cols-[1.35fr_0.9fr] gap-5">
-        <div className="glass-card rounded-[2rem] p-6 md:p-7 relative overflow-hidden">
-          <div
-            className="absolute -right-12 -top-12 h-36 w-36 rounded-full blur-3xl"
-            style={{ background: "rgba(239,68,68,0.12)" }}
-          />
-          <div className="relative z-10">
-            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-red-400/80 mb-2">
-              Stay Informed
-            </p>
-            <h2 className="text-2xl md:text-3xl font-black text-wayanad-text tracking-tight">
-              Watch urgent alerts before they become problems
-            </h2>
-            <p className="text-sm text-wayanad-muted mt-3 max-w-2xl">
-              Official alerts come from township authorities. Community alerts come from residents and are always labeled separately.
-            </p>
-
-            <div className="grid grid-cols-3 gap-3 mt-6">
-              {statCards.map((card) => (
-                <div key={card.label} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                  <card.icon size={16} className="text-emerald-500 mb-3" />
-                  <p className="text-2xl font-black text-wayanad-text">{card.value}</p>
-                  <p className="text-[11px] uppercase tracking-[0.18em] text-wayanad-muted font-black mt-1">
-                    {card.label}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="glass-card rounded-[2rem] p-6 border border-cyan-500/15">
-          <p className="text-[11px] font-black uppercase tracking-[0.28em] text-cyan-400/80 mb-2">
-            Community Alerts
-          </p>
-          <h3 className="text-xl font-black text-wayanad-text tracking-tight">
-            Share local updates responsibly
-          </h3>
-          <p className="text-sm text-wayanad-muted mt-3 leading-relaxed">
-            Community alerts publish immediately and appear with a clear community label so residents can distinguish them from official warnings.
-          </p>
+      <motion.div variants={fadeUp} className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 pb-6 border-b border-black/10 dark:border-white/10">
+        <div>
           <button
-            onClick={() => navigate("/create-alert")}
-            className="mt-5 inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-bold text-white"
-            style={{ background: "linear-gradient(135deg, #0891b2, #06b6d4)" }}
+            onClick={() => navigate(-1)}
+            className="mb-6 px-4 py-2 rounded-lg text-sm font-medium text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white bg-neutral-100 dark:bg-[#111] border border-black/5 dark:border-white/5 transition-colors inline-flex items-center gap-2"
           >
-            <Plus size={16} />
-            Create Community Alert
+            <ArrowLeft size={16} /> Back
           </button>
+          <h1 className="text-4xl md:text-5xl font-bold text-black dark:text-white tracking-tight">System Alerts</h1>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+           <button
+             onClick={() => navigate("/create-alert")}
+             className="px-6 py-2.5 rounded-xl font-semibold text-sm text-white dark:text-black bg-black dark:bg-white hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+           >
+             <Plus size={16} /> New Alert
+           </button>
+           <button
+             onClick={refreshAlerts}
+             className="px-4 py-2.5 rounded-xl font-medium text-sm text-black dark:text-white border border-black/10 dark:border-white/10 hover:bg-neutral-50 dark:hover:bg-[#111] transition-colors flex items-center justify-center gap-2"
+           >
+             <RefreshCw size={16} />
+           </button>
         </div>
       </motion.div>
 
-      <motion.div variants={fadeUp} className="glass-card rounded-[2rem] p-4 md:p-5 space-y-4">
-        <div className="flex flex-wrap gap-2">
+      {/* ── Enterprise Search & Filter Bar ── */}
+      <motion.div variants={fadeUp} className="flex flex-col lg:flex-row items-stretch lg:items-center gap-4">
+        <label className="flex-1 flex items-center gap-3 px-4 py-3 bg-white dark:bg-[#0a0a0a] border border-black/10 dark:border-white/10 rounded-xl relative focus-within:border-black/30 dark:focus-within:border-white/30 transition-colors">
+          <Search size={18} className="text-neutral-400" />
+          <input
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="Search alerts by title, location, or content..."
+            className="bg-transparent outline-none w-full text-sm font-medium text-black dark:text-white placeholder:text-neutral-400"
+          />
+        </label>
+        
+        <div className="flex flex-wrap items-center gap-2">
           {SOURCE_FILTERS.map((filter) => (
             <button
               key={filter.id}
               onClick={() => setSourceFilter(filter.id)}
-              className={`px-4 py-2 rounded-2xl text-sm font-bold transition-colors ${
+              className={`px-4 py-3 rounded-xl text-[11px] font-bold uppercase tracking-[0.1em] transition-colors border ${
                 sourceFilter === filter.id
-                  ? "bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg"
-                  : "bg-white/[0.03] text-wayanad-muted hover:text-wayanad-text"
+                  ? "bg-black dark:bg-white text-white dark:text-black border-black dark:border-white"
+                  : "bg-white dark:bg-[#0a0a0a] text-neutral-500 dark:text-neutral-400 border-black/10 dark:border-white/10 hover:border-black/30 dark:hover:border-white/30 hover:text-black dark:hover:text-white"
               }`}
             >
               {filter.label}
             </button>
           ))}
         </div>
-
-        <div className="grid lg:grid-cols-[1.4fr_1fr] gap-3">
-          <label className="glass-card rounded-2xl px-4 py-3 flex items-center gap-3">
-            <Search size={16} className="text-wayanad-muted" />
-            <input
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              placeholder="Search title, message, location, or category"
-              className="bg-transparent outline-none w-full text-sm text-wayanad-text placeholder:text-wayanad-muted"
-            />
-          </label>
-
-          <div className="flex flex-wrap gap-2">
-            {SEVERITY_FILTERS.map((filter) => (
-              <button
-                key={filter.id}
-                onClick={() => setSeverityFilter(filter.id)}
-                className={`px-4 py-2 rounded-2xl text-sm font-bold transition-colors ${
-                  severityFilter === filter.id
-                    ? "bg-white text-slate-900"
-                    : "bg-white/[0.03] text-wayanad-muted hover:text-wayanad-text"
-                }`}
-              >
-                {filter.label}
-              </button>
-            ))}
-          </div>
-        </div>
       </motion.div>
 
       {loading ? (
-        <div className="space-y-4">
+        <div className="space-y-4 mt-8">
           {Array.from({ length: 3 }).map((_, index) => (
-            <motion.div key={index} variants={fadeUp} className="glass-card rounded-[1.8rem] min-h-[180px] animate-pulse" />
+            <motion.div key={index} variants={fadeUp} className="bg-neutral-100 dark:bg-[#111] rounded-[1.5rem] min-h-[160px] animate-pulse border border-black/5 dark:border-white/5" />
           ))}
         </div>
       ) : filteredAlerts.length === 0 ? (
-        <motion.div variants={fadeUp} className="glass-card rounded-[2rem] p-12 text-center">
-          <ShieldAlert size={42} className="mx-auto text-wayanad-muted opacity-30 mb-4" />
-          <h3 className="text-xl font-black text-wayanad-text mb-2">No matching alerts</h3>
-          <p className="text-sm text-wayanad-muted">
-            Try adjusting your filters or publish a community update if people nearby should know about something.
+        <motion.div variants={fadeUp} className="py-24 text-center border border-dashed border-black/20 dark:border-white/20 rounded-[2rem] mt-8 bg-white dark:bg-[#0a0a0a]">
+          <ShieldAlert size={48} className="mx-auto text-neutral-300 dark:text-neutral-700 mb-6" />
+          <h3 className="text-xl font-semibold text-black dark:text-white mb-2 tracking-tight">No alerts found</h3>
+          <p className="text-neutral-500 dark:text-neutral-400 font-medium">
+            There are no alerts matching your current filters and search terms.
           </p>
+          <button onClick={() => { setSearchTerm(''); setSourceFilter('ALL'); setSeverityFilter('ALL'); }} className="mt-6 text-sm font-semibold text-black dark:text-white underline underline-offset-4 hover:opacity-80">
+            Clear all filters
+          </button>
         </motion.div>
       ) : (
-        <>
+        <div className="space-y-10 mt-8">
           {featuredAlert && (
-            <motion.div variants={fadeUp} className="glass-card rounded-[2rem] p-6 md:p-7 relative overflow-hidden">
-              <div
-                className="absolute -right-10 -top-10 h-40 w-40 rounded-full blur-3xl"
-                style={{ background: featuredAlert.type === "critical" ? "rgba(239,68,68,0.16)" : "rgba(16,185,129,0.14)" }}
-              />
-
-              <div className="relative z-10">
-                <div className="flex flex-wrap items-center gap-2 mb-4">
-                  <span className={`text-[10px] font-black uppercase tracking-[0.18em] px-2.5 py-1 rounded-full ${getAccent(featuredAlert.type).soft} ${getAccent(featuredAlert.type).text}`}>
-                    Featured {featuredAlert.severityLabel}
-                  </span>
-                  <span className={`text-[10px] font-black uppercase tracking-[0.18em] px-2.5 py-1 rounded-full ${
-                    featuredAlert.isOfficial ? "bg-emerald-500/10 text-emerald-400" : "bg-cyan-500/10 text-cyan-400"
-                  }`}>
-                    {featuredAlert.sourceLabel}
-                  </span>
-                  <span className="text-[10px] font-black uppercase tracking-[0.18em] px-2.5 py-1 rounded-full bg-white/5 text-wayanad-muted">
-                    {featuredAlert.categoryLabel}
-                  </span>
-                </div>
-
-                <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-5">
-                  <div className="min-w-0">
-                    <h2 className="text-2xl md:text-3xl font-black text-wayanad-text tracking-tight">
-                      {featuredAlert.title}
-                    </h2>
-                    <p className="text-sm md:text-base text-wayanad-text/80 mt-3 leading-relaxed max-w-3xl">
-                      {featuredAlert.message}
-                    </p>
-
-                    <div className="flex flex-wrap items-center gap-4 mt-5 text-sm">
-                      <span className="text-wayanad-muted flex items-center gap-1.5">
-                        <MapPin size={14} />
-                        {featuredAlert.location}
-                      </span>
-                      <span className="text-wayanad-muted">{featuredAlert.createdAtLabel}</span>
-                    </div>
-                  </div>
-
-                  <div className="xl:text-right shrink-0">
-                    <p className="text-sm font-black text-wayanad-text">{featuredAlert.relativeTime}</p>
-                    <p className="text-xs text-wayanad-muted mt-1">
-                      {featuredAlert.isActive ? "Active now" : "Older update"}
-                    </p>
-
-                    {featuredAlert.actionTarget && (
-                      <button
-                        onClick={() => openAlertAction(featuredAlert)}
-                        className="mt-5 inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-bold text-white"
-                        style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}
-                      >
-                        {featuredAlert.actionLabel}
-                        <ChevronRight size={16} />
-                      </button>
-                    )}
-                  </div>
-                </div>
+            <motion.div variants={fadeUp} className="space-y-5">
+              <div className="flex items-center gap-3 px-1">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-[pulse_2s_ease-in-out_infinite]"></div>
+                <h3 className="text-[10px] font-bold text-neutral-500 dark:text-neutral-400 tracking-[0.15em] uppercase">Featured Priority</h3>
               </div>
+              <AlertCard alert={featuredAlert} onOpen={openAlertAction} />
             </motion.div>
           )}
 
           {activeAlerts.length > 0 && (
-            <motion.div variants={fadeUp} className="space-y-4">
-              <div className="flex items-center gap-2">
-                <AlertTriangle size={16} className="text-red-400" />
-                <h3 className="text-lg font-black text-wayanad-text tracking-tight">Active Now</h3>
+            <motion.div variants={fadeUp} className="space-y-5">
+              <div className="flex items-center gap-3 px-1">
+                <AlertTriangle size={14} className="text-neutral-400" />
+                <h3 className="text-[10px] font-bold text-neutral-500 dark:text-neutral-400 tracking-[0.15em] uppercase">Active Alerts</h3>
               </div>
               <div className="space-y-4">
                 {activeAlerts.map((alert) => (
@@ -423,19 +275,19 @@ const Alerts = () => {
           )}
 
           {olderAlerts.length > 0 && (
-            <motion.div variants={fadeUp} className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Info size={16} className="text-wayanad-muted" />
-                <h3 className="text-lg font-black text-wayanad-text tracking-tight">Earlier Updates</h3>
+            <motion.div variants={fadeUp} className="space-y-5">
+              <div className="flex items-center gap-3 px-1 pt-8 border-t border-black/10 dark:border-white/10">
+                <Info size={14} className="text-neutral-400" />
+                <h3 className="text-[10px] font-bold text-neutral-500 dark:text-neutral-400 tracking-[0.15em] uppercase">Earlier Updates</h3>
               </div>
-              <div className="space-y-4 opacity-95">
+              <div className="space-y-4">
                 {olderAlerts.map((alert) => (
                   <AlertCard key={alert.id} alert={alert} onOpen={openAlertAction} />
                 ))}
               </div>
             </motion.div>
           )}
-        </>
+        </div>
       )}
     </motion.div>
   );

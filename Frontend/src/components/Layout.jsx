@@ -50,11 +50,11 @@ const Layout = () => {
 
   return (
     <div className="min-h-screen bg-wayanad-bg text-wayanad-text font-sans transition-colors duration-300 relative overflow-hidden">
-      {/* Aurora */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="user-aurora-1 absolute top-[-20%] left-[-12%] w-[700px] h-[700px] rounded-full blur-[160px] will-change-transform bg-emerald-500/[0.08] dark:bg-emerald-500/[0.10]"></div>
-        <div className="user-aurora-2 absolute bottom-[-12%] right-[-8%] w-[550px] h-[550px] rounded-full blur-[140px] will-change-transform bg-cyan-500/[0.06] dark:bg-indigo-500/[0.08]"></div>
-        <div className="user-aurora-3 absolute top-[35%] right-[10%] w-[400px] h-[400px] rounded-full blur-[120px] will-change-transform bg-teal-500/[0.05] dark:bg-cyan-500/[0.06]"></div>
+      {/* ── Enterprise Background ── */}
+      <div className="fixed inset-0 z-0 pointer-events-none bg-zinc-50 dark:bg-[#000000] transition-colors duration-500">
+        {/* Extremely subtle radial glow in the center for depth */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(0,0,0,0)_0%,rgba(0,0,0,0.02)_100%)] dark:bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.03)_0%,rgba(0,0,0,0)_60%)]"></div>
+        <div className="absolute inset-0 bg-[url('/noise.svg')] opacity-[0.02] mix-blend-overlay"></div>
       </div>
 
       {/* ── Navbar ── */}

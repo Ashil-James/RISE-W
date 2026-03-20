@@ -20,21 +20,21 @@ const SEVERITY_OPTIONS = [
     label: "Info",
     description: "Useful local update without immediate danger.",
     icon: Info,
-    className: "bg-sky-500/10 text-sky-400 border-sky-500/20",
+    colorClass: "text-blue-500",
   },
   {
     id: "Medium",
     label: "Warning",
     description: "Potential disruption or caution for nearby residents.",
     icon: Zap,
-    className: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    colorClass: "text-orange-500",
   },
   {
     id: "High",
     label: "Critical",
     description: "Immediate danger or urgent disruption residents should notice quickly.",
     icon: AlertTriangle,
-    className: "bg-red-500/10 text-red-400 border-red-500/20",
+    colorClass: "text-red-500",
   },
 ];
 
@@ -112,207 +112,178 @@ const CreateAlert = () => {
     );
   };
 
+  const fadeUp = {
+    hidden: { opacity: 0, y: 15 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } }
+  };
+
   return (
     <motion.div
-      className="w-full max-w-3xl mx-auto pb-20 space-y-6"
-      initial={{ opacity: 0, y: 18 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ type: "spring", stiffness: 110, damping: 18 }}
+      className="w-full max-w-3xl mx-auto pb-24 space-y-8 pt-8 md:pt-16"
+      initial="hidden"
+      animate="visible"
+      variants={{ visible: { transition: { staggerChildren: 0.05 } } }}
     >
-      <div className="flex items-center gap-4">
+      <motion.div variants={fadeUp} className="flex items-start gap-4 mb-4">
         <button
           onClick={() => navigate(-1)}
-          className="p-2.5 -ml-2 rounded-xl glass-card text-wayanad-muted hover:text-wayanad-text transition-colors"
+          className="p-2.5 -ml-2 rounded-lg text-neutral-500 hover:text-black dark:text-neutral-400 dark:hover:text-white bg-neutral-100 dark:bg-neutral-900 border border-black/5 dark:border-white/5 transition-colors"
         >
-          <ArrowLeft size={20} />
+          <ArrowLeft size={18} />
         </button>
         <div>
-          <h1 className="text-2xl font-black text-wayanad-text tracking-tight">Create Community Alert</h1>
-          <p className="text-sm text-wayanad-muted">
-            Community alerts publish immediately and are always labeled separately from official warnings.
+          <h1 className="text-3xl font-bold text-black dark:text-white tracking-tight">Broadcast Alert</h1>
+          <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1 max-w-md">
+            Community alerts publish immediately to the public feed.
           </p>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-6">
-        <form onSubmit={handleSubmit} className="glass-card rounded-[2rem] p-6 md:p-7 space-y-6">
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.24em] text-cyan-400/80 font-black mb-2">
-              Community Alert
-            </p>
-            <h2 className="text-2xl font-black text-wayanad-text tracking-tight">
-              Share a local update people nearby should know about
-            </h2>
-          </div>
-
-          <div className="space-y-3">
-            <label className="text-xs font-black uppercase tracking-[0.18em] text-wayanad-muted">
-              Alert Category
-            </label>
-            <select
-              value={formData.category}
-              onChange={(event) => setFormData((previous) => ({ ...previous, category: event.target.value }))}
-              className="w-full glass-card rounded-2xl px-4 py-3 text-sm text-wayanad-text bg-transparent outline-none"
-            >
-              {COMMUNITY_CATEGORY_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value} className="bg-slate-900">
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-3">
-            <label className="text-xs font-black uppercase tracking-[0.18em] text-wayanad-muted">
-              Severity
-            </label>
-            <div className="grid gap-3">
-              {SEVERITY_OPTIONS.map((option) => {
-                const active = formData.severity === option.id;
-                return (
-                  <button
-                    key={option.id}
-                    type="button"
-                    onClick={() => setFormData((previous) => ({ ...previous, severity: option.id }))}
-                    className={`text-left rounded-2xl border p-4 transition-colors ${
-                      active ? option.className : "border-white/10 bg-white/[0.03] text-wayanad-muted"
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={`p-2 rounded-xl border ${active ? option.className : "border-white/10 bg-white/[0.03] text-wayanad-muted"}`}>
-                        <option.icon size={16} />
-                      </div>
-                      <div>
-                        <p className="text-sm font-black">{option.label}</p>
-                        <p className="text-xs mt-1 opacity-80">{option.description}</p>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <label className="text-xs font-black uppercase tracking-[0.18em] text-wayanad-muted">
-              Alert Title
-            </label>
-            <input
-              type="text"
-              value={formData.title}
-              onChange={(event) => setFormData((previous) => ({ ...previous, title: event.target.value }))}
-              className="w-full glass-card rounded-2xl px-4 py-3 text-sm text-wayanad-text bg-transparent outline-none"
-              placeholder="e.g. Water rising near the bus stand"
-              required
-            />
-          </div>
-
-          <div className="space-y-3">
-            <label className="text-xs font-black uppercase tracking-[0.18em] text-wayanad-muted">
-              Location
-            </label>
-            <div className="flex gap-3">
-              <div className="relative flex-1">
-                <MapPin size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-wayanad-muted" />
-                <input
-                  type="text"
-                  value={formData.location}
-                  onChange={(event) => setFormData((previous) => ({ ...previous, location: event.target.value }))}
-                  className="w-full glass-card rounded-2xl px-4 py-3 pl-11 text-sm text-wayanad-text bg-transparent outline-none"
-                  placeholder="Near the market, Sector B, main road..."
-                />
+      <motion.div variants={fadeUp} className="max-w-2xl">
+        <form onSubmit={handleSubmit} className="w-full">
+          <div className="bg-white dark:bg-[#0a0a0a] border border-black/10 dark:border-white/10 rounded-[1.5rem] p-6 md:p-10 shadow-sm space-y-8">
+            
+            {/* Category */}
+            <div className="space-y-3">
+              <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-neutral-500 dark:text-neutral-400">
+                Alert Category
+              </label>
+              <div className="relative">
+                <select
+                  value={formData.category}
+                  onChange={(event) => setFormData((previous) => ({ ...previous, category: event.target.value }))}
+                  className="w-full rounded-xl px-4 py-3.5 text-sm font-medium text-black dark:text-white bg-neutral-50 dark:bg-[#111] border border-black/10 dark:border-white/10 outline-none focus:border-black/30 dark:focus:border-white/30 transition-colors appearance-none"
+                >
+                  {COMMUNITY_CATEGORY_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
               </div>
+            </div>
+
+            {/* Severity */}
+            <div className="space-y-3">
+              <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-neutral-500 dark:text-neutral-400">
+                Severity Level
+              </label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {SEVERITY_OPTIONS.map((option) => {
+                  const active = formData.severity === option.id;
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => setFormData((previous) => ({ ...previous, severity: option.id }))}
+                      className={`text-center rounded-xl border py-4 px-3 flex flex-col items-center gap-2 transition-all ${
+                        active 
+                          ? `bg-neutral-100 dark:bg-neutral-800 border-black/20 dark:border-white/20 shadow-sm ring-1 ring-black/5 dark:ring-white/5` 
+                          : "bg-transparent border-black/10 dark:border-white/10 text-neutral-500 dark:text-neutral-400 hover:bg-neutral-50 dark:hover:bg-[#111]"
+                      }`}
+                    >
+                      <option.icon size={20} className={active ? option.colorClass : "opacity-60"} />
+                      <p className={`text-xs font-semibold uppercase tracking-wider ${active ? "text-black dark:text-white" : ""}`}>{option.label}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Headline */}
+            <div className="space-y-3">
+              <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-neutral-500 dark:text-neutral-400">
+                Headline
+              </label>
+              <input
+                type="text"
+                value={formData.title}
+                onChange={(event) => setFormData((previous) => ({ ...previous, title: event.target.value }))}
+                className="w-full rounded-xl px-4 py-3.5 text-sm font-medium text-black dark:text-white bg-neutral-50 dark:bg-[#111] border border-black/10 dark:border-white/10 outline-none focus:border-black/30 dark:focus:border-white/30 transition-colors placeholder:text-neutral-400"
+                placeholder="Brief summary of the incident..."
+                required
+              />
+            </div>
+
+            {/* Location */}
+            <div className="space-y-3">
+              <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-neutral-500 dark:text-neutral-400">
+                Pinpoint Location
+              </label>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="relative flex-1">
+                  <MapPin size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
+                  <input
+                    type="text"
+                    value={formData.location}
+                    onChange={(event) => setFormData((previous) => ({ ...previous, location: event.target.value }))}
+                    className="w-full rounded-xl px-4 py-3.5 pl-11 text-sm font-medium text-black dark:text-white bg-neutral-50 dark:bg-[#111] border border-black/10 dark:border-white/10 outline-none focus:border-black/30 dark:focus:border-white/30 transition-colors placeholder:text-neutral-400"
+                    placeholder="Area, distinct landmark..."
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={detectLocation}
+                  className="px-6 py-3.5 sm:py-0 rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-[#0a0a0a] text-black dark:text-white text-sm font-medium hover:bg-neutral-50 dark:hover:bg-[#111] transition-colors whitespace-nowrap flex items-center justify-center gap-2"
+                >
+                  <MapPin size={16} /> GPS
+                </button>
+              </div>
+            </div>
+
+            {/* Details */}
+            <div className="space-y-3">
+              <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-neutral-500 dark:text-neutral-400">
+                Details & Instructions
+              </label>
+              <textarea
+                rows={5}
+                value={formData.message}
+                onChange={(event) => setFormData((previous) => ({ ...previous, message: event.target.value }))}
+                className="w-full rounded-xl px-4 py-3.5 text-sm font-medium text-black dark:text-white bg-neutral-50 dark:bg-[#111] border border-black/10 dark:border-white/10 outline-none focus:border-black/30 dark:focus:border-white/30 transition-colors placeholder:text-neutral-400 resize-none leading-relaxed"
+                placeholder="Elaborate on the situation. Include actionable advice if possible."
+                required
+              />
+            </div>
+
+            {/* Submit */}
+            <div className="pt-6 border-t border-black/10 dark:border-white/10">
+              {formError && (
+                <div className="rounded-xl border border-red-500/20 bg-red-50 dark:bg-red-500/10 px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400 mb-6 flex items-start gap-3">
+                  <AlertTriangle size={18} className="mt-0.5 shrink-0" />
+                  <p>{formError}</p>
+                </div>
+              )}
+
               <button
-                type="button"
-                onClick={detectLocation}
-                className="px-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 text-sm font-bold hover:bg-emerald-500/15 transition-colors"
+                type="submit"
+                disabled={loading}
+                className="w-full py-4 rounded-xl font-semibold text-sm text-white dark:text-black bg-black dark:bg-white hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center gap-3"
               >
-                Use My Location
+                {loading ? (
+                  <>
+                    <Loader2 size={18} className="animate-spin" />
+                    Broadcasting...
+                  </>
+                ) : (
+                  <>
+                    <Send size={18} />
+                    Publish Alert
+                  </>
+                )}
               </button>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <label className="text-xs font-black uppercase tracking-[0.18em] text-wayanad-muted">
-              Details
-            </label>
-            <textarea
-              rows={5}
-              value={formData.message}
-              onChange={(event) => setFormData((previous) => ({ ...previous, message: event.target.value }))}
-              className="w-full glass-card rounded-2xl px-4 py-3 text-sm text-wayanad-text bg-transparent outline-none resize-none"
-              placeholder="Describe what is happening, who may be affected, and any immediate advice for residents."
-              required
-            />
-          </div>
-
-          {formError && (
-            <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
-              {formError}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-4 rounded-2xl font-black text-white flex items-center justify-center gap-3 disabled:opacity-60"
-            style={{ background: "linear-gradient(135deg, #0891b2, #06b6d4)" }}
-          >
-            {loading ? (
-              <>
-                <Loader2 size={18} className="animate-spin" />
-                Publishing...
-              </>
-            ) : (
-              <>
-                <Send size={18} />
-                Publish Community Alert
-              </>
-            )}
-          </button>
-        </form>
-
-        <div className="space-y-6">
-          <div className="glass-card rounded-[2rem] p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <ShieldCheck size={18} className="text-emerald-500" />
-              <h3 className="text-lg font-black text-wayanad-text">Before You Post</h3>
-            </div>
-            <div className="space-y-4 text-sm text-wayanad-muted">
-              <p>Community alerts publish immediately, so keep the title factual and the message clear.</p>
-              <p>Official alerts come from authorities and admins. Your alert will always be marked as community-submitted.</p>
-              <p>Use critical severity only for urgent safety risks or major service disruption.</p>
-            </div>
-          </div>
-
-          <div className="glass-card rounded-[2rem] p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <AlertTriangle size={18} className="text-cyan-400" />
-              <h3 className="text-lg font-black text-wayanad-text">What Residents Will See</h3>
-            </div>
-            <div className="rounded-[1.6rem] border border-cyan-500/20 bg-cyan-500/10 p-4">
-              <div className="flex flex-wrap items-center gap-2 mb-3">
-                <span className="text-[10px] font-black uppercase tracking-[0.18em] px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-400">
-                  Community
-                </span>
-                <span className="text-[10px] font-black uppercase tracking-[0.18em] px-2.5 py-1 rounded-full bg-white/5 text-wayanad-muted">
-                  {SEVERITY_OPTIONS.find((option) => option.id === formData.severity)?.label || "Info"}
-                </span>
+              
+              <div className="mt-4 flex items-center justify-center gap-2 text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
+                <ShieldCheck size={14} />
+                <span>Verified Public Feed</span>
               </div>
-              <p className="text-sm font-black text-wayanad-text">
-                {formData.title || "Your alert title will appear here"}
-              </p>
-              <p className="text-sm text-wayanad-text/80 mt-2">
-                {formData.message || "Residents will see your details here once the alert is published."}
-              </p>
-              <p className="text-xs text-wayanad-muted mt-3 flex items-center gap-1.5">
-                <MapPin size={12} />
-                {formData.location || "Township Area"}
-              </p>
             </div>
           </div>
-        </div>
-      </div>
+        </form>
+      </motion.div>
     </motion.div>
   );
 };
