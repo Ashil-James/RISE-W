@@ -230,9 +230,29 @@ const MyReports = () => {
 
       <div className="space-y-4">
         {loading && scopedReports.length === 0 ? (
-          Array.from({ length: 3 }).map((_, index) => (
-            <motion.div key={index} variants={fadeUp} className="glass-card rounded-[1.8rem] p-6 animate-pulse min-h-[180px]" />
-          ))
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="glass-card rounded-[1.8rem] p-6 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
+                <div className="flex flex-col lg:flex-row gap-4 mb-5">
+                  <div className="flex-1 space-y-3">
+                    <div className="flex gap-2">
+                      <div className="h-6 w-20 bg-emerald-500/10 rounded-xl" />
+                      <div className="h-6 w-24 bg-white/5 rounded-xl" />
+                    </div>
+                    <div className="h-8 w-3/4 bg-white/5 rounded-xl" />
+                    <div className="h-4 w-1/2 bg-white/5 rounded-xl" />
+                  </div>
+                  <div className="w-32 h-12 bg-white/5 rounded-xl lg:ml-auto" />
+                </div>
+                <div className="grid md:grid-cols-3 gap-3">
+                  <div className="h-24 bg-white/[0.02] rounded-2xl border border-white/5" />
+                  <div className="h-24 bg-white/[0.02] rounded-2xl border border-white/5" />
+                  <div className="h-24 bg-white/[0.02] rounded-2xl border border-white/5" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : filteredReports.length === 0 ? (
           <motion.div
             variants={fadeUp}

@@ -22,12 +22,53 @@ const Signup = () => {
   const [location, setLocation] = useState(null);
   const [locationName, setLocationName] = useState("");
   const [showMap, setShowMap] = useState(false);
+  const [isDetecting, setIsDetecting] = useState(false);
 
   useEffect(() => {
     if (user) {
       navigate("/");
     }
   }, [user, navigate]);
+
+  useEffect(() => {
+    detectLocation();
+  }, []);
+
+  const detectLocation = () => {
+    if (navigator.geolocation) {
+      setIsDetecting(true);
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          const lat = latitude;
+          const lon = longitude;
+          setLocation({ lat, lon });
+          
+          try {
+            const { data } = await axios.get(
+              `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+            );
+            if (data && data.display_name) {
+              const parts = data.display_name.split(", ");
+              setLocationName(parts.slice(0, 3).join(", "));
+            } else {
+              setLocationName(`${lat.toFixed(4)}, ${lon.toFixed(4)}`);
+            }
+          } catch (err) {
+            console.error("Reverse geocoding error:", err);
+            setLocationName(`${lat.toFixed(4)}, ${lon.toFixed(4)}`);
+          } finally {
+            setIsDetecting(false);
+          }
+        },
+        (error) => {
+          console.error("Geolocation error:", error);
+          setIsDetecting(false);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -39,20 +80,22 @@ const Signup = () => {
     e.preventDefault();
     setError("");
 
+    if (!location) {
+      setError("Please select your location to continue. This is required for area-centric alerts.");
+      return;
+    }
+
     try {
       const payload = {
         name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
         password: formData.password,
         phoneNumber: formData.phone,
-      };
-
-      if (location) {
-        payload.location = {
+        location: {
           type: "Point",
           coordinates: [location.lon, location.lat],
-        };
-      }
+        },
+      };
 
       const { data: response } = await axios.post("/api/v1/auth/register", payload);
 
@@ -223,27 +266,43 @@ const Signup = () => {
               </p>
             </div>
 
-            {/* Location (Optional but recommended) */}
+            {/* Location (Auto-detected but adjustable) */}
             <div>
               <label className="block text-sm font-medium text-wayanad-text mb-2 ml-1">
-                Your Location <span className="text-wayanad-muted font-normal">(for weather alerts)</span>
+                Your Location <span className="text-red-500">*</span>
               </label>
 
-              {!showMap ? (
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowMap(true)}
-                    className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-white/50 dark:bg-black/20 border border-wayanad-border rounded-xl text-wayanad-text hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:border-emerald-300 transition-all focus:ring-2 focus:ring-emerald-500/50"
-                  >
-                    <MapIcon size={18} className="text-emerald-500" />
-                    <span className="font-medium whitespace-nowrap">
-                      {location ? "Adjust Location" : "Pick on Map"}
-                    </span>
-                  </button>
+              {isDetecting ? (
+                <div className="flex items-center justify-center gap-3 py-3 px-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl text-emerald-600 dark:text-emerald-400 animate-pulse">
+                  <Loader2 className="animate-spin" size={18} />
+                  <span className="font-medium">Detecting your location...</span>
+                </div>
+              ) : !showMap ? (
+                <div className="flex flex-col gap-2">
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowMap(true)}
+                      className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-white/50 dark:bg-black/20 border border-wayanad-border rounded-xl text-wayanad-text hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:border-emerald-300 transition-all focus:ring-2 focus:ring-emerald-500/50"
+                    >
+                      <MapIcon size={18} className="text-emerald-500" />
+                      <span className="font-medium whitespace-nowrap">
+                        {location ? "Adjust Location" : "Pick on Map"}
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={detectLocation}
+                      className="p-3 bg-white/50 dark:bg-black/20 border border-wayanad-border rounded-xl text-wayanad-text hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all"
+                      title="Refresh Location"
+                    >
+                      <Loader2 size={18} className={isDetecting ? "animate-spin" : ""} />
+                    </button>
+                  </div>
                   {locationName && (
-                    <div className="flex-[2] flex items-center px-4 py-3 bg-white/30 dark:bg-black/10 border border-wayanad-border rounded-xl text-sm text-wayanad-text truncate">
-                      {locationName}
+                    <div className="px-4 py-2.5 bg-emerald-500/5 border border-emerald-500/10 rounded-xl text-xs text-wayanad-text flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="truncate font-medium">{locationName}</span>
                     </div>
                   )}
                 </div>

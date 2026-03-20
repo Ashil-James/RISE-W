@@ -3,19 +3,37 @@ import { Outlet, Link, useLocation } from "react-router-dom";
 import { Home, Bell, FileText, User } from "lucide-react";
 import ThemeToggle from "./ThemeToggle";
 import NotificationsDropdown from "./NotificationsDropdown";
+import LanguageSwitcher from "./LanguageSwitcher";
 import { useUser } from "../context/UserContext";
 import { motion } from "framer-motion";
+import { detectLanguageFromCoordinates } from "../utils/detectLanguage";
+import { useTranslation } from "react-i18next";
 
 const NAV_ITEMS = [
-  { to: "/", icon: Home, label: "Home", exact: true },
-  { to: "/alerts", icon: Bell, label: "Alerts" },
-  { to: "/my-reports", icon: FileText, label: "Reports" },
+  { to: "/", icon: Home, labelKey: "nav.home", exact: true },
+  { to: "/alerts", icon: Bell, labelKey: "nav.alerts" },
+  { to: "/my-reports", icon: FileText, labelKey: "nav.myReports" },
 ];
 
 const Layout = () => {
   const { user } = useUser();
+  const { t } = useTranslation();
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
+  const [langAutoDetected, setLangAutoDetected] = useState(false);
+
+  // Auto-detect language from user's GPS coordinates on mount
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          const lang = await detectLanguageFromCoordinates(pos.coords.latitude, pos.coords.longitude);
+          if (lang !== "en") setLangAutoDetected(true);
+        },
+        () => {} // silently fail if user denies
+      );
+    }
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -78,7 +96,7 @@ const Layout = () => {
                       transition={{ type: "spring", stiffness: 400, damping: 30 }} />
                   )}
                   <item.icon size={16} className="relative z-10" />
-                  <span className="relative z-10">{item.label}</span>
+                  <span className="relative z-10">{t(item.labelKey)}</span>
                 </Link>
               );
             })}
@@ -87,6 +105,7 @@ const Layout = () => {
           {/* Right */}
           <div className="flex items-center gap-4">
             <NotificationsDropdown />
+            <LanguageSwitcher autoDetected={langAutoDetected} />
             <ThemeToggle />
             <Link to="/profile" className="relative group">
               <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 opacity-0 group-hover:opacity-40 blur-md transition-opacity duration-500"></div>
@@ -116,14 +135,14 @@ const Layout = () => {
               <Link key={item.to} to={item.to}
                 className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all ${active ? "text-emerald-500" : "text-wayanad-muted"}`}>
                 <item.icon size={20} />
-                <span className="text-[10px] font-bold">{item.label}</span>
+                <span className="text-[10px] font-bold">{t(item.labelKey)}</span>
               </Link>
             );
           })}
           <Link to="/profile"
             className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all ${location.pathname === "/profile" ? "text-emerald-500" : "text-wayanad-muted"}`}>
             <User size={20} />
-            <span className="text-[10px] font-bold">Profile</span>
+            <span className="text-[10px] font-bold">{t("nav.profile")}</span>
           </Link>
         </div>
       </div>

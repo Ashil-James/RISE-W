@@ -33,60 +33,61 @@ export const ReportProvider = ({ children }) => {
   const [error, setError] = useState(null);
   const { user, refreshUser, logout } = useUser();
 
+  const [lastRefreshed, setLastRefreshed] = useState(0);
+
   const refreshReports = useCallback(
-    async (tokenOverride = user?.token, { showLoading = true } = {}) => {
-      const token = tokenOverride;
+    async (tokenOverride = user?.token, { showLoading = true, force = false } = {}) => {
+      const token = tokenOverride || user?.token;
+      if (!token) return { success: false };
 
-      if (showLoading) {
-        setLoading(true);
+      const now = Date.now();
+      if (!force && reports.length > 0 && (now - lastRefreshed < 10000)) {
+        return { success: true, data: reports };
       }
 
-      if (!token) {
-        setReports([]);
-        setError(null);
-        setLoading(false);
-        return { success: true, data: [] };
-      }
+      if (showLoading) setLoading(true);
 
       try {
         const response = await fetch("/api/v1/incidents", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
 
         if (response.status === 401) {
           if (logout) logout();
-          setReports([]);
-          setLoading(false);
           return { success: false, message: "Session expired" };
         }
 
-        if (!response.ok) {
-          throw new Error(await getErrorMessage(response, "Failed to fetch reports"));
-        }
-
         const result = await response.json();
+        if (!response.ok) throw new Error(result?.message || "Failed to fetch");
+
         const mappedReports = sortReportsByLatestUpdate((result.data || []).map(mapIncidentToReport));
+        
         setReports(mappedReports);
+        setLastRefreshed(now);
         setError(null);
         return { success: true, data: mappedReports };
       } catch (fetchError) {
-        console.error(fetchError);
+        console.error("Refresh Error:", fetchError);
         setError(fetchError.message);
         return { success: false, message: fetchError.message };
       } finally {
-        if (showLoading) {
-          setLoading(false);
-        }
+        if (showLoading) setLoading(false);
       }
     },
-    [logout, user?.token],
+    [logout, user?.token, lastRefreshed, reports.length],
   );
 
+  // Use a ref to keep the effect dependency size constant and avoid loops
+  const refreshRef = React.useRef(refreshReports);
+  useEffect(() => { refreshRef.current = refreshReports; }, [refreshReports]);
+
   useEffect(() => {
-    refreshReports(user?.token, { showLoading: true });
-  }, [refreshReports, user?.token]);
+    if (user?.token) {
+      refreshRef.current(user.token, { showLoading: reports.length === 0 });
+    } else {
+      setLoading(false);
+    }
+  }, [user?.token]); // Constant dependency size now
 
   const fetchReportById = useCallback(
     async (id, tokenOverride = user?.token) => {

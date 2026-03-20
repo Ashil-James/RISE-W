@@ -12,6 +12,7 @@ import {
     getUserRoadIncidents,
     revokeIncident,
     respondToIncidentResolution,
+    categorizeIncident,
 } from "../controllers/incident.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -24,6 +25,7 @@ router.route("/").post(verifyJWT, createIncident);
 
 router.route("/batch").post(verifyJWT, batchCreateIncidents);
 router.route("/check-nearby").post(verifyJWT, checkNearbyIncidents);
+router.route("/categorize").post(verifyJWT, categorizeIncident);
 router.route("/:id/upvote").post(verifyJWT, upvoteIncident);
 router.route("/:id/revoke").patch(verifyJWT, revokeIncident);
 router.route("/:id/resolution-response").patch(verifyJWT, respondToIncidentResolution);

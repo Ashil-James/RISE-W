@@ -8,17 +8,17 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useUser } from "../context/UserContext";
 import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
 
 const Profile = () => {
   const navigate = useNavigate();
   const { logout: authLogout } = useAuth();
   const { user, logout: userLogout, updateProfile, changePassword, refreshUser } = useUser();
 
-  useEffect(() => { refreshUser(); }, []);
-
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: "", text: "" });
+  const [locationName, setLocationName] = useState("");
 
   const [formData, setFormData] = useState({
     name: user?.name || "",
@@ -33,16 +33,87 @@ const Profile = () => {
   const [passData, setPassData] = useState({ current: "", new: "", confirm: "" });
   const fileInputRef = useRef(null);
 
+  useEffect(() => {
+    refreshUser();
+  }, []);
+
+  useEffect(() => {
+    if (user?.location && typeof user?.location === 'object' && user.location.coordinates) {
+      const [lon, lat] = user.location.coordinates;
+      const getHumanReadable = async () => {
+        try {
+          const { data } = await axios.get(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+          );
+          if (data && data.display_name) {
+            const parts = data.display_name.split(", ");
+            const shortName = parts.slice(0, 3).join(", ");
+            setLocationName(shortName);
+          }
+        } catch (err) {
+          console.error("Failed to reverse geocode stored location:", err);
+        }
+      };
+      getHumanReadable();
+    }
+  }, [user?.location]);
+
   const handleLogout = () => { authLogout(); userLogout(); navigate("/login"); };
 
   const handleSaveProfile = async () => {
     setLoading(true);
     setMessage({ type: "", text: "" });
-    const result = await updateProfile({ name: formData.name, email: formData.email, phoneNumber: formData.phone, location: formData.location });
+    const result = await updateProfile({ 
+      name: formData.name, 
+      email: formData.email, 
+      phoneNumber: formData.phone, 
+      location: formData.location 
+    });
     setLoading(false);
-    if (result.success) { setIsEditing(false); setMessage({ type: "success", text: "Profile updated successfully!" }); }
-    else { setMessage({ type: "error", text: result.message || "Failed to update profile." }); }
+    if (result.success) { 
+      setIsEditing(false); 
+      setMessage({ type: "success", text: "Profile updated successfully!" }); 
+    }
+    else { 
+      setMessage({ type: "error", text: result.message || "Failed to update profile." }); 
+    }
     setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+  };
+
+  const detectLocation = () => {
+    if (navigator.geolocation) {
+      setLoading(true);
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          const lat = latitude;
+          const lon = longitude;
+          
+          try {
+            const { data } = await axios.get(
+              `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+            );
+            const locationString = data && data.display_name 
+              ? data.display_name.split(", ").slice(0, 3).join(", ")
+              : `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+            
+            setFormData(prev => ({ ...prev, location: locationString }));
+            setLocationName(locationString);
+            setMessage({ type: "success", text: "Location detected!" });
+          } catch (err) {
+            setFormData(prev => ({ ...prev, location: `${lat.toFixed(4)}, ${lon.toFixed(4)}` }));
+          } finally {
+            setLoading(false);
+            setTimeout(() => setMessage({ type: "", text: "" }), 2000);
+          }
+        },
+        () => {
+          setLoading(false);
+          setMessage({ type: "error", text: "Could not detect location." });
+          setTimeout(() => setMessage({ type: "", text: "" }), 3000);
+        }
+      );
+    }
   };
 
   const handleAvatarClick = () => { fileInputRef.current?.click(); };
@@ -187,9 +258,9 @@ const Profile = () => {
               { label: "Email Address", icon: Mail, color: "#3b82f6", key: "email", value: user.email, type: "email" },
               {
                 label: "Location", icon: MapPin, color: "#f97316", key: "location",
-                value: user.location && typeof user.location === 'object'
-                  ? (user.location.coordinates ? `Coordinates: ${user.location.coordinates.join(', ')}` : "Location Set")
-                  : (user.location || "Wayanad"),
+                value: locationName || ((user.location && typeof user.location === 'object')
+                  ? (user.location.coordinates ? `Coords: ${user.location.coordinates.join(', ')}` : "Location Set")
+                  : (user.location || "Wayanad")),
                 type: "text", placeholder: "e.g. Wayanad, Kerala"
               },
             ].map((field) => (
@@ -199,13 +270,25 @@ const Profile = () => {
                   style={isEditing ? { background: "var(--glass-bg)", borderColor: "var(--glass-border)" } : {}}>
                   {fieldIcon(field.icon, field.color)}
                   {isEditing ? (
-                    <input
-                      type={field.type}
-                      value={formData[field.key]}
-                      onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
-                      className="bg-transparent w-full outline-none text-wayanad-text font-medium"
-                      placeholder={field.placeholder}
-                    />
+                    <div className="flex-1 flex items-center gap-2">
+                      <input
+                        type={field.type}
+                        value={formData[field.key]}
+                        onChange={(e) => setFormData({ ...formData, [field.key]: e.target.value })}
+                        className="bg-transparent w-full outline-none text-wayanad-text font-medium"
+                        placeholder={field.placeholder}
+                      />
+                      {field.key === 'location' && (
+                        <button
+                          type="button"
+                          onClick={detectLocation}
+                          className="p-2 hover:bg-emerald-500/10 rounded-lg text-emerald-500 transition-colors"
+                          title="Detect My Location"
+                        >
+                          {loading ? <Loader2 size={16} className="animate-spin" /> : <MapPin size={16} />}
+                        </button>
+                      )}
+                    </div>
                   ) : (
                     <p className="text-wayanad-text font-medium text-lg">{field.value}</p>
                   )}

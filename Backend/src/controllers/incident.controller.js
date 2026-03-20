@@ -1,4 +1,5 @@
 import { Incident } from "../models/incident.model.js";
+import natural from "natural";
 import { Notification } from "../models/notification.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -392,35 +393,124 @@ export const batchCreateIncidents = asyncHandler(async (req, res) => {
     );
 });
 
-// ── Incident DNA: Check for nearby duplicate incidents ──
+// ── NLP Utilities for Duplicate Detection (TF-IDF + Cosine Similarity) ──
+const TfIdf = natural.TfIdf;
+
+/**
+ * Compute cosine similarity between a new report and an existing one
+ * using TF-IDF vectors. Words common across both documents (like "water")
+ * are automatically downweighted — only distinctive words drive the score.
+ */
+const tfidfCosineSimilarity = (textA, textB) => {
+    if (!textA || !textB) return 0;
+
+    const tfidf = new TfIdf();
+    tfidf.addDocument(textA.toLowerCase());
+    tfidf.addDocument(textB.toLowerCase());
+
+    // Collect all unique terms from both documents
+    const allTerms = new Set();
+    tfidf.listTerms(0).forEach((t) => allTerms.add(t.term));
+    tfidf.listTerms(1).forEach((t) => allTerms.add(t.term));
+
+    if (allTerms.size === 0) return 0;
+
+    // Build TF-IDF vectors for both documents
+    let dotProduct = 0;
+    let magA = 0;
+    let magB = 0;
+
+    allTerms.forEach((term) => {
+        const weightA = tfidf.tfidf(term, 0);
+        const weightB = tfidf.tfidf(term, 1);
+        dotProduct += weightA * weightB;
+        magA += weightA * weightA;
+        magB += weightB * weightB;
+    });
+
+    const magnitude = Math.sqrt(magA) * Math.sqrt(magB);
+    return magnitude === 0 ? 0 : dotProduct / magnitude;
+};
+
+// Dynamic radius per category (meters)
+const CATEGORY_RADIUS = {
+    "Power Issue": 500,
+    "Water & Sanitation": 500,
+    "Infrastructure": 150,
+    "Wildlife Intrusion": 200,
+};
+
+// Similarity threshold — only flag above this
+const SIMILARITY_THRESHOLD = 0.5;
+
+// ── Incident DNA: Check for nearby duplicate incidents (NLP-powered) ──
 export const checkNearbyIncidents = asyncHandler(async (req, res) => {
-    const { latitude, longitude, category } = req.body;
+    const { latitude, longitude, category, title, description, addressDetails } = req.body;
 
     if (!latitude || !longitude) {
         return res.status(200).json(new ApiResponse(200, [], "No coordinates provided, skipping nearby check"));
     }
 
-    const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
+    const radius = CATEGORY_RADIUS[category] || 200;
+    // Utility-scale issues stay open longer, so widen the time window
+    const isUtility = ["Power Issue", "Water & Sanitation"].includes(category);
+    const lookbackMs = isUtility ? 7 * 24 * 60 * 60 * 1000 : 48 * 60 * 60 * 1000;
+    const cutoff = new Date(Date.now() - lookbackMs);
 
     const nearby = await Incident.find({
-        category,
         status: { $in: ["OPEN", "ACCEPTED", "IN_PROGRESS"] },
-        createdAt: { $gte: fortyEightHoursAgo },
+        createdAt: { $gte: cutoff },
         location: {
             $nearSphere: {
                 $geometry: {
                     type: "Point",
                     coordinates: [parseFloat(longitude), parseFloat(latitude)],
                 },
-                $maxDistance: 200, // 200 meters
+                $maxDistance: radius,
             },
         },
     })
-        .select("title category address upvotes reportId createdAt image location")
-        .limit(5)
+        .select("title description address category upvotes reportId createdAt image location")
+        .limit(10)
         .lean();
 
-    return res.status(200).json(new ApiResponse(200, nearby, "Nearby incidents checked"));
+    // Build the new report's full text fingerprint (title + description + address details)
+    const newText = `${title || ""} ${description || ""} ${addressDetails || ""}`.trim();
+
+    // If no text provided at all, fall back to geo-only match
+    if (!newText) {
+        const sameCat = nearby.filter((inc) => inc.category === category);
+        return res.status(200).json(new ApiResponse(200, sameCat.slice(0, 5), "Nearby incidents checked (geo-only)"));
+    }
+
+    const now = Date.now();
+    const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
+
+    // Score each nearby incident using TF-IDF cosine similarity + time bonus
+    const scored = nearby.map((inc) => {
+        // Full text comparison: title + description + address
+        const existingText = `${inc.title || ""} ${inc.description || ""} ${inc.address || ""}`.trim();
+        const textScore = tfidfCosineSimilarity(newText, existingText);
+
+        // Time proximity bonus: within 2 hours → full bonus
+        const ageMs = now - new Date(inc.createdAt).getTime();
+        const timeBonus = ageMs < TWO_HOURS_MS ? 1 : 0;
+
+        // Weighted final score: 85% text + 15% time (no category bonus)
+        const similarityScore = Math.min(1,
+            (textScore * 0.85) + (timeBonus * 0.15)
+        );
+
+        return { ...inc, similarityScore: Math.round(similarityScore * 100) / 100 };
+    });
+
+    // Filter by threshold and sort best matches first
+    const results = scored
+        .filter((inc) => inc.similarityScore >= SIMILARITY_THRESHOLD)
+        .sort((a, b) => b.similarityScore - a.similarityScore)
+        .slice(0, 5);
+
+    return res.status(200).json(new ApiResponse(200, results, "Nearby incidents checked"));
 });
 
 // ── Incident DNA: Upvote an existing incident ──
@@ -451,4 +541,57 @@ export const upvoteIncident = asyncHandler(async (req, res) => {
     return res.status(200).json(
         new ApiResponse(200, serializeIncidentForViewer(incident, req.user), "Upvote recorded successfully"),
     );
+});
+
+// ── AI Auto-Categorization ──
+const CATEGORY_KEYWORDS = {
+    "Water & Sanitation": [
+        "water", "pipe", "leak", "flood", "drain", "sewage", "sewer",
+        "tap", "supply", "contaminated", "dirty", "overflow", "clogged",
+        "well", "borewell", "tank", "pipeline", "burst", "sanitation",
+    ],
+    "Power Issue": [
+        "power", "electricity", "outage", "blackout", "voltage", "transformer",
+        "wire", "pole", "cable", "spark", "short", "circuit", "fuse",
+        "light", "meter", "generator", "electrocution", "current",
+    ],
+    "Infrastructure": [
+        "road", "pothole", "bridge", "crack", "footpath", "pavement",
+        "construction", "collapse", "building", "wall", "landslide",
+        "broken", "damaged", "sign", "signal", "traffic", "barrier",
+        "hole", "street", "highway",
+    ],
+    "Wildlife Intrusion": [
+        "animal", "snake", "elephant", "monkey", "wildlife", "wild",
+        "boar", "leopard", "tiger", "dog", "stray", "bite", "attack",
+        "intrusion", "sighting", "bear", "insect", "hive", "bee",
+    ],
+};
+
+export const categorizeIncident = asyncHandler(async (req, res) => {
+    const { text } = req.body;
+
+    if (!text || !text.trim()) {
+        return res.status(200).json(new ApiResponse(200, { suggestion: null, confidence: 0 }, "No text provided"));
+    }
+
+    const tokens = text.toLowerCase().split(/\W+/).filter(t => t.length > 1);
+    const scores = {};
+
+    for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+        const matches = tokens.filter((t) => keywords.includes(t));
+        scores[category] = matches.length;
+    }
+
+    // Find the best matching category
+    const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+    const [bestCategory, bestScore] = sorted[0];
+    const totalTokens = tokens.length || 1;
+    const confidence = Math.min(1, bestScore / Math.max(2, totalTokens * 0.5));
+
+    return res.status(200).json(new ApiResponse(200, {
+        suggestion: bestScore > 0 ? bestCategory : null,
+        confidence: Math.round(confidence * 100) / 100,
+        allScores: scores,
+    }, "Category suggestion generated"));
 });
