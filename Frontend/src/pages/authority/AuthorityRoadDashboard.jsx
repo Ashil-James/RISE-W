@@ -26,28 +26,29 @@ import { useAuth } from "../../context/AuthContext";
 // ─── StatCard Component ────────────────────────────────────────────────────────
 const StatCard = ({ title, value, icon: Icon, delay, bgClass, iconClass, loading }) => (
     <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay }}
-        whileHover={{ y: -5, scale: 1.02 }}
-        className="relative overflow-hidden rounded-xl p-6 bg-white/5 border border-white/10 backdrop-blur-xl group cursor-default"
+        transition={{ duration: 0.6, delay, type: "spring", stiffness: 100 }}
+        whileHover={{ y: -8, scale: 1.02 }}
+        className="relative overflow-hidden rounded-[2rem] p-8 bg-white/[0.02] border border-white/5 backdrop-blur-2xl group cursor-default shadow-lg"
     >
-        {/* Hover Glow */}
-        <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full bg-white/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        {/* Futuristic Hover Glows */}
+        <div className={`absolute -right-10 -top-10 w-40 h-40 rounded-full blur-[50px] opacity-0 group-hover:opacity-30 transition-all duration-700 ${bgClass.split(' ')[0]}`} />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
-        <div className="flex items-start justify-between mb-4 relative z-10">
-            <div className={`p-3.5 rounded-xl border border-white/5 transition-colors duration-300 ${bgClass}`}>
-                <Icon size={22} className={iconClass} />
+        <div className="flex items-start justify-between mb-6 relative z-10">
+            <div className={`p-4 rounded-2xl border border-white/10 transition-colors duration-500 shadow-inner backdrop-blur-md ${bgClass}`}>
+                <Icon size={26} className={iconClass} />
             </div>
         </div>
 
         <div className="relative z-10">
             {loading ? (
-                <Loader2 className="animate-spin text-gray-500 mb-2" size={24} />
+                <div className="h-10 w-24 bg-white/5 animate-pulse rounded-lg mb-2" />
             ) : (
-                <h3 className="text-3xl font-black text-white mb-1 tracking-tight">{value}</h3>
+                <h3 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 tracking-tight drop-shadow-sm mb-2">{value}</h3>
             )}
-            <p className="text-gray-400 text-sm font-medium">{title}</p>
+            <p className="text-gray-400 text-sm font-bold uppercase tracking-[0.2em]">{title}</p>
         </div>
     </motion.div>
 );
@@ -202,26 +203,29 @@ const AuthorityRoadDashboard = () => {
     ];
 
     return (
-        <div className="space-y-8 pb-12">
+        <div className="space-y-10 pb-16 relative">
+            <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-orange-500/10 blur-[120px] rounded-full pointer-events-none -translate-y-1/2" />
+            
             {/* ── HEADER ── */}
             <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="flex flex-col gap-1"
+                className="flex flex-col gap-1 relative z-10"
             >
-                <div className="flex flex-col mb-2">
-                    <span className="text-xs uppercase tracking-[0.3em] text-orange-400 font-bold mb-1">
+                <div className="flex flex-col mb-4">
+                    <span className="inline-block px-4 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/20 text-[10px] uppercase tracking-[0.3em] text-orange-400 font-black mb-2 w-max shadow-[0_0_15px_rgba(249,115,22,0.15)] flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-ping" />
                         {getGreeting()}
                     </span>
-                    <span className="text-[10px] uppercase tracking-widest text-gray-500 font-medium">
-                        Road Authority Control Center Online
+                    <span className="text-xs uppercase tracking-[0.2em] text-gray-500 font-bold ml-1">
+                        System Monitoring Active
                     </span>
                 </div>
-                <h1 className="text-3xl lg:text-4xl font-black text-white tracking-tight">
-                    Operations Dashboard
+                <h1 className="text-4xl lg:text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-orange-50 to-orange-200 tracking-tight drop-shadow-lg leading-tight">
+                    Command Center
                 </h1>
-                <p className="text-gray-400 font-medium">
-                    Operational status & analytics for the ROAD INFRASTRUCTURE Authority
+                <p className="text-orange-100/70 text-lg font-medium max-w-2xl ml-1">
+                    Live operational metrics and infrastructure health for the Road Authority.
                 </p>
             </motion.div>
 
@@ -267,15 +271,18 @@ const AuthorityRoadDashboard = () => {
 
             {/* ── CRITICAL ITEMS TABLE ── */}
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="bg-white/5 border border-white/10 rounded-xl overflow-hidden shadow-2xl backdrop-blur-xl"
+                transition={{ delay: 0.5, duration: 0.6 }}
+                className="glass-card border border-white/5 rounded-[2rem] overflow-hidden shadow-2xl relative group"
             >
-                <div className="p-6 border-b border-white/10 flex items-center justify-between">
-                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse shadow-[0_0_8px_rgba(249,115,22,0.8)]" />
-                        Critical Attention Items
+                <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
+                <div className="p-8 border-b border-white/5 flex items-center justify-between relative z-10">
+                    <h3 className="text-xl font-black text-white flex items-center gap-3 tracking-tight">
+                        <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
+                            <span className="w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse shadow-[0_0_15px_rgba(249,115,22,0.8)]" />
+                        </div>
+                        Critical Action Board
                     </h3>
                 </div>
 
@@ -403,26 +410,26 @@ const AuthorityRoadDashboard = () => {
             </motion.div>
 
             {/* Analytics Stat Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
                 {analyticsStats.map((stat, i) => (
                     <motion.div
                         key={stat.label}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.7 + i * 0.1 }}
-                        className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl relative overflow-hidden group"
+                        className="glass-card border border-white/5 rounded-[2rem] p-8 relative overflow-hidden group hover:border-white/10 transition-colors"
                     >
-                        <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:scale-110 transition-transform duration-500">
-                            <stat.icon size={64} />
+                        <div className="absolute -top-10 -right-10 p-3 opacity-[0.03] group-hover:opacity-10 group-hover:scale-125 transition-all duration-700 text-white">
+                            <stat.icon size={120} />
                         </div>
-                        <p className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">{stat.label}</p>
-                        <div className="flex items-end gap-3">
+                        <p className="text-gray-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">{stat.label}</p>
+                        <div className="flex items-end gap-4">
                             {analyticsLoading ? (
-                                <Loader2 size={24} className="animate-spin text-gray-500 my-1" />
+                                <div className="h-10 w-20 bg-white/5 animate-pulse rounded-lg my-1" />
                             ) : (
-                                <h3 className="text-3xl font-black text-white tracking-tight">{stat.value}</h3>
+                                <h3 className="text-4xl font-black text-white tracking-tight">{stat.value}</h3>
                             )}
-                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${stat.change.startsWith("+") ? "text-green-400 bg-green-400/10" : "text-red-400 bg-red-400/10"}`}>
+                            <span className={`text-[11px] font-black px-2.5 py-1 rounded-xl uppercase tracking-wider ${stat.change.startsWith("+") ? "text-green-400 bg-green-400/10 border border-green-400/20" : "text-red-400 bg-red-400/10 border border-red-400/20"}`}>
                                 {stat.change}
                             </span>
                         </div>

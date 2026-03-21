@@ -11,10 +11,11 @@
 
   --color-wayanad-primary: #10b981;
   --color-wayanad-danger: #ef4444;
+  --color-wayanad-glow: rgba(16, 185, 129, 0.4);
 
   /* Animations */
   --animate-blob: blob 7s infinite;
-  --animate-fade-up: fade-up 0.5s ease-out forwards;
+  --animate-fade-up: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   --animate-pulse-subtle: pulse-subtle 2s ease-in-out infinite;
   --animate-pulse-danger: pulse-danger 1.5s ease-in-out infinite;
@@ -123,6 +124,28 @@ body {
   overflow-x: hidden;
 }
 
+/* Premium Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.2);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.5);
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.6);
+}
+
 @utility scrollbar-hide {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -160,7 +183,30 @@ body {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@utility glass-panel {
+  backdrop-filter: blur(40px) saturate(1.8);
+  -webkit-backdrop-filter: blur(40px) saturate(1.8);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.08);
+}
+
+@utility hover-lift {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+  &:hover {
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 12px 40px -10px var(--color-wayanad-glow);
+  }
+  &:active {
+    transform: translateY(0) scale(0.98);
+  }
+}
+
+@utility neon-text {
+  text-shadow: 0 0 20px var(--color-wayanad-glow);
 }
 
 @layer base {
@@ -224,4 +270,45 @@ body {
 
 .user-aurora-3 {
   animation: userAurora3 18s ease-in-out infinite;
+}
+
+/* ── Typography & Clean UI Improvements ──────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.02em;
+}
+
+/* Adjust scrolling behavior for a smoother feel */
+html {
+  scroll-behavior: smooth;
+}
+
+/* 
+  Malayalam (ml) and Hindi (hi) fonts typically render inherently wider and taller than Latin fonts.
+  This causes the UI to look "way too big" and cramped. 
+  By scaling the root font-size slightly down for these languages, all 'rem' based 
+  Tailwind spacing and text-sizes gracefully compress, achieving a clean UI.
+*/
+html[lang="hi"] {
+  font-size: 15px;
+}
+
+html[lang="ml"] {
+  font-size: 13.5px;
+}
+
+/* Specific overrides for Malayalam to fix clipping on tight leading classes */
+html[lang="ml"] h1,
+html[lang="ml"] h2,
+html[lang="ml"] h3,
+html[lang="ml"] .text-4xl,
+html[lang="ml"] .text-3xl,
+html[lang="ml"] .text-2xl {
+  line-height: 1.5 !important;
+  letter-spacing: 0.01em;
+}
+
+/* Increase leading slightly for reading text in Malayalam */
+html[lang="ml"] p,
+html[lang="ml"] span {
+  line-height: 1.6;
 }

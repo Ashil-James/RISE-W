@@ -14,7 +14,7 @@ import { useTranslation } from "react-i18next";
 const ReportIncident = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
-  const { addReport } = useReports();
+  const { addReport, refreshReports } = useReports();
   const { user } = useUser();
 
   const [step, setStep] = useState(1);
@@ -240,6 +240,10 @@ const ReportIncident = () => {
         },
       });
       if (!res.ok) throw new Error("Upvote failed");
+      
+      // Force refresh the global reports context so the new supported case appears instantly
+      await refreshReports(user?.token, { force: true, showLoading: false });
+      
       setShowDuplicateModal(false);
       setStep(4); // upvote success step
     } catch (e) {

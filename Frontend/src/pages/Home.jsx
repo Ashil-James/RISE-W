@@ -180,9 +180,9 @@ const Home = () => {
       <motion.div variants={fadeUp} className="w-full max-w-md mb-8">
         <Link to="/report">
           <motion.button
-            whileHover={{ scale: 1.02, y: -2 }}
+            whileHover={{ y: -2 }}
             whileTap={{ scale: 0.98 }}
-            className="group relative w-full h-16 rounded-2xl font-bold text-lg text-white flex items-center justify-center gap-3 overflow-hidden transition-all"
+            className="group relative w-full h-16 rounded-2xl font-bold text-lg text-white flex items-center justify-center gap-3 overflow-hidden transition-all hover-lift"
             style={{
               background: "linear-gradient(135deg, #ff0f39, #ff4b6e)",
               boxShadow: "0 10px 40px -10px rgba(255,15,57,0.5)",
@@ -242,7 +242,7 @@ const Home = () => {
                 {summaryCards.map((card) => (
                   <div
                     key={card.label}
-                    className={`rounded-2xl p-5 ${card.bg} border ${card.border}`}
+                    className={`rounded-2xl p-5 ${card.bg} border ${card.border} hover-lift transition-all duration-300`}
                   >
                     <div
                       className={`w-10 h-10 rounded-xl flex items-center justify-center ${card.bg} ${card.tint} border ${card.border} mb-4`}
@@ -364,9 +364,8 @@ const Home = () => {
         latestAlert && (
           <Link to="/alerts" className="w-full max-w-3xl">
             <motion.div
-              className="w-full glass-card rounded-2xl p-4 flex items-center gap-4 group cursor-pointer relative overflow-hidden"
+              className="w-full glass-card rounded-2xl p-4 flex items-center gap-4 group cursor-pointer relative overflow-hidden hover-lift"
               variants={fadeUp}
-              whileHover={{ scale: 1.01, y: -2 }}
             >
               <div
                 className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl ${latestAlert.type === "critical" ? "bg-red-500" : latestAlert.type === "warning" ? "bg-yellow-500" : "bg-blue-500"}`}

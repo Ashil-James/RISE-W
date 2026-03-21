@@ -121,28 +121,38 @@ const Layout = () => {
       </nav>
 
       {/* Mobile Bottom Nav */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-4">
-        <div className="flex items-center justify-around py-2 rounded-2xl"
-          style={{
-            backdropFilter: "blur(40px) saturate(1.8)",
-            background: "var(--glass-bg)",
-            border: "1px solid var(--glass-border)",
-            boxShadow: "0 -4px 30px rgba(0,0,0,0.1)",
-          }}>
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 ptr-events-none">
+        <div className="flex items-center justify-around py-2 px-1 rounded-[1.5rem] glass-panel pointer-events-auto">
           {NAV_ITEMS.map((item) => {
             const active = isActive(item);
             return (
               <Link key={item.to} to={item.to}
-                className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all ${active ? "text-emerald-500" : "text-wayanad-muted"}`}>
-                <item.icon size={20} />
-                <span className="text-[10px] font-bold">{t(item.labelKey)}</span>
+                className={`relative flex flex-col items-center justify-center w-16 h-14 rounded-xl transition-all duration-300 ${active ? "text-white" : "text-wayanad-muted hover:text-wayanad-text"}`}>
+                {active && (
+                  <motion.div layoutId="mobile-nav-active"
+                    className="absolute inset-0 rounded-xl"
+                    style={{ background: "linear-gradient(135deg, #10b981, #059669)", boxShadow: "0 4px 12px rgba(16,185,129,0.3)" }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25 }} />
+                )}
+                <item.icon size={22} className={`relative z-10 transition-transform duration-300 ${active ? "scale-110 mb-0.5" : "scale-100"}`} />
+                <span className={`relative z-10 text-[10px] font-bold transition-all duration-300 ${active ? "opacity-100" : "opacity-0 h-0"}`}>
+                  {t(item.labelKey)}
+                </span>
               </Link>
             );
           })}
           <Link to="/profile"
-            className={`flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-all ${location.pathname === "/profile" ? "text-emerald-500" : "text-wayanad-muted"}`}>
-            <User size={20} />
-            <span className="text-[10px] font-bold">{t("nav.profile")}</span>
+            className={`relative flex flex-col items-center justify-center w-16 h-14 rounded-xl transition-all duration-300 ${location.pathname === "/profile" ? "text-white" : "text-wayanad-muted hover:text-wayanad-text"}`}>
+            {location.pathname === "/profile" && (
+              <motion.div layoutId="mobile-nav-active"
+                className="absolute inset-0 rounded-xl"
+                style={{ background: "linear-gradient(135deg, #10b981, #059669)", boxShadow: "0 4px 12px rgba(16,185,129,0.3)" }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }} />
+            )}
+            <User size={22} className={`relative z-10 transition-transform duration-300 ${location.pathname === "/profile" ? "scale-110 mb-0.5" : "scale-100"}`} />
+            <span className={`relative z-10 text-[10px] font-bold transition-all duration-300 ${location.pathname === "/profile" ? "opacity-100" : "opacity-0 h-0"}`}>
+              {t("nav.profile")}
+            </span>
           </Link>
         </div>
       </div>

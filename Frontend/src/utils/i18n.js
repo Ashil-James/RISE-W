@@ -419,4 +419,11 @@ i18n.use(initReactI18next).init({
   },
 });
 
+i18n.on('languageChanged', (lng) => {
+  document.documentElement.lang = lng;
+});
+
+// Set initial lang
+document.documentElement.lang = i18n.language || "en";
+
 export default i18n;

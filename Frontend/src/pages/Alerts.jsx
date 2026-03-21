@@ -70,17 +70,20 @@ const AlertCard = ({ alert, onOpen }) => {
 
   return (
     <motion.button
-      whileHover={{ y: -2 }}
+      whileHover={{ y: -4, scale: 1.01 }}
+      whileTap={{ scale: 0.99 }}
       onClick={interactive ? () => onOpen(alert) : undefined}
-      className={`w-full text-left rounded-[1.7rem] border p-5 relative overflow-hidden transition-colors ${
-        interactive ? "cursor-pointer hover:border-emerald-500/30" : ""
+      className={`w-full text-left rounded-[2rem] border p-6 relative overflow-hidden transition-all duration-300 group ${
+        interactive ? "cursor-pointer hover:border-emerald-500/40 hover:shadow-[0_0_30px_rgba(16,185,129,0.1)]" : ""
       }`}
       style={{
-        background: "rgba(255,255,255,0.03)",
+        background: "rgba(255,255,255,0.02)",
         borderColor: accent.border,
       }}
     >
-      <div className="flex items-start gap-4">
+      <div className={`absolute inset-0 bg-gradient-to-r from-transparent via-[${accent.bg.split(',').slice(0,3).join(',')},0.02)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl`} />
+      
+      <div className="relative z-10 flex items-start gap-5">
         <div
           className={`mt-1 p-3 rounded-2xl ${accent.text}`}
           style={{ background: accent.bg }}
@@ -233,10 +236,10 @@ const Alerts = () => {
       </motion.div>
 
       <motion.div variants={fadeUp} className="grid xl:grid-cols-[1.35fr_0.9fr] gap-5">
-        <div className="glass-card rounded-[2rem] p-6 md:p-7 relative overflow-hidden">
+        <div className="glass-card rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden border border-red-500/20 shadow-[0_0_40px_rgba(239,68,68,0.05)] group">
           <div
-            className="absolute -right-12 -top-12 h-36 w-36 rounded-full blur-3xl"
-            style={{ background: "rgba(239,68,68,0.12)" }}
+            className="absolute -right-12 -top-12 h-64 w-64 rounded-full blur-[80px]"
+            style={{ background: "rgba(239,68,68,0.15)" }}
           />
           <div className="relative z-10">
             <p className="text-[11px] font-black uppercase tracking-[0.28em] text-red-400/80 mb-2">
@@ -249,12 +252,12 @@ const Alerts = () => {
               Official alerts come from township authorities. Community alerts come from residents and are always labeled separately.
             </p>
 
-            <div className="grid grid-cols-3 gap-3 mt-6">
+            <div className="grid grid-cols-3 gap-4 mt-8">
               {statCards.map((card) => (
-                <div key={card.label} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-                  <card.icon size={16} className="text-emerald-500 mb-3" />
-                  <p className="text-2xl font-black text-wayanad-text">{card.value}</p>
-                  <p className="text-[11px] uppercase tracking-[0.18em] text-wayanad-muted font-black mt-1">
+                <div key={card.label} className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 backdrop-blur-md hover:bg-white/[0.04] transition-colors">
+                  <card.icon size={20} className="text-emerald-500 mb-4 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+                  <p className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70">{card.value}</p>
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-wayanad-muted font-black mt-2">
                     {card.label}
                   </p>
                 </div>
@@ -263,24 +266,29 @@ const Alerts = () => {
           </div>
         </div>
 
-        <div className="glass-card rounded-[2rem] p-6 border border-cyan-500/15">
-          <p className="text-[11px] font-black uppercase tracking-[0.28em] text-cyan-400/80 mb-2">
-            Community Alerts
-          </p>
-          <h3 className="text-xl font-black text-wayanad-text tracking-tight">
-            Share local updates responsibly
-          </h3>
-          <p className="text-sm text-wayanad-muted mt-3 leading-relaxed">
-            Community alerts publish immediately and appear with a clear community label so residents can distinguish them from official warnings.
-          </p>
-          <button
-            onClick={() => navigate("/create-alert")}
-            className="mt-5 inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-bold text-white"
-            style={{ background: "linear-gradient(135deg, #0891b2, #06b6d4)" }}
-          >
-            <Plus size={16} />
-            Create Community Alert
-          </button>
+        <div className="glass-card rounded-[2.5rem] p-8 md:p-10 border border-cyan-500/20 relative overflow-hidden group shadow-[0_0_30px_rgba(6,182,212,0.05)]">
+          <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 to-transparent pointer-events-none" />
+          <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-cyan-500/10 blur-[80px] rounded-full group-hover:bg-cyan-500/20 transition-colors duration-700" />
+          
+          <div className="relative z-10">
+            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-cyan-400 mb-3">
+              Community Alerts
+            </p>
+            <h3 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-cyan-100 tracking-tight leading-tight">
+              Share local updates responsibly
+            </h3>
+            <p className="text-sm text-cyan-100/60 mt-4 leading-relaxed">
+              Community alerts publish immediately and appear with a clear community label so residents can distinguish them from official warnings.
+            </p>
+            <button
+              onClick={() => navigate("/create-alert")}
+              className="mt-8 inline-flex items-center gap-3 rounded-xl px-5 py-3.5 text-sm font-bold text-white transition-transform hover:scale-105 hover:shadow-[0_0_20px_rgba(8,145,178,0.4)]"
+              style={{ background: "linear-gradient(135deg, #0891b2, #06b6d4)" }}
+            >
+              <Plus size={18} strokeWidth={2.5} />
+              Publish an Update
+            </button>
+          </div>
         </div>
       </motion.div>
 
@@ -347,10 +355,10 @@ const Alerts = () => {
       ) : (
         <>
           {featuredAlert && (
-            <motion.div variants={fadeUp} className="glass-card rounded-[2rem] p-6 md:p-7 relative overflow-hidden">
+            <motion.div variants={fadeUp} className="glass-card rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden border border-red-500/30 group shadow-[0_0_40px_rgba(239,68,68,0.08)]">
               <div
-                className="absolute -right-10 -top-10 h-40 w-40 rounded-full blur-3xl"
-                style={{ background: featuredAlert.type === "critical" ? "rgba(239,68,68,0.16)" : "rgba(16,185,129,0.14)" }}
+                className="absolute -right-10 -top-10 h-64 w-64 rounded-full blur-[80px]"
+                style={{ background: featuredAlert.type === "critical" ? "rgba(239,68,68,0.2)" : "rgba(16,185,129,0.2)" }}
               />
 
               <div className="relative z-10">

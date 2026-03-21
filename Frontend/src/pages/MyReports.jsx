@@ -255,7 +255,9 @@ const MyReports = () => {
           </div>
         ) : filteredReports.length === 0 ? (
           <motion.div
-            variants={fadeUp}
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 110, damping: 18 }}
             className="text-center py-20 glass-card rounded-[2rem]"
           >
             <FileText size={42} className="mx-auto mb-4 text-wayanad-muted opacity-30" />
@@ -265,13 +267,14 @@ const MyReports = () => {
             </p>
           </motion.div>
         ) : (
-          filteredReports.map((report) => (
+          filteredReports.map((report, index) => (
             <motion.button
               key={report.id}
-              variants={fadeUp}
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 110, damping: 18, delay: Math.min(index * 0.05, 0.4) }}
               onClick={() => navigate(`/my-reports/${report.id}`)}
-              className="w-full text-left glass-card rounded-[1.8rem] p-5 md:p-6 group relative overflow-hidden"
-              whileHover={{ y: -2, scale: 1.005 }}
+              className="w-full text-left glass-card rounded-[1.8rem] p-5 md:p-6 group relative overflow-hidden hover-lift"
             >
               <div className="absolute -right-10 -top-12 h-32 w-32 rounded-full bg-emerald-500/15 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
 

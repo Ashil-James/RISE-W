@@ -89,37 +89,51 @@ const WeatherWidget = () => {
     <motion.div 
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.02 }}
-      className="inline-flex items-center gap-4 py-2.5 px-6 rounded-full bg-slate-900/5 dark:bg-white/5 border border-slate-900/10 dark:border-white/10 shadow-sm dark:shadow-lg backdrop-blur-xl transition-all cursor-default"
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      className="group relative inline-flex items-center gap-4 py-2.5 px-6 rounded-full overflow-hidden cursor-default transition-all duration-300"
     >
-      {/* Temp and Icon */}
-      <div className="flex items-center gap-2.5">
-        {getWeatherIcon(current.weather_code, 22)}
-        <span className="text-xl font-black text-slate-800 dark:text-white tracking-tight">
-          {Math.round(current.temperature_2m)}°
-        </span>
-      </div>
+      {/* Animated glowing backdrop */}
+      <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-cyan-500/10 to-blue-500/10 opacity-50 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="absolute inset-0 backdrop-blur-xl border border-white/10 dark:border-white/5 rounded-full" />
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-gradient-to-r from-emerald-400/20 via-cyan-400/20 to-blue-400/20 blur-md transition-opacity duration-500" />
+
+      {/* Content wrapper */}
+      <div className="relative z-10 flex items-center gap-4">
+        {/* Temp and Icon */}
+        <div className="flex items-center gap-2.5">
+          <motion.div 
+            animate={{ y: [0, -2, 0] }} 
+            transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+          >
+            {getWeatherIcon(current.weather_code, 22)}
+          </motion.div>
+          <span className="text-2xl font-black text-slate-800 dark:text-white tracking-tight drop-shadow-sm">
+            {Math.round(current.temperature_2m)}°
+          </span>
+        </div>
 
       <div className="w-px h-6 bg-slate-900/10 dark:bg-white/10"></div>
 
       {/* Description and Location Info */}
       <div className="flex flex-col justify-center">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-bold text-slate-700 dark:text-gray-100 leading-none">
+          <span className="text-sm font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-cyan-600 dark:from-emerald-400 dark:to-cyan-400">
             {getWeatherDescription(current.weather_code)}
           </span>
           {todayPrecip > 0 && (
-            <span className="text-[10px] font-black bg-blue-500/20 text-blue-600 dark:text-blue-300 px-1.5 py-0.5 rounded uppercase tracking-wider">
+            <span className="text-[10px] font-black bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-300 px-2 py-0.5 rounded-md uppercase tracking-wider backdrop-blur-sm">
               {todayPrecip}mm Rain
             </span>
           )}
         </div>
-        <span className="text-xs text-slate-500 dark:text-gray-400 font-medium mt-1 leading-none flex items-center gap-1.5">
+        <span className="text-xs text-slate-500 dark:text-gray-400 font-bold mt-1 leading-none flex items-center gap-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
           <MapPin size={10} className="text-emerald-600 dark:text-emerald-500" />
           {user?.location ? "My Location" : "Wayanad"}
           <span className="mx-0.5 opacity-50">•</span>
           H:{todayMax}° L:{todayMin}°
         </span>
+      </div>
       </div>
     </motion.div>
   );
