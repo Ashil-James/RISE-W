@@ -30,13 +30,16 @@ const StatCard = ({ title, value, icon: Icon, delay, bgClass, iconClass, loading
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay }}
         whileHover={{ y: -5, scale: 1.02 }}
-        className="relative overflow-hidden rounded-xl p-6 bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 backdrop-blur-xl group cursor-default"
+        className="relative overflow-hidden rounded-2xl p-6 bg-white/40 dark:bg-black/20 border border-white/60 dark:border-white/10 backdrop-blur-2xl group cursor-default shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)] ring-1 ring-white/50 dark:ring-white/5"
     >
         {/* Hover Glow */}
-        <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full bg-emerald-900/5 dark:bg-white/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className={`absolute -right-6 -top-6 w-32 h-32 rounded-full ${bgClass} blur-[40px] opacity-0 group-hover:opacity-50 transition-opacity duration-500`} />
+        
+        {/* Inner Top Highlight */}
+        <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-white/50 dark:via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
         <div className="flex items-start justify-between mb-4 relative z-10">
-            <div className={`p-3.5 rounded-xl border border-emerald-900/5 dark:border-white/5 transition-colors duration-300 ${bgClass}`}>
+            <div className={`p-3.5 rounded-2xl border border-white/50 dark:border-white/5 transition-colors duration-300 ${bgClass.split(" ")[0]} shadow-inner`}>
                 <Icon size={22} className={iconClass} />
             </div>
         </div>
@@ -47,7 +50,7 @@ const StatCard = ({ title, value, icon: Icon, delay, bgClass, iconClass, loading
             ) : (
                 <h3 className="text-3xl font-black text-emerald-950 dark:text-white mb-1 tracking-tight">{value}</h3>
             )}
-            <p className="text-gray-400 text-sm font-medium">{title}</p>
+            <p className="text-emerald-900/60 dark:text-gray-400 text-[13px] font-bold uppercase tracking-wider">{title}</p>
         </div>
     </motion.div>
 );
@@ -71,7 +74,7 @@ const COLORS = ["#F59E0B", "#6366f1", "#8b5cf6", "#ec4899", "#f43f5e"];
 const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
         return (
-            <div className="bg-[#0f172a] border border-emerald-900/10 dark:border-white/10 p-3 rounded-lg backdrop-blur-md shadow-2xl">
+            <div className="bg-white/80 dark:bg-black/40 border border-white/60 dark:border-white/10 p-4 rounded-xl backdrop-blur-3xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] ring-1 ring-white/50 dark:ring-white/5">
                 <p className="text-emerald-950 dark:text-white font-bold text-xs mb-1">{label || payload[0].name}</p>
                 <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: payload[0].color || payload[0].fill }} />
@@ -181,7 +184,13 @@ const AuthorityPowerDashboard = () => {
     ];
 
     return (
-        <div className="space-y-8 pb-12">
+        <div className="space-y-8 pb-12 relative min-h-screen">
+            {/* ── AMBIENT POWER BACKGROUND MESH ── */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+                 <div className="absolute -top-[10%] -left-[10%] h-[600px] w-[600px] rounded-full bg-amber-400/20 dark:bg-amber-500/10 blur-[120px] mix-blend-multiply dark:mix-blend-screen animate-blob" />
+                 <div className="absolute top-[40%] -right-[10%] h-[700px] w-[700px] rounded-full bg-orange-400/20 dark:bg-orange-600/10 blur-[130px] mix-blend-multiply dark:mix-blend-screen animate-blob delay-200" />
+                 <div className="absolute -bottom-[20%] left-[20%] h-[500px] w-[500px] rounded-full bg-yellow-400/10 dark:bg-yellow-500/5 blur-[100px] mix-blend-multiply dark:mix-blend-screen animate-blob delay-500" />
+            </div>
             {/* ── HEADER ── */}
             <motion.div
                 initial={{ opacity: 0, x: -20 }}
@@ -249,7 +258,7 @@ const AuthorityPowerDashboard = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-xl overflow-hidden shadow-2xl backdrop-blur-xl"
+                className="bg-white/40 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-2xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)] backdrop-blur-2xl ring-1 ring-white/50 dark:ring-white/5"
             >
                 <div className="p-6 border-b border-emerald-900/10 dark:border-white/10 flex items-center justify-between">
                     <h3 className="text-lg font-bold text-emerald-950 dark:text-white flex items-center gap-2">
@@ -326,8 +335,16 @@ const AuthorityPowerDashboard = () => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={8} className="py-12 text-center text-gray-500 font-medium">
-                                        No critical items currently require immediate attention.
+                                    <td colSpan={8} className="py-24 text-center">
+                                        <div className="flex flex-col items-center justify-center space-y-4 animate-fade-up">
+                                            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-500/20 to-orange-500/5 flex items-center justify-center mb-2 shadow-[0_0_40px_rgba(245,158,11,0.15)] ring-1 ring-amber-500/20">
+                                                <CheckCircle size={40} className="text-amber-500" />
+                                            </div>
+                                            <h4 className="text-xl font-black text-emerald-950 dark:text-white tracking-tight">System Stable</h4>
+                                            <p className="text-[15px] font-medium text-emerald-900/60 dark:text-gray-400 max-w-sm">
+                                                All active parameters are within normal thresholds. No critical incident reports demand your immediate attention.
+                                            </p>
+                                        </div>
                                     </td>
                                 </tr>
                             )}
@@ -363,7 +380,7 @@ const AuthorityPowerDashboard = () => {
                 <div className="relative">
                     <button
                         onClick={() => setIsFilterOpen(!isFilterOpen)}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-emerald-900/5 dark:bg-white/5 border border-amber-500/20 text-emerald-950 dark:text-white rounded-xl text-sm font-bold transition-all hover:bg-emerald-900/10 hover:dark:hover:bg-white/10"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-white/40 dark:bg-black/20 border border-white/60 dark:border-white/10 text-emerald-950 dark:text-white rounded-xl text-sm font-bold transition-all hover:bg-white/60 hover:dark:bg-white/5 shadow-lg backdrop-blur-xl ring-1 ring-white/50 dark:ring-white/5"
                     >
                         <Filter size={16} className="text-amber-400" />
                         {timeRange}
@@ -401,7 +418,7 @@ const AuthorityPowerDashboard = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.7 + i * 0.1 }}
-                        className="bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl relative overflow-hidden group"
+                        className="bg-white/40 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-2xl p-6 backdrop-blur-2xl relative overflow-hidden group shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)] ring-1 ring-white/50 dark:ring-white/5"
                     >
                         <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:scale-110 transition-transform duration-500">
                             <stat.icon size={64} />
@@ -428,7 +445,7 @@ const AuthorityPowerDashboard = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.1 }}
-                    className="bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl"
+                    className="bg-white/40 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-2xl p-6 backdrop-blur-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)] ring-1 ring-white/50 dark:ring-white/5"
                 >
                     <div className="flex items-center gap-3 mb-8">
                         <div className="p-2 rounded-lg bg-amber-500/10">
@@ -458,7 +475,7 @@ const AuthorityPowerDashboard = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.2 }}
-                    className="bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl"
+                    className="bg-white/40 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-2xl p-6 backdrop-blur-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)] ring-1 ring-white/50 dark:ring-white/5"
                 >
                     <div className="flex items-center gap-3 mb-8">
                         <div className="p-2 rounded-lg bg-amber-500/10">
@@ -492,7 +509,7 @@ const AuthorityPowerDashboard = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.3 }}
-                    className="lg:col-span-2 bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl"
+                    className="lg:col-span-2 bg-white/40 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-2xl p-6 backdrop-blur-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)] ring-1 ring-white/50 dark:ring-white/5"
                 >
                     <div className="flex items-center gap-3 mb-8">
                         <div className="p-2 rounded-lg bg-amber-500/10">

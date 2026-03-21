@@ -72,7 +72,7 @@ const COLORS = ["#F97316", "#6366f1", "#8b5cf6", "#ec4899", "#f43f5e"];
 const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
         return (
-            <div className="bg-[#0f172a] border border-emerald-900/10 dark:border-white/10 p-3 rounded-lg backdrop-blur-md shadow-2xl">
+            <div className="bg-white/80 dark:bg-black/40 border border-white/60 dark:border-white/10 p-4 rounded-xl backdrop-blur-3xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] ring-1 ring-white/50 dark:ring-white/5">
                 <p className="text-emerald-950 dark:text-white font-bold text-xs mb-1">{label || payload[0].name}</p>
                 <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: payload[0].color || payload[0].fill }} />
@@ -342,8 +342,16 @@ const AuthorityRoadDashboard = () => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={8} className="py-20 text-center text-gray-500 font-medium">
-                                        No critical attention items found.
+                                    <td colSpan={8} className="py-24 text-center">
+                                        <div className="flex flex-col items-center justify-center space-y-4 animate-fade-up">
+                                            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500/20 to-red-500/5 flex items-center justify-center mb-2 shadow-[0_0_40px_rgba(249,115,22,0.15)] ring-1 ring-orange-500/20">
+                                                <CheckCircle size={40} className="text-orange-500" />
+                                            </div>
+                                            <h4 className="text-xl font-black text-emerald-950 dark:text-white tracking-tight">System Stable</h4>
+                                            <p className="text-[15px] font-medium text-emerald-900/60 dark:text-gray-400 max-w-sm">
+                                                All active parameters are within normal thresholds. No critical incident reports demand your immediate attention.
+                                            </p>
+                                        </div>
                                     </td>
                                 </tr>
                             )}
@@ -379,7 +387,7 @@ const AuthorityRoadDashboard = () => {
                 <div className="relative">
                     <button
                         onClick={() => setIsFilterOpen(!isFilterOpen)}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-emerald-900/5 dark:bg-white/5 border border-orange-500/20 text-emerald-950 dark:text-white rounded-xl text-sm font-bold transition-all hover:bg-emerald-900/10 hover:dark:hover:bg-white/10"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-white/40 dark:bg-black/20 border border-white/60 dark:border-white/10 text-emerald-950 dark:text-white rounded-xl text-sm font-bold transition-all hover:bg-white/60 hover:dark:bg-white/5 shadow-lg backdrop-blur-xl ring-1 ring-white/50 dark:ring-white/5"
                     >
                         <Filter size={16} className="text-orange-400" />
                         {timeRange}
@@ -444,7 +452,7 @@ const AuthorityRoadDashboard = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.1 }}
-                    className="bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl"
+                    className="bg-white/40 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-[2rem] p-8 backdrop-blur-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)] ring-1 ring-white/50 dark:ring-white/5"
                 >
                     <div className="flex items-center gap-3 mb-8">
                         <div className="p-2 rounded-lg bg-orange-500/10">
@@ -474,7 +482,7 @@ const AuthorityRoadDashboard = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.2 }}
-                    className="bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl"
+                    className="bg-white/40 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-[2rem] p-8 backdrop-blur-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)] ring-1 ring-white/50 dark:ring-white/5"
                 >
                     <div className="flex items-center gap-3 mb-8">
                         <div className="p-2 rounded-lg bg-orange-500/10">
@@ -508,7 +516,7 @@ const AuthorityRoadDashboard = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.3 }}
-                    className="lg:col-span-2 bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl"
+                    className="lg:col-span-2 bg-white/40 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-[2rem] p-8 backdrop-blur-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)] ring-1 ring-white/50 dark:ring-white/5"
                 >
                     <div className="flex items-center gap-3 mb-8">
                         <div className="p-2 rounded-lg bg-orange-500/10">
