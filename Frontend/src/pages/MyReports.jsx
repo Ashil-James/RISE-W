@@ -228,27 +228,25 @@ const MyReports = () => {
         </div>
       </motion.div>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {loading && scopedReports.length === 0 ? (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="glass-card rounded-[1.8rem] p-6 relative overflow-hidden">
+              <div key={i} className="glass-card rounded-[1.5rem] p-5 relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full animate-[shimmer_2s_infinite]" />
-                <div className="flex flex-col lg:flex-row gap-4 mb-5">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div className="flex-1 space-y-3">
                     <div className="flex gap-2">
-                      <div className="h-6 w-20 bg-emerald-500/10 rounded-xl" />
-                      <div className="h-6 w-24 bg-white/5 rounded-xl" />
+                      <div className="h-5 w-16 bg-emerald-500/10 rounded-lg" />
+                      <div className="h-5 w-20 bg-white/5 rounded-lg" />
                     </div>
-                    <div className="h-8 w-3/4 bg-white/5 rounded-xl" />
-                    <div className="h-4 w-1/2 bg-white/5 rounded-xl" />
+                    <div className="h-6 w-2/3 max-w-[300px] bg-white/5 rounded-lg" />
+                    <div className="h-4 w-1/2 max-w-[200px] bg-white/5 rounded-lg" />
                   </div>
-                  <div className="w-32 h-12 bg-white/5 rounded-xl lg:ml-auto" />
-                </div>
-                <div className="grid md:grid-cols-3 gap-3">
-                  <div className="h-24 bg-white/[0.02] rounded-2xl border border-white/5" />
-                  <div className="h-24 bg-white/[0.02] rounded-2xl border border-white/5" />
-                  <div className="h-24 bg-white/[0.02] rounded-2xl border border-white/5" />
+                  <div className="flex flex-col gap-2 md:items-end w-32">
+                    <div className="h-3 w-20 bg-white/5 rounded-md" />
+                    <div className="h-5 w-24 bg-white/5 rounded-lg" />
+                  </div>
                 </div>
               </div>
             ))}
@@ -270,97 +268,58 @@ const MyReports = () => {
           filteredReports.map((report, index) => (
             <motion.button
               key={report.id}
-              initial={{ y: 20, opacity: 0 }}
+              initial={{ y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ type: "spring", stiffness: 110, damping: 18, delay: Math.min(index * 0.05, 0.4) }}
               onClick={() => navigate(`/my-reports/${report.id}`)}
-              className="w-full text-left glass-card rounded-[1.8rem] p-5 md:p-6 group relative overflow-hidden hover-lift"
+              className="w-full text-left glass-card rounded-[1.5rem] p-4 md:p-5 group relative overflow-hidden transition-all hover:bg-white/[0.03] hover:border-emerald-500/30"
             >
-              <div className="absolute -right-10 -top-12 h-32 w-32 rounded-full bg-emerald-500/15 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
-
-              <div className="relative z-10">
-                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-5">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2 mb-3">
-                      <span className="text-[11px] font-mono font-bold px-2.5 py-1 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
-                        {report.displayId}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-y-1/2 translate-x-1/2" />
+              
+              <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                      {report.displayId}
+                    </span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${report.statusColor}`}>
+                      {report.status}
+                    </span>
+                    {report.isSupporter && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md text-cyan-400 bg-cyan-500/10 border border-cyan-500/20">
+                        Supporting
                       </span>
-                      <span className={`text-[11px] font-bold px-2.5 py-1 rounded-xl ${report.statusColor}`}>
-                        {report.status}
-                      </span>
-                      {report.isSupporter && (
-                        <span className="text-[11px] font-bold px-2.5 py-1 rounded-xl text-cyan-400 bg-cyan-500/10 border border-cyan-500/20">
-                          Supporting
-                        </span>
-                      )}
-                    </div>
-
-                    <h3 className="text-xl font-black text-wayanad-text tracking-tight mb-2">
-                      {report.issue}
-                    </h3>
-                    <div className="flex flex-wrap items-center gap-3 text-sm text-wayanad-muted">
-                      <span className="flex items-center gap-1.5">
-                        <MapPin size={14} />
-                        {report.location}
-                      </span>
-                      <span className="hidden md:inline text-white/10">•</span>
-                      <span>{report.authorityLabel}</span>
-                    </div>
+                    )}
                   </div>
-
-                  <div className="text-left lg:text-right">
-                    <p className="text-[11px] uppercase tracking-[0.18em] text-wayanad-muted font-black mb-2">
-                      Last Update
-                    </p>
-                    <p className="text-sm font-bold text-wayanad-text flex items-center gap-2 lg:justify-end">
-                      <Clock3 size={14} className="text-emerald-500" />
+                  
+                  <h3 className="text-[1.1rem] font-bold text-wayanad-text mb-1.5 truncate">
+                    {report.issue}
+                  </h3>
+                  
+                  <div className="flex items-center gap-2.5 text-xs text-wayanad-muted">
+                    <span className="flex items-center gap-1.5 min-w-0">
+                      <MapPin size={12} className="shrink-0 text-white/40" />
+                      <span className="truncate">{report.location}</span>
+                    </span>
+                    <span className="w-1 h-1 rounded-full bg-white/20 shrink-0" />
+                    <span className="truncate">{report.authorityLabel}</span>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between md:justify-end gap-5 md:min-w-[180px]">
+                  <div className="flex flex-col items-start md:items-end">
+                    <span className="text-[10px] uppercase tracking-wider text-wayanad-muted font-bold mb-1">
+                      Last Updated
+                    </span>
+                    <div className="flex items-center gap-1.5 text-sm font-medium text-wayanad-text">
+                      <Clock3 size={13} className="text-emerald-500/70" />
                       {report.lastUpdatedLabel}
-                    </p>
-                    <p className="text-xs text-wayanad-muted mt-1">{report.lastUpdatedDateTime}</p>
+                    </div>
                   </div>
-                </div>
-
-                <div className="grid md:grid-cols-3 gap-3">
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
-                    <p className="text-[11px] uppercase tracking-[0.18em] text-wayanad-muted font-black mb-2">
-                      What Happens Next
-                    </p>
-                    <p className="text-sm font-bold text-wayanad-text">{report.nextActionLabel}</p>
-                    <p className="text-xs text-wayanad-muted mt-2 line-clamp-2">{report.nextActionDescription}</p>
+                  
+                  <div className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-emerald-500/10 group-hover:text-emerald-500 group-hover:border-emerald-500/30 transition-all shrink-0">
+                    <ChevronRight size={16} className="translate-x-0 group-hover:translate-x-0.5 transition-transform" />
                   </div>
-
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
-                    <p className="text-[11px] uppercase tracking-[0.18em] text-wayanad-muted font-black mb-2">
-                      Latest Progress
-                    </p>
-                    <p className="text-sm font-bold text-wayanad-text line-clamp-2">
-                      {report.latestUpdate?.note || report.statusMeaning}
-                    </p>
-                    <p className="text-xs text-wayanad-muted mt-2">
-                      {report.latestUpdate?.actorLabel || report.authorityLabel}
-                    </p>
-                  </div>
-
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-4">
-                    <p className="text-[11px] uppercase tracking-[0.18em] text-wayanad-muted font-black mb-2">
-                      Community Support
-                    </p>
-                    <p className="text-sm font-bold text-wayanad-text flex items-center gap-2">
-                      <Users size={15} className="text-emerald-500" />
-                      {report.supportCount > 0 ? `${report.supportCount} supporters` : "Only your report"}
-                    </p>
-                    <p className="text-xs text-wayanad-muted mt-2 line-clamp-2">{report.communitySummary}</p>
-                  </div>
-                </div>
-
-                <div className="mt-4 flex items-center justify-between text-sm">
-                  <p className="text-wayanad-muted">
-                    Submitted {report.submittedLabel}
-                  </p>
-                  <span className="text-emerald-500 font-bold flex items-center gap-1">
-                    View case
-                    <ChevronRight size={16} className="group-hover:translate-x-1 transition-transform" />
-                  </span>
                 </div>
               </div>
             </motion.button>
