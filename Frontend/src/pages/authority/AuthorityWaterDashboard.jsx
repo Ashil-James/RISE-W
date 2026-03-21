@@ -30,19 +30,19 @@ const StatCard = ({ title, value, icon: Icon, delay, bgClass, iconClass }) => (
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay }}
         whileHover={{ y: -5, scale: 1.02 }}
-        className="relative overflow-hidden rounded-xl p-6 bg-white/5 border border-white/10 backdrop-blur-xl group cursor-default"
+        className="relative overflow-hidden rounded-xl p-6 bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 backdrop-blur-xl group cursor-default"
     >
         {/* Hover Glow */}
-        <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full bg-white/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full bg-emerald-900/5 dark:bg-white/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
         <div className="flex items-start justify-between mb-4 relative z-10">
-            <div className={`p-3.5 rounded-xl border border-white/5 transition-colors duration-300 ${bgClass}`}>
+            <div className={`p-3.5 rounded-xl border border-emerald-900/5 dark:border-white/5 transition-colors duration-300 ${bgClass}`}>
                 <Icon size={22} className={iconClass} />
             </div>
         </div>
 
         <div className="relative z-10">
-            <h3 className="text-3xl font-black text-white mb-1 tracking-tight">{value}</h3>
+            <h3 className="text-3xl font-black text-emerald-950 dark:text-white mb-1 tracking-tight">{value}</h3>
             <p className="text-gray-400 text-sm font-medium">{title}</p>
         </div>
     </motion.div>
@@ -94,8 +94,8 @@ const COLORS = ["#0EA5E9", "#6366f1", "#8b5cf6", "#ec4899", "#f43f5e"];
 const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
         return (
-            <div className="bg-[#0f172a] border border-white/10 p-3 rounded-lg backdrop-blur-md shadow-2xl">
-                <p className="text-white font-bold text-xs mb-1">{label || payload[0].name}</p>
+            <div className="bg-[#0f172a] border border-emerald-900/10 dark:border-white/10 p-3 rounded-lg backdrop-blur-md shadow-2xl">
+                <p className="text-emerald-950 dark:text-white font-bold text-xs mb-1">{label || payload[0].name}</p>
                 <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: payload[0].color || payload[0].fill }} />
                     <p className="text-[#e2e8f0] text-sm font-medium">
@@ -232,7 +232,7 @@ const AuthorityWaterDashboard = () => {
                         Water Authority Control Center Online
                     </span>
                 </div>
-                <h1 className="text-3xl lg:text-4xl font-black text-white tracking-tight">
+                <h1 className="text-3xl lg:text-4xl font-black text-emerald-950 dark:text-white tracking-tight">
                     Operations Dashboard
                 </h1>
                 <p className="text-gray-400 font-medium">
@@ -281,10 +281,10 @@ const AuthorityWaterDashboard = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="bg-white/5 border border-white/10 rounded-xl overflow-hidden shadow-2xl backdrop-blur-xl"
+                className="bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-xl overflow-hidden shadow-2xl backdrop-blur-xl"
             >
-                <div className="p-6 border-b border-white/10 flex items-center justify-between">
-                    <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <div className="p-6 border-b border-emerald-900/10 dark:border-white/10 flex items-center justify-between">
+                    <h3 className="text-lg font-bold text-emerald-950 dark:text-white flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
                         Critical Attention Items
                     </h3>
@@ -304,7 +304,7 @@ const AuthorityWaterDashboard = () => {
                     ) : (
                         <table className="w-full text-left border-collapse">
                             <thead>
-                                <tr className="bg-black/20 text-xs uppercase tracking-wider text-gray-500 font-bold border-b border-white/5">
+                                <tr className="bg-emerald-900/5 dark:bg-black/20 text-xs uppercase tracking-wider text-gray-500 font-bold border-b border-emerald-900/5 dark:border-white/5">
                                     <th className="px-6 py-4">Report ID</th>
                                     <th className="px-6 py-4">Category</th>
                                     <th className="px-6 py-4">Sub-Type</th>
@@ -318,12 +318,12 @@ const AuthorityWaterDashboard = () => {
                             <tbody className="divide-y divide-white/5">
                                 {criticalItems.length > 0 ? (
                                     criticalItems.map((row) => (
-                                        <tr key={row.id} className="hover:bg-white/5 transition-colors group">
+                                        <tr key={row.id} className="hover:bg-emerald-900/5 hover:dark:hover:bg-white/5 transition-colors group">
                                             <td className="px-6 py-4 font-mono text-sm text-sky-400 font-bold">{row.ref}</td>
                                             <td className="px-6 py-4 text-sm text-gray-300">{row.category}</td>
-                                            <td className="px-6 py-4 text-sm text-white font-medium">{row.subtype}</td>
+                                            <td className="px-6 py-4 text-sm text-emerald-950 dark:text-white font-medium">{row.subtype}</td>
                                             <td className="px-6 py-4 text-sm text-gray-400">{row.loc}</td>
-                                            <td className="px-6 py-4 text-sm font-black text-white">{row.urg}</td>
+                                            <td className="px-6 py-4 text-sm font-black text-emerald-950 dark:text-white">{row.urg}</td>
                                             <td className="px-6 py-4">
                                                 {row.urg >= 75 && row.status !== "Resolved" && row.status !== "Work Completed" ? (
                                                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${STATUS_STYLES["High Urgency"]}`}>
@@ -341,7 +341,7 @@ const AuthorityWaterDashboard = () => {
                                             <td className="px-6 py-4 text-right">
                                                 <button
                                                     onClick={() => navigate(`/authority/water/case/${row.id}`)}
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-sky-500/20 text-gray-300 hover:text-sky-300 border border-white/10 hover:border-sky-500/30 rounded-lg text-xs font-bold transition-all"
+                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-900/5 dark:bg-white/5 hover:bg-sky-500/20 text-gray-300 hover:text-sky-300 border border-emerald-900/10 dark:border-white/10 hover:border-sky-500/30 rounded-lg text-xs font-bold transition-all"
                                                 >
                                                     View <ArrowUpRight size={14} />
                                                 </button>
@@ -370,10 +370,10 @@ const AuthorityWaterDashboard = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
-                className="flex flex-col md:flex-row md:items-end justify-between gap-4 pt-4 border-t border-white/5"
+                className="flex flex-col md:flex-row md:items-end justify-between gap-4 pt-4 border-t border-emerald-900/5 dark:border-white/5"
             >
                 <div>
-                    <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-3">
+                    <h2 className="text-2xl font-black text-emerald-950 dark:text-white tracking-tight flex items-center gap-3">
                         <div className="p-2 rounded-lg bg-sky-500/10">
                             <BarChart3 size={20} className="text-sky-400" />
                         </div>
@@ -388,7 +388,7 @@ const AuthorityWaterDashboard = () => {
                 <div className="relative">
                     <button
                         onClick={() => setIsFilterOpen(!isFilterOpen)}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-sky-500/20 text-white rounded-xl text-sm font-bold transition-all hover:bg-white/10"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-emerald-900/5 dark:bg-white/5 border border-sky-500/20 text-emerald-950 dark:text-white rounded-xl text-sm font-bold transition-all hover:bg-emerald-900/10 hover:dark:hover:bg-white/10"
                     >
                         <Filter size={16} className="text-sky-400" />
                         {timeRange}
@@ -401,13 +401,13 @@ const AuthorityWaterDashboard = () => {
                                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                className="absolute right-0 mt-2 w-48 bg-[#020617] border border-white/10 rounded-xl shadow-2xl z-50 p-1 backdrop-blur-3xl"
+                                className="absolute right-0 mt-2 w-48 bg-[#020617] border border-emerald-900/10 dark:border-white/10 rounded-xl shadow-2xl z-50 p-1 backdrop-blur-3xl"
                             >
                                 {["Last 7 Days", "Last 30 Days", "Last 3 Months"].map((range) => (
                                     <button
                                         key={range}
                                         onClick={() => { setTimeRange(range); setIsFilterOpen(false); }}
-                                        className={`w-full text-left px-4 py-2 rounded-lg text-sm font-medium transition-colors ${timeRange === range ? "bg-sky-500/10 text-sky-400" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}
+                                        className={`w-full text-left px-4 py-2 rounded-lg text-sm font-medium transition-colors ${timeRange === range ? "bg-sky-500/10 text-sky-400" : "text-gray-400 hover:bg-emerald-900/5 hover:dark:hover:bg-white/5 hover:text-emerald-950 hover:dark:hover:text-white"}`}
                                     >
                                         {range}
                                     </button>
@@ -426,7 +426,7 @@ const AuthorityWaterDashboard = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.7 + i * 0.1 }}
-                        className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl relative overflow-hidden group"
+                        className="bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl relative overflow-hidden group"
                     >
                         <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:scale-110 transition-transform duration-500">
                             <stat.icon size={64} />
@@ -436,7 +436,7 @@ const AuthorityWaterDashboard = () => {
                             {analyticsLoading ? (
                                 <Loader2 size={24} className="animate-spin text-gray-500 my-1" />
                             ) : (
-                                <h3 className="text-3xl font-black text-white tracking-tight">{stat.value}</h3>
+                                <h3 className="text-3xl font-black text-emerald-950 dark:text-white tracking-tight">{stat.value}</h3>
                             )}
                             <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${stat.change.startsWith("+") ? "text-green-400 bg-green-400/10" : "text-red-400 bg-red-400/10"}`}>
                                 {stat.change}
@@ -453,13 +453,13 @@ const AuthorityWaterDashboard = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.1 }}
-                    className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl"
+                    className="bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl"
                 >
                     <div className="flex items-center gap-3 mb-8">
                         <div className="p-2 rounded-lg bg-sky-500/10">
                             <BarChart3 size={20} className="text-sky-400" />
                         </div>
-                        <h3 className="text-lg font-bold text-white">Weekly Complaint Trend</h3>
+                        <h3 className="text-lg font-bold text-emerald-950 dark:text-white">Weekly Complaint Trend</h3>
                     </div>
                     <div className="h-80 w-full">
                         {analyticsLoading ? (
@@ -483,13 +483,13 @@ const AuthorityWaterDashboard = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.2 }}
-                    className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl"
+                    className="bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl"
                 >
                     <div className="flex items-center gap-3 mb-8">
                         <div className="p-2 rounded-lg bg-sky-500/10">
                             <PieChartIcon size={20} className="text-sky-400" />
                         </div>
-                        <h3 className="text-lg font-bold text-white">Issue Category Breakdown</h3>
+                        <h3 className="text-lg font-bold text-emerald-950 dark:text-white">Issue Category Breakdown</h3>
                     </div>
                     <div className="h-80 w-full">
                         {analyticsLoading ? (
@@ -517,13 +517,13 @@ const AuthorityWaterDashboard = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.3 }}
-                    className="lg:col-span-2 bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl"
+                    className="lg:col-span-2 bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl"
                 >
                     <div className="flex items-center gap-3 mb-8">
                         <div className="p-2 rounded-lg bg-sky-500/10">
                             <Users size={20} className="text-sky-400" />
                         </div>
-                        <h3 className="text-lg font-bold text-white">Complaints by Sector</h3>
+                        <h3 className="text-lg font-bold text-emerald-950 dark:text-white">Complaints by Sector</h3>
                     </div>
                     <div className="h-64 w-full">
                         {analyticsLoading ? (

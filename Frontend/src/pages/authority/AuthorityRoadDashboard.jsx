@@ -30,21 +30,21 @@ const StatCard = ({ title, value, icon: Icon, delay, bgClass, iconClass, loading
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay, type: "spring", stiffness: 100 }}
         whileHover={{ y: -8, scale: 1.02 }}
-        className="relative overflow-hidden rounded-[2rem] p-8 bg-white/[0.02] border border-white/5 backdrop-blur-2xl group cursor-default shadow-lg"
+        className="relative overflow-hidden rounded-[2rem] p-8 bg-emerald-900/5 dark:bg-white/[0.02] border border-emerald-900/5 dark:border-white/5 backdrop-blur-2xl group cursor-default shadow-lg"
     >
         {/* Futuristic Hover Glows */}
         <div className={`absolute -right-10 -top-10 w-40 h-40 rounded-full blur-[50px] opacity-0 group-hover:opacity-30 transition-all duration-700 ${bgClass.split(' ')[0]}`} />
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
         <div className="flex items-start justify-between mb-6 relative z-10">
-            <div className={`p-4 rounded-2xl border border-white/10 transition-colors duration-500 shadow-inner backdrop-blur-md ${bgClass}`}>
+            <div className={`p-4 rounded-2xl border border-emerald-900/10 dark:border-white/10 transition-colors duration-500 shadow-inner backdrop-blur-md ${bgClass}`}>
                 <Icon size={26} className={iconClass} />
             </div>
         </div>
 
         <div className="relative z-10">
             {loading ? (
-                <div className="h-10 w-24 bg-white/5 animate-pulse rounded-lg mb-2" />
+                <div className="h-10 w-24 bg-emerald-900/5 dark:bg-white/5 animate-pulse rounded-lg mb-2" />
             ) : (
                 <h3 className="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70 tracking-tight drop-shadow-sm mb-2">{value}</h3>
             )}
@@ -72,8 +72,8 @@ const COLORS = ["#F97316", "#6366f1", "#8b5cf6", "#ec4899", "#f43f5e"];
 const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
         return (
-            <div className="bg-[#0f172a] border border-white/10 p-3 rounded-lg backdrop-blur-md shadow-2xl">
-                <p className="text-white font-bold text-xs mb-1">{label || payload[0].name}</p>
+            <div className="bg-[#0f172a] border border-emerald-900/10 dark:border-white/10 p-3 rounded-lg backdrop-blur-md shadow-2xl">
+                <p className="text-emerald-950 dark:text-white font-bold text-xs mb-1">{label || payload[0].name}</p>
                 <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: payload[0].color || payload[0].fill }} />
                     <p className="text-[#e2e8f0] text-sm font-medium">
@@ -274,11 +274,11 @@ const AuthorityRoadDashboard = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5, duration: 0.6 }}
-                className="glass-card border border-white/5 rounded-[2rem] overflow-hidden shadow-2xl relative group"
+                className="glass-card border border-emerald-900/5 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-2xl relative group"
             >
                 <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
-                <div className="p-8 border-b border-white/5 flex items-center justify-between relative z-10">
-                    <h3 className="text-xl font-black text-white flex items-center gap-3 tracking-tight">
+                <div className="p-8 border-b border-emerald-900/5 dark:border-white/5 flex items-center justify-between relative z-10">
+                    <h3 className="text-xl font-black text-emerald-950 dark:text-white flex items-center gap-3 tracking-tight">
                         <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
                             <span className="w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse shadow-[0_0_15px_rgba(249,115,22,0.8)]" />
                         </div>
@@ -289,7 +289,7 @@ const AuthorityRoadDashboard = () => {
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-black/20 text-xs uppercase tracking-wider text-gray-500 font-bold border-b border-white/5">
+                            <tr className="bg-emerald-900/5 dark:bg-black/20 text-xs uppercase tracking-wider text-gray-500 font-bold border-b border-emerald-900/5 dark:border-white/5">
                                 <th className="px-6 py-4">Report ID</th>
                                 <th className="px-6 py-4">Category</th>
                                 <th className="px-6 py-4">Sub-Type</th>
@@ -310,12 +310,12 @@ const AuthorityRoadDashboard = () => {
                                 </tr>
                             ) : criticalIncidents.length > 0 ? (
                                 criticalIncidents.map((row) => (
-                                    <tr key={row.id} className="hover:bg-white/5 transition-colors group">
+                                    <tr key={row.id} className="hover:bg-emerald-900/5 hover:dark:hover:bg-white/5 transition-colors group">
                                         <td className="px-6 py-4 font-mono text-sm text-orange-400 font-bold">{row.reportId}</td>
                                         <td className="px-6 py-4 text-sm text-gray-300">{row.category}</td>
-                                        <td className="px-6 py-4 text-sm text-white font-medium">{row.subtype}</td>
+                                        <td className="px-6 py-4 text-sm text-emerald-950 dark:text-white font-medium">{row.subtype}</td>
                                         <td className="px-6 py-4 text-sm text-gray-400">{row.loc}</td>
-                                        <td className="px-6 py-4 text-sm font-black text-white">{row.urg}</td>
+                                        <td className="px-6 py-4 text-sm font-black text-emerald-950 dark:text-white">{row.urg}</td>
                                         <td className="px-6 py-4">
                                             {row.urg >= 75 && row.status !== "Resolved" ? (
                                                 <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${STATUS_STYLES["High Urgency"]}`}>
@@ -333,7 +333,7 @@ const AuthorityRoadDashboard = () => {
                                         <td className="px-6 py-4 text-right">
                                             <button
                                                 onClick={() => navigate(`/authority/road/case/${row.id}`)}
-                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-orange-500/20 text-gray-300 hover:text-orange-300 border border-white/10 hover:border-orange-500/30 rounded-lg text-xs font-bold transition-all"
+                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-900/5 dark:bg-white/5 hover:bg-orange-500/20 text-gray-300 hover:text-orange-300 border border-emerald-900/10 dark:border-white/10 hover:border-orange-500/30 rounded-lg text-xs font-bold transition-all"
                                             >
                                                 View <ArrowUpRight size={14} />
                                             </button>
@@ -361,10 +361,10 @@ const AuthorityRoadDashboard = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.6 }}
-                className="flex flex-col md:flex-row md:items-end justify-between gap-4 pt-4 border-t border-white/5"
+                className="flex flex-col md:flex-row md:items-end justify-between gap-4 pt-4 border-t border-emerald-900/5 dark:border-white/5"
             >
                 <div>
-                    <h2 className="text-2xl font-black text-white tracking-tight flex items-center gap-3">
+                    <h2 className="text-2xl font-black text-emerald-950 dark:text-white tracking-tight flex items-center gap-3">
                         <div className="p-2 rounded-lg bg-orange-500/10">
                             <BarChart3 size={20} className="text-orange-400" />
                         </div>
@@ -379,7 +379,7 @@ const AuthorityRoadDashboard = () => {
                 <div className="relative">
                     <button
                         onClick={() => setIsFilterOpen(!isFilterOpen)}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-white/5 border border-orange-500/20 text-white rounded-xl text-sm font-bold transition-all hover:bg-white/10"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-emerald-900/5 dark:bg-white/5 border border-orange-500/20 text-emerald-950 dark:text-white rounded-xl text-sm font-bold transition-all hover:bg-emerald-900/10 hover:dark:hover:bg-white/10"
                     >
                         <Filter size={16} className="text-orange-400" />
                         {timeRange}
@@ -392,13 +392,13 @@ const AuthorityRoadDashboard = () => {
                                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                className="absolute right-0 mt-2 w-48 bg-[#020617] border border-white/10 rounded-xl shadow-2xl z-50 p-1 backdrop-blur-3xl"
+                                className="absolute right-0 mt-2 w-48 bg-[#020617] border border-emerald-900/10 dark:border-white/10 rounded-xl shadow-2xl z-50 p-1 backdrop-blur-3xl"
                             >
                                 {["Last 7 Days", "Last 30 Days", "Last 3 Months"].map((range) => (
                                     <button
                                         key={range}
                                         onClick={() => { setTimeRange(range); setIsFilterOpen(false); }}
-                                        className={`w-full text-left px-4 py-2 rounded-lg text-sm font-medium transition-colors ${timeRange === range ? "bg-orange-500/10 text-orange-400" : "text-gray-400 hover:bg-white/5 hover:text-white"}`}
+                                        className={`w-full text-left px-4 py-2 rounded-lg text-sm font-medium transition-colors ${timeRange === range ? "bg-orange-500/10 text-orange-400" : "text-gray-400 hover:bg-emerald-900/5 hover:dark:hover:bg-white/5 hover:text-emerald-950 hover:dark:hover:text-white"}`}
                                     >
                                         {range}
                                     </button>
@@ -417,17 +417,17 @@ const AuthorityRoadDashboard = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.7 + i * 0.1 }}
-                        className="glass-card border border-white/5 rounded-[2rem] p-8 relative overflow-hidden group hover:border-white/10 transition-colors"
+                        className="glass-card border border-emerald-900/5 dark:border-white/5 rounded-[2rem] p-8 relative overflow-hidden group hover:border-emerald-900/10 hover:dark:hover:border-white/10 transition-colors"
                     >
-                        <div className="absolute -top-10 -right-10 p-3 opacity-[0.03] group-hover:opacity-10 group-hover:scale-125 transition-all duration-700 text-white">
+                        <div className="absolute -top-10 -right-10 p-3 opacity-[0.03] group-hover:opacity-10 group-hover:scale-125 transition-all duration-700 text-emerald-950 dark:text-white">
                             <stat.icon size={120} />
                         </div>
                         <p className="text-gray-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">{stat.label}</p>
                         <div className="flex items-end gap-4">
                             {analyticsLoading ? (
-                                <div className="h-10 w-20 bg-white/5 animate-pulse rounded-lg my-1" />
+                                <div className="h-10 w-20 bg-emerald-900/5 dark:bg-white/5 animate-pulse rounded-lg my-1" />
                             ) : (
-                                <h3 className="text-4xl font-black text-white tracking-tight">{stat.value}</h3>
+                                <h3 className="text-4xl font-black text-emerald-950 dark:text-white tracking-tight">{stat.value}</h3>
                             )}
                             <span className={`text-[11px] font-black px-2.5 py-1 rounded-xl uppercase tracking-wider ${stat.change.startsWith("+") ? "text-green-400 bg-green-400/10 border border-green-400/20" : "text-red-400 bg-red-400/10 border border-red-400/20"}`}>
                                 {stat.change}
@@ -444,13 +444,13 @@ const AuthorityRoadDashboard = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.1 }}
-                    className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl"
+                    className="bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl"
                 >
                     <div className="flex items-center gap-3 mb-8">
                         <div className="p-2 rounded-lg bg-orange-500/10">
                             <BarChart3 size={20} className="text-orange-400" />
                         </div>
-                        <h3 className="text-lg font-bold text-white">Weekly Complaint Trend</h3>
+                        <h3 className="text-lg font-bold text-emerald-950 dark:text-white">Weekly Complaint Trend</h3>
                     </div>
                     <div className="h-80 w-full">
                         {analyticsLoading ? (
@@ -474,13 +474,13 @@ const AuthorityRoadDashboard = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.2 }}
-                    className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl"
+                    className="bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl"
                 >
                     <div className="flex items-center gap-3 mb-8">
                         <div className="p-2 rounded-lg bg-orange-500/10">
                             <PieChartIcon size={20} className="text-orange-400" />
                         </div>
-                        <h3 className="text-lg font-bold text-white">Issue Category Breakdown</h3>
+                        <h3 className="text-lg font-bold text-emerald-950 dark:text-white">Issue Category Breakdown</h3>
                     </div>
                     <div className="h-80 w-full">
                         {analyticsLoading ? (
@@ -508,13 +508,13 @@ const AuthorityRoadDashboard = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.3 }}
-                    className="lg:col-span-2 bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl"
+                    className="lg:col-span-2 bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl"
                 >
                     <div className="flex items-center gap-3 mb-8">
                         <div className="p-2 rounded-lg bg-orange-500/10">
                             <Users size={20} className="text-orange-400" />
                         </div>
-                        <h3 className="text-lg font-bold text-white">Complaints by Sector</h3>
+                        <h3 className="text-lg font-bold text-emerald-950 dark:text-white">Complaints by Sector</h3>
                     </div>
                     <div className="h-64 w-full">
                         {analyticsLoading ? (

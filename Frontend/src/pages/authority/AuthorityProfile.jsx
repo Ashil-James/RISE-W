@@ -48,7 +48,7 @@ const AuthorityProfile = () => {
             {/* ── TOP NAV ── */}
             <button
                 onClick={() => navigate(-1)}
-                className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm font-bold group w-fit"
+                className="flex items-center gap-2 text-gray-400 hover:text-emerald-950 hover:dark:hover:text-white transition-colors text-sm font-bold group w-fit"
             >
                 <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                 Back to Dashboard
@@ -60,7 +60,7 @@ const AuthorityProfile = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="flex flex-col gap-1"
             >
-                <h1 className="text-2xl font-semibold text-white tracking-tight">
+                <h1 className="text-2xl font-semibold text-emerald-950 dark:text-white tracking-tight">
                     My Profile
                 </h1>
                 <p className="text-gray-400 text-sm font-medium">
@@ -73,9 +73,9 @@ const AuthorityProfile = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-white/5 border border-white/10 rounded-xl p-6 backdrop-blur-xl shadow-xl shadow-black/20"
+                className="bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-xl p-6 backdrop-blur-xl shadow-xl shadow-black/20"
             >
-                <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                <h3 className="text-lg font-bold text-emerald-950 dark:text-white mb-6 flex items-center gap-2">
                     <User className="text-blue-400" size={20} />
                     Authority Information
                 </h3>
@@ -83,11 +83,11 @@ const AuthorityProfile = () => {
                 <div className="space-y-6">
                     <div>
                         <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Authority Name</p>
-                        <p className="text-white text-lg font-bold">{authorityName}</p>
+                        <p className="text-emerald-950 dark:text-white text-lg font-bold">{authorityName}</p>
                     </div>
                     <div>
                         <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-1">Officer Role</p>
-                        <p className="text-white text-lg font-bold">{officerRole}</p>
+                        <p className="text-emerald-950 dark:text-white text-lg font-bold">{officerRole}</p>
                     </div>
                 </div>
             </motion.div>
@@ -97,9 +97,9 @@ const AuthorityProfile = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="bg-white/5 border border-white/10 rounded-xl p-6 backdrop-blur-xl shadow-xl shadow-black/20"
+                className="bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-xl p-6 backdrop-blur-xl shadow-xl shadow-black/20"
             >
-                <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                <h3 className="text-lg font-bold text-emerald-950 dark:text-white mb-6 flex items-center gap-2">
                     <Mail className="text-blue-400" size={20} />
                     Contact Information
                 </h3>
@@ -109,7 +109,7 @@ const AuthorityProfile = () => {
                         <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Officer Name</p>
                         <div className="flex items-center gap-3 text-gray-400">
                             <User size={16} />
-                            <span className="text-white font-medium">{contactInfo.officerName}</span>
+                            <span className="text-emerald-950 dark:text-white font-medium">{contactInfo.officerName}</span>
                         </div>
                     </div>
 
@@ -117,7 +117,7 @@ const AuthorityProfile = () => {
                         <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Email Address</p>
                         <div className="flex items-center gap-3 text-gray-400">
                             <Mail size={16} />
-                            <span className="text-white font-medium">{contactInfo.email}</span>
+                            <span className="text-emerald-950 dark:text-white font-medium">{contactInfo.email}</span>
                         </div>
                     </div>
 
@@ -125,7 +125,7 @@ const AuthorityProfile = () => {
                         <p className="text-xs font-bold text-gray-500 uppercase tracking-widest">Phone Number</p>
                         <div className="flex items-center gap-3 text-gray-400">
                             <Phone size={16} />
-                            <span className="text-white font-medium">{contactInfo.phone}</span>
+                            <span className="text-emerald-950 dark:text-white font-medium">{contactInfo.phone}</span>
                         </div>
                     </div>
                 </div>
@@ -149,9 +149,9 @@ const AuthorityProfile = () => {
                     <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: "auto" }}
-                        className="bg-white/5 border border-white/10 rounded-xl p-6 backdrop-blur-xl shadow-xl"
+                        className="bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-xl p-6 backdrop-blur-xl shadow-xl"
                     >
-                        <h4 className="text-white font-bold mb-4">Edit Profile Details</h4>
+                        <h4 className="text-emerald-950 dark:text-white font-bold mb-4">Edit Profile Details</h4>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                             <div className="space-y-2">
                                 <label className="text-xs font-bold text-gray-500 uppercase">Officer Name</label>
@@ -159,7 +159,7 @@ const AuthorityProfile = () => {
                                     type="text"
                                     value={tempContactInfo.officerName}
                                     onChange={(e) => setTempContactInfo({ ...tempContactInfo, officerName: e.target.value })}
-                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
+                                    className="w-full bg-black/40 border border-emerald-900/10 dark:border-white/10 rounded-lg px-4 py-2 text-emerald-950 dark:text-white text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -168,7 +168,7 @@ const AuthorityProfile = () => {
                                     type="email"
                                     value={tempContactInfo.email}
                                     onChange={(e) => setTempContactInfo({ ...tempContactInfo, email: e.target.value })}
-                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
+                                    className="w-full bg-black/40 border border-emerald-900/10 dark:border-white/10 rounded-lg px-4 py-2 text-emerald-950 dark:text-white text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
                                 />
                             </div>
                             <div className="space-y-2">
@@ -177,20 +177,20 @@ const AuthorityProfile = () => {
                                     type="text"
                                     value={tempContactInfo.phone}
                                     onChange={(e) => setTempContactInfo({ ...tempContactInfo, phone: e.target.value })}
-                                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
+                                    className="w-full bg-black/40 border border-emerald-900/10 dark:border-white/10 rounded-lg px-4 py-2 text-emerald-950 dark:text-white text-sm focus:outline-none focus:border-blue-500/50 transition-colors"
                                 />
                             </div>
                         </div>
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={handleSave}
-                                className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg transition-colors text-sm"
+                                className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-emerald-950 dark:text-white font-bold rounded-lg transition-colors text-sm"
                             >
                                 Save Changes
                             </button>
                             <button
                                 onClick={handleCancel}
-                                className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white font-bold rounded-lg transition-colors text-sm"
+                                className="px-6 py-2 bg-emerald-900/10 dark:bg-white/10 hover:bg-white/20 text-emerald-950 dark:text-white font-bold rounded-lg transition-colors text-sm"
                             >
                                 Cancel
                             </button>

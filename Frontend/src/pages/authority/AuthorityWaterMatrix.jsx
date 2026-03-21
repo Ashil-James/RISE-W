@@ -30,7 +30,7 @@ const lifecycleColor = (status) => {
         Rejected: "text-red-400 bg-red-500/10 border-red-500/20",
         Revoked: "text-gray-300 bg-gray-500/10 border-gray-500/20",
     };
-    return map[status] || "text-gray-400 bg-white/5 border-white/10";
+    return map[status] || "text-gray-400 bg-emerald-900/5 dark:bg-white/5 border-emerald-900/10 dark:border-white/10";
 };
 
 const mapStatusToLifecycle = (backendStatus) => {
@@ -133,7 +133,7 @@ const AuthorityWaterMatrix = () => {
         <div className="space-y-8 pb-12">
             {/* ── HEADER ── */}
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex flex-col gap-1">
-                <h1 className="text-3xl lg:text-4xl font-black text-white tracking-tight">Complaint Matrix</h1>
+                <h1 className="text-3xl lg:text-4xl font-black text-emerald-950 dark:text-white tracking-tight">Complaint Matrix</h1>
                 <p className="text-gray-400 font-medium">Operational Case Management Registry</p>
             </motion.div>
 
@@ -143,14 +143,14 @@ const AuthorityWaterMatrix = () => {
                 <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
 
                     {/* Tabs */}
-                    <div className="flex flex-wrap gap-2 p-1.5 bg-white/5 border border-white/10 rounded-xl backdrop-blur-xl w-full lg:w-auto overflow-hidden">
+                    <div className="flex flex-wrap gap-2 p-1.5 bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-xl backdrop-blur-xl w-full lg:w-auto overflow-hidden">
                         {TABS.map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
                                 className={`relative px-4 py-2 rounded-lg text-sm font-bold transition-all duration-300 ${activeTab === tab
                                     ? "text-sky-400 bg-sky-500/20 shadow-[0_0_15px_rgba(56,189,248,0.2)]"
-                                    : "text-gray-400 hover:text-white hover:bg-white/5"
+                                    : "text-gray-400 hover:text-emerald-950 hover:dark:hover:text-white hover:bg-emerald-900/5 hover:dark:hover:bg-white/5"
                                     }`}
                             >
                                 {tab}
@@ -170,14 +170,14 @@ const AuthorityWaterMatrix = () => {
                                 placeholder="Search Report ID Registry..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="w-full bg-black/40 border border-white/10 text-white text-sm rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:border-sky-500/50 transition-colors placeholder:text-gray-600 shadow-inner"
+                                className="w-full bg-black/40 border border-emerald-900/10 dark:border-white/10 text-emerald-950 dark:text-white text-sm rounded-xl pl-9 pr-4 py-2.5 focus:outline-none focus:border-sky-500/50 transition-colors placeholder:text-gray-600 shadow-inner"
                             />
                         </div>
 
                         <div className="relative">
                             <button
                                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                                className="flex items-center gap-2 px-4 py-2.5 bg-black/40 border border-white/10 hover:border-white/20 text-gray-300 rounded-xl text-sm font-bold transition-colors w-44 justify-between"
+                                className="flex items-center gap-2 px-4 py-2.5 bg-black/40 border border-emerald-900/10 dark:border-white/10 hover:border-emerald-900/20 hover:dark:hover:border-white/20 text-gray-300 rounded-xl text-sm font-bold transition-colors w-44 justify-between"
                             >
                                 <div className="flex items-center gap-2 shrink-0">
                                     <ListFilter size={14} className="text-sky-400" />
@@ -192,7 +192,7 @@ const AuthorityWaterMatrix = () => {
                                         initial={{ opacity: 0, scale: 0.95, y: -10 }}
                                         animate={{ opacity: 1, scale: 1, y: 0 }}
                                         exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                                        className="absolute right-0 top-full mt-2 w-44 bg-neutral-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 backdrop-blur-2xl"
+                                        className="absolute right-0 top-full mt-2 w-44 bg-neutral-900 border border-emerald-900/10 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden z-50 backdrop-blur-2xl"
                                     >
                                         {URGENCY_LEVELS.map((level) => (
                                             <button
@@ -212,7 +212,7 @@ const AuthorityWaterMatrix = () => {
                 </div>
 
                 {/* ── MATRIX TABLE ── */}
-                <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden shadow-2xl backdrop-blur-xl">
+                <div className="bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-xl overflow-hidden shadow-2xl backdrop-blur-xl">
                     <div className="overflow-x-auto min-h-[300px]">
                         {loading ? (
                             <div className="flex flex-col items-center justify-center h-64 text-sky-400">
@@ -227,7 +227,7 @@ const AuthorityWaterMatrix = () => {
                         ) : (
                             <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="bg-black/40 text-xs uppercase tracking-wider text-gray-500 font-bold border-b border-white/5">
+                                    <tr className="bg-black/40 text-xs uppercase tracking-wider text-gray-500 font-bold border-b border-emerald-900/5 dark:border-white/5">
                                         <th className="px-5 py-4">Ref ID</th>
                                         <th className="px-5 py-4">Operational Sector</th>
                                         <th className="px-5 py-4">Sub-Type</th>
@@ -241,12 +241,12 @@ const AuthorityWaterMatrix = () => {
                                 <tbody className="divide-y divide-white/5">
                                     {filteredData.length > 0 ? (
                                         filteredData.map((row) => (
-                                            <tr key={row.ref} className="hover:bg-white/5 transition-colors group cursor-default">
+                                            <tr key={row.ref} className="hover:bg-emerald-900/5 hover:dark:hover:bg-white/5 transition-colors group cursor-default">
                                                 <td className="px-5 py-4 font-mono text-sm text-sky-400 font-bold">{row.ref}</td>
                                                 <td className="px-5 py-4 text-sm text-gray-300">{row.category}</td>
-                                                <td className="px-5 py-4 text-sm text-white font-medium">{row.subtype}</td>
+                                                <td className="px-5 py-4 text-sm text-emerald-950 dark:text-white font-medium">{row.subtype}</td>
                                                 <td className="px-5 py-4 text-sm text-gray-400">{row.loc}</td>
-                                                <td className="px-5 py-4 text-sm font-black text-white">Urgency {row.urg}</td>
+                                                <td className="px-5 py-4 text-sm font-black text-emerald-950 dark:text-white">Urgency {row.urg}</td>
                                                 <td className="px-5 py-4">
                                                     {row.urg >= 75 && row.lifecycle !== "Resolved" && row.lifecycle !== "Work Completed" ? (
                                                         <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border border-red-500/20 text-red-400 bg-red-500/10 animate-ping">
@@ -264,7 +264,7 @@ const AuthorityWaterMatrix = () => {
                                                 <td className="px-5 py-4 text-right">
                                                     <button
                                                         onClick={() => navigate(`/authority/water/case/${row.id}`)}
-                                                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-sky-500/10 hover:bg-sky-500 text-sky-400 hover:text-white border border-sky-500/30 rounded-lg text-xs font-bold transition-all shadow-lg hover:shadow-sky-500/25 group/btn"
+                                                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-sky-500/10 hover:bg-sky-500 text-sky-400 hover:text-emerald-950 hover:dark:hover:text-white border border-sky-500/30 rounded-lg text-xs font-bold transition-all shadow-lg hover:shadow-sky-500/25 group/btn"
                                                     >
                                                         {row.protocol}
                                                         <ArrowRight size={14} className="group-hover/btn:translate-x-0.5 transition-transform" />

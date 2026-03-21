@@ -151,28 +151,28 @@ const AdminIncidentDetail = () => {
         </div>
 
         <div className="grid gap-4 lg:grid-cols-5">
-          <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4">
-            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Reporter</p>
-            <p className="mt-2 text-sm font-bold text-white">{incident.reporterName}</p>
-            <p className="mt-1 text-xs text-slate-500">{incident.reporterEmail || "No email recorded"}</p>
+          <div className="rounded-[1.5rem] border border-emerald-900/10 dark:border-white/10 bg-emerald-900/5 dark:bg-white/[0.03] p-4">
+            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-900/60 dark:text-slate-500">Reporter</p>
+            <p className="mt-2 text-sm font-bold text-emerald-950 dark:text-white">{incident.reporterName}</p>
+            <p className="mt-1 text-xs text-emerald-900/60 dark:text-slate-500">{incident.reporterEmail || "No email recorded"}</p>
           </div>
-          <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4">
-            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Submitted</p>
-            <p className="mt-2 text-sm font-bold text-white">{formatAdminDateTime(incident.createdAt)}</p>
+          <div className="rounded-[1.5rem] border border-emerald-900/10 dark:border-white/10 bg-emerald-900/5 dark:bg-white/[0.03] p-4">
+            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-900/60 dark:text-slate-500">Submitted</p>
+            <p className="mt-2 text-sm font-bold text-emerald-950 dark:text-white">{formatAdminDateTime(incident.createdAt)}</p>
           </div>
-          <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4">
-            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Last Updated</p>
-            <p className="mt-2 text-sm font-bold text-white">{formatAdminRelativeTime(incident.lastUpdatedAt)}</p>
-            <p className="mt-1 text-xs text-slate-500">{formatAdminDateTime(incident.lastUpdatedAt)}</p>
+          <div className="rounded-[1.5rem] border border-emerald-900/10 dark:border-white/10 bg-emerald-900/5 dark:bg-white/[0.03] p-4">
+            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-900/60 dark:text-slate-500">Last Updated</p>
+            <p className="mt-2 text-sm font-bold text-emerald-950 dark:text-white">{formatAdminRelativeTime(incident.lastUpdatedAt)}</p>
+            <p className="mt-1 text-xs text-emerald-900/60 dark:text-slate-500">{formatAdminDateTime(incident.lastUpdatedAt)}</p>
           </div>
-          <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4">
-            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Community Support</p>
-            <p className="mt-2 text-sm font-bold text-white">{getCommunitySupportLabel(incident.supportCount)}</p>
+          <div className="rounded-[1.5rem] border border-emerald-900/10 dark:border-white/10 bg-emerald-900/5 dark:bg-white/[0.03] p-4">
+            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-900/60 dark:text-slate-500">Community Support</p>
+            <p className="mt-2 text-sm font-bold text-emerald-950 dark:text-white">{getCommunitySupportLabel(incident.supportCount)}</p>
           </div>
-          <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4">
-            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Next Action</p>
-            <p className="mt-2 text-sm font-bold text-white">{incident.nextActionLabel}</p>
-            <p className="mt-1 text-xs text-slate-500">
+          <div className="rounded-[1.5rem] border border-emerald-900/10 dark:border-white/10 bg-emerald-900/5 dark:bg-white/[0.03] p-4">
+            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-900/60 dark:text-slate-500">Next Action</p>
+            <p className="mt-2 text-sm font-bold text-emerald-950 dark:text-white">{incident.nextActionLabel}</p>
+            <p className="mt-1 text-xs text-emerald-900/60 dark:text-slate-500">
               {getAdminNextActionDescription(incident.status, incident.nextActionOwner)}
             </p>
           </div>
@@ -191,10 +191,10 @@ const AdminIncidentDetail = () => {
           <AdminSurface className="p-6">
             <div className="flex items-center gap-3 mb-4">
               <ShieldCheck size={18} className="text-emerald-300" />
-              <h2 className="text-xl font-black text-white">What this status means</h2>
+              <h2 className="text-xl font-black text-emerald-950 dark:text-white">What this status means</h2>
             </div>
-            <p className="text-base font-bold text-white">{statusMeta.summary}</p>
-            <p className="mt-3 text-sm text-slate-300/80">
+            <p className="text-base font-bold text-emerald-950 dark:text-white">{statusMeta.summary}</p>
+            <p className="mt-3 text-sm text-emerald-800 dark:text-slate-300/80">
               {latestUpdate?.note || getAdminNextActionDescription(incident.status, incident.nextActionOwner)}
             </p>
           </AdminSurface>
@@ -202,64 +202,64 @@ const AdminIncidentDetail = () => {
           <AdminSurface className="p-6">
             <div className="flex items-center gap-3 mb-4">
               <AlertTriangle size={18} className="text-emerald-300" />
-              <h2 className="text-xl font-black text-white">Evidence and updates</h2>
+              <h2 className="text-xl font-black text-emerald-950 dark:text-white">Evidence and updates</h2>
             </div>
 
             <div className="grid gap-4 lg:grid-cols-2">
-              <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 mb-3">Reported image</p>
+              <div className="rounded-[1.5rem] border border-emerald-900/10 dark:border-white/10 bg-emerald-900/5 dark:bg-white/[0.03] p-4">
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-900/60 dark:text-slate-500 mb-3">Reported image</p>
                 {incident.image ? (
                   <button
                     type="button"
                     onClick={() => window.open(incident.image, "_blank")}
-                    className="block w-full overflow-hidden rounded-[1.3rem] border border-white/10 text-left"
+                    className="block w-full overflow-hidden rounded-[1.3rem] border border-emerald-900/10 dark:border-white/10 text-left"
                   >
                     <img src={incident.image} alt="Reported issue" className="h-60 w-full object-cover" />
-                    <div className="flex items-center justify-between px-4 py-3 text-sm text-white bg-black/30">
+                    <div className="flex items-center justify-between px-4 py-3 text-sm text-emerald-950 dark:text-white bg-black/30">
                       <span>Open original upload</span>
                       <ExternalLink size={14} />
                     </div>
                   </button>
                 ) : (
-                  <p className="text-sm text-slate-400">No citizen image was attached.</p>
+                  <p className="text-sm text-emerald-800/70 dark:text-slate-400">No citizen image was attached.</p>
                 )}
               </div>
 
-              <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 mb-3">Authority proof</p>
+              <div className="rounded-[1.5rem] border border-emerald-900/10 dark:border-white/10 bg-emerald-900/5 dark:bg-white/[0.03] p-4">
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-900/60 dark:text-slate-500 mb-3">Authority proof</p>
                 {incident.resolutionImage ? (
                   <button
                     type="button"
                     onClick={() => window.open(incident.resolutionImage, "_blank")}
-                    className="block w-full overflow-hidden rounded-[1.3rem] border border-white/10 text-left"
+                    className="block w-full overflow-hidden rounded-[1.3rem] border border-emerald-900/10 dark:border-white/10 text-left"
                   >
                     <img src={incident.resolutionImage} alt="Resolution proof" className="h-60 w-full object-cover" />
-                    <div className="flex items-center justify-between px-4 py-3 text-sm text-white bg-black/30">
+                    <div className="flex items-center justify-between px-4 py-3 text-sm text-emerald-950 dark:text-white bg-black/30">
                       <span>Open resolution proof</span>
                       <ExternalLink size={14} />
                     </div>
                   </button>
                 ) : (
-                  <p className="text-sm text-slate-400">No authority proof image is attached yet.</p>
+                  <p className="text-sm text-emerald-800/70 dark:text-slate-400">No authority proof image is attached yet.</p>
                 )}
               </div>
             </div>
 
             <div className="mt-4 grid gap-4 lg:grid-cols-2">
-              <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Authority note</p>
-                <p className="mt-3 text-sm text-white">
+              <div className="rounded-[1.5rem] border border-emerald-900/10 dark:border-white/10 bg-emerald-900/5 dark:bg-white/[0.03] p-4">
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-900/60 dark:text-slate-500">Authority note</p>
+                <p className="mt-3 text-sm text-emerald-950 dark:text-white">
                   {incident.authorityMessage || latestAuthorityUpdate?.note || "No authority note attached yet."}
                 </p>
               </div>
-              <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Location</p>
-                <p className="mt-3 flex items-center gap-2 text-sm text-white">
+              <div className="rounded-[1.5rem] border border-emerald-900/10 dark:border-white/10 bg-emerald-900/5 dark:bg-white/[0.03] p-4">
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-900/60 dark:text-slate-500">Location</p>
+                <p className="mt-3 flex items-center gap-2 text-sm text-emerald-950 dark:text-white">
                   <MapPin size={14} className="text-emerald-300" />
                   {incident.address || "Location unavailable"}
                 </p>
                 {incident.location?.coordinates ? (
-                  <p className="mt-2 text-xs text-slate-500">
+                  <p className="mt-2 text-xs text-emerald-900/60 dark:text-slate-500">
                     {incident.location.coordinates[1]?.toFixed(5)}, {incident.location.coordinates[0]?.toFixed(5)}
                   </p>
                 ) : null}
@@ -279,21 +279,21 @@ const AdminIncidentDetail = () => {
           <AdminSurface className="p-6">
             <div className="flex items-center gap-3 mb-4">
               <Users size={18} className="text-emerald-300" />
-              <h2 className="text-xl font-black text-white">Operational summary</h2>
+              <h2 className="text-xl font-black text-emerald-950 dark:text-white">Operational summary</h2>
             </div>
             <div className="space-y-4">
-              <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Current status</p>
-                <p className="mt-2 text-sm font-bold text-white">{statusMeta.label}</p>
+              <div className="rounded-[1.5rem] border border-emerald-900/10 dark:border-white/10 bg-emerald-900/5 dark:bg-white/[0.03] p-4">
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-900/60 dark:text-slate-500">Current status</p>
+                <p className="mt-2 text-sm font-bold text-emerald-950 dark:text-white">{statusMeta.label}</p>
               </div>
-              <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Latest update owner</p>
-                <p className="mt-2 text-sm font-bold text-white">{latestUpdate?.actorLabel || "System"}</p>
-                <p className="mt-1 text-xs text-slate-500">{formatAdminDateTime(latestUpdate?.changedAt)}</p>
+              <div className="rounded-[1.5rem] border border-emerald-900/10 dark:border-white/10 bg-emerald-900/5 dark:bg-white/[0.03] p-4">
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-900/60 dark:text-slate-500">Latest update owner</p>
+                <p className="mt-2 text-sm font-bold text-emerald-950 dark:text-white">{latestUpdate?.actorLabel || "System"}</p>
+                <p className="mt-1 text-xs text-emerald-900/60 dark:text-slate-500">{formatAdminDateTime(latestUpdate?.changedAt)}</p>
               </div>
-              <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4">
-                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Community impact</p>
-                <p className="mt-2 text-sm font-bold text-white">{getCommunitySupportLabel(incident.supportCount)}</p>
+              <div className="rounded-[1.5rem] border border-emerald-900/10 dark:border-white/10 bg-emerald-900/5 dark:bg-white/[0.03] p-4">
+                <p className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-900/60 dark:text-slate-500">Community impact</p>
+                <p className="mt-2 text-sm font-bold text-emerald-950 dark:text-white">{getCommunitySupportLabel(incident.supportCount)}</p>
               </div>
             </div>
           </AdminSurface>
@@ -301,7 +301,7 @@ const AdminIncidentDetail = () => {
       </div>
 
       <AdminSurface className="p-6">
-        <h2 className="text-2xl font-black text-white mb-5">Status Timeline</h2>
+        <h2 className="text-2xl font-black text-emerald-950 dark:text-white mb-5">Status Timeline</h2>
         <div className="space-y-4">
           {(incident.statusHistory || []).map((entry, index) => {
             const isLatest = index === (incident.statusHistory?.length || 1) - 1;
@@ -313,7 +313,7 @@ const AdminIncidentDetail = () => {
                 className={`rounded-[1.6rem] border p-5 ${
                   isLatest
                     ? "border-emerald-400/20 bg-emerald-500/10"
-                    : "border-white/10 bg-white/[0.03]"
+                    : "border-emerald-900/10 dark:border-white/10 bg-emerald-900/5 dark:bg-white/[0.03]"
                 }`}
               >
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -328,12 +328,12 @@ const AdminIncidentDetail = () => {
                         </span>
                       ) : null}
                     </div>
-                    <p className="text-base font-bold text-white">{entry.note || entryMeta.summary}</p>
-                    <p className="mt-2 text-sm text-slate-300/75">
+                    <p className="text-base font-bold text-emerald-950 dark:text-white">{entry.note || entryMeta.summary}</p>
+                    <p className="mt-2 text-sm text-emerald-800 dark:text-slate-300/75">
                       {entry.actorLabel} · {formatAdminDateTime(entry.changedAt)}
                     </p>
                   </div>
-                  <div className="shrink-0 text-sm text-slate-400">
+                  <div className="shrink-0 text-sm text-emerald-800/70 dark:text-slate-400">
                     {formatAdminRelativeTime(entry.changedAt)}
                   </div>
                 </div>
@@ -342,10 +342,10 @@ const AdminIncidentDetail = () => {
                   <button
                     type="button"
                     onClick={() => window.open(entry.proofImage, "_blank")}
-                    className="mt-4 block overflow-hidden rounded-[1.3rem] border border-white/10 text-left"
+                    className="mt-4 block overflow-hidden rounded-[1.3rem] border border-emerald-900/10 dark:border-white/10 text-left"
                   >
                     <img src={entry.proofImage} alt={`${entry.status} proof`} className="h-56 w-full object-cover" />
-                    <div className="flex items-center justify-between bg-black/30 px-4 py-3 text-sm text-white">
+                    <div className="flex items-center justify-between bg-black/30 px-4 py-3 text-sm text-emerald-950 dark:text-white">
                       <span>Open attached proof</span>
                       <ExternalLink size={14} />
                     </div>

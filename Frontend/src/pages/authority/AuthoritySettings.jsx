@@ -74,11 +74,11 @@ const PasswordChangeModal = ({ isOpen, onClose }) => {
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className="w-full max-w-md bg-[#0B0F1A] border border-white/10 rounded-2xl overflow-hidden shadow-2xl"
+                        className="w-full max-w-md bg-[#0B0F1A] border border-emerald-900/10 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xl"
                     >
-                        <div className="flex justify-between items-center p-6 border-b border-white/10">
-                            <h3 className="text-xl font-bold text-white">Change Password</h3>
-                            <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
+                        <div className="flex justify-between items-center p-6 border-b border-emerald-900/10 dark:border-white/10">
+                            <h3 className="text-xl font-bold text-emerald-950 dark:text-white">Change Password</h3>
+                            <button onClick={onClose} className="text-gray-400 hover:text-emerald-950 hover:dark:hover:text-white transition-colors">
                                 <X size={20} />
                             </button>
                         </div>
@@ -105,7 +105,7 @@ const PasswordChangeModal = ({ isOpen, onClose }) => {
                                         required
                                         value={formData.currentPassword}
                                         onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500/50 transition-colors"
+                                        className="w-full bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-xl px-4 py-3 text-emerald-950 dark:text-white focus:outline-none focus:border-blue-500/50 transition-colors"
                                         placeholder="••••••••"
                                     />
                                     <button
@@ -126,7 +126,7 @@ const PasswordChangeModal = ({ isOpen, onClose }) => {
                                         required
                                         value={formData.newPassword}
                                         onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500/50 transition-colors"
+                                        className="w-full bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-xl px-4 py-3 text-emerald-950 dark:text-white focus:outline-none focus:border-blue-500/50 transition-colors"
                                         placeholder="••••••••"
                                     />
                                     <button
@@ -147,7 +147,7 @@ const PasswordChangeModal = ({ isOpen, onClose }) => {
                                         required
                                         value={formData.confirmPassword}
                                         onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500/50 transition-colors"
+                                        className="w-full bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-xl px-4 py-3 text-emerald-950 dark:text-white focus:outline-none focus:border-blue-500/50 transition-colors"
                                         placeholder="••••••••"
                                     />
                                     <button
@@ -163,7 +163,7 @@ const PasswordChangeModal = ({ isOpen, onClose }) => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-500/50 text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
+                                className="w-full py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-500/50 text-emerald-950 dark:text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2"
                             >
                                 {loading ? <Loader2 size={18} className="animate-spin" /> : <Key size={18} />}
                                 {loading ? "Updating..." : "Update Password"}
@@ -242,7 +242,7 @@ const AuthoritySettings = () => {
             {/* ── TOP NAV ── */}
             <button
                 onClick={() => navigate(-1)}
-                className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm font-bold group w-fit"
+                className="flex items-center gap-2 text-gray-400 hover:text-emerald-950 hover:dark:hover:text-white transition-colors text-sm font-bold group w-fit"
             >
                 <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
                 Back to Dashboard
@@ -254,7 +254,7 @@ const AuthoritySettings = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="flex flex-col gap-1"
             >
-                <h1 className="text-2xl font-semibold text-white tracking-tight">
+                <h1 className="text-2xl font-semibold text-emerald-950 dark:text-white tracking-tight">
                     Settings
                 </h1>
                 <p className="text-gray-400 text-sm">
@@ -267,11 +267,11 @@ const AuthoritySettings = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl"
+                className="bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl"
             >
-                <div className="flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
+                <div className="flex items-center gap-3 mb-6 border-b border-emerald-900/10 dark:border-white/10 pb-4">
                     <Shield className="text-blue-400" size={20} />
-                    <h3 className="text-lg font-bold text-white">
+                    <h3 className="text-lg font-bold text-emerald-950 dark:text-white">
                         Account Security
                     </h3>
                 </div>
@@ -299,31 +299,31 @@ const AuthoritySettings = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl"
+                className="bg-emerald-900/5 dark:bg-white/5 border border-emerald-900/10 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl"
             >
-                <div className="flex items-center gap-3 mb-6 border-b border-white/10 pb-4">
+                <div className="flex items-center gap-3 mb-6 border-b border-emerald-900/10 dark:border-white/10 pb-4">
                     <Clock className="text-purple-400" size={20} />
-                    <h3 className="text-lg font-bold text-white">
+                    <h3 className="text-lg font-bold text-emerald-950 dark:text-white">
                         Account Activity
                     </h3>
                 </div>
 
                 <div className="space-y-4">
-                    <div className="flex justify-between items-center py-2 border-b border-white/5">
+                    <div className="flex justify-between items-center py-2 border-b border-emerald-900/5 dark:border-white/5">
                         <div className="flex items-center gap-3">
                             <Clock size={16} className="text-gray-500" />
                             <span className="text-gray-400 font-medium text-sm">Last Login Time</span>
                         </div>
-                        <span className="text-white font-bold">
+                        <span className="text-emerald-950 dark:text-white font-bold">
                             {loading ? <Loader2 size={16} className="animate-spin text-blue-500" /> : formatDateTime(user?.lastLogin)}
                         </span>
                     </div>
-                    <div className="flex justify-between items-center py-2 border-b border-white/5">
+                    <div className="flex justify-between items-center py-2 border-b border-emerald-900/5 dark:border-white/5">
                         <div className="flex items-center gap-3">
                             <Calendar size={16} className="text-gray-500" />
                             <span className="text-gray-400 font-medium text-sm">Account Created Date</span>
                         </div>
-                        <span className="text-white font-bold">
+                        <span className="text-emerald-950 dark:text-white font-bold">
                             {loading ? <Loader2 size={16} className="animate-spin text-blue-500" /> : formatDate(user?.createdAt)}
                         </span>
                     </div>
@@ -332,7 +332,7 @@ const AuthoritySettings = () => {
                             <Briefcase size={16} className="text-gray-500" />
                             <span className="text-gray-400 font-medium text-sm">System Access Level</span>
                         </div>
-                        <span className="text-white font-bold">
+                        <span className="text-emerald-950 dark:text-white font-bold">
                             {loading ? <Loader2 size={16} className="animate-spin text-blue-500" /> : getAccessLevel(user?.role)}
                         </span>
                     </div>

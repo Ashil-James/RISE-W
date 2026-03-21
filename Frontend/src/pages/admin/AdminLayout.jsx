@@ -13,6 +13,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import { useUser } from "../../context/UserContext";
+import ThemeToggle from "../../components/ThemeToggle";
 
 const NAV_ITEMS = [
   { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -56,7 +57,7 @@ const AdminLayout = () => {
       <button
         type="button"
         onClick={() => setIsSidebarOpen((value) => !value)}
-        className="fixed right-4 top-4 z-50 rounded-2xl border border-white/10 bg-black/35 p-3 text-white backdrop-blur-xl lg:hidden"
+        className="fixed right-4 top-4 z-50 rounded-2xl border border-emerald-900/10 dark:border-white/10 bg-wayanad-panel dark:bg-black/35 p-3 text-emerald-950 dark:text-white backdrop-blur-xl lg:hidden"
       >
         {isSidebarOpen ? <X size={22} /> : <Menu size={22} />}
       </button>
@@ -77,28 +78,29 @@ const AdminLayout = () => {
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: -280, opacity: 0 }}
                 transition={{ type: "spring", stiffness: 220, damping: 26 }}
-                className="fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-white/5 bg-wayanad-bg/40 p-6 backdrop-blur-[40px] lg:static lg:z-10 lg:border-r-0 lg:bg-transparent lg:pr-4"
+                className="fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-emerald-900/5 dark:border-white/5 bg-wayanad-bg/40 p-6 backdrop-blur-[40px] lg:static lg:z-10 lg:border-r-0 lg:bg-transparent lg:pr-4"
               >
-                <div className="flex items-center gap-4 px-2">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-emerald-500/10 text-xl font-black text-emerald-300">
+                <div className="flex items-center gap-3 px-2">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-emerald-900/10 dark:border-white/10 bg-emerald-500/10 text-xl font-black text-emerald-300">
                     R
                   </div>
-                  <div>
-                    <h2 className="text-2xl font-black tracking-tight text-white">
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-2xl font-black tracking-tight text-emerald-950 dark:text-white truncate">
                       RISE.ADMIN
                     </h2>
-                    <p className="text-[11px] font-black uppercase tracking-[0.26em] text-emerald-300/75">
+                    <p className="text-[11px] font-black uppercase tracking-[0.26em] text-emerald-300/75 truncate">
                       Control Center
                     </p>
                   </div>
+                  <ThemeToggle />
                 </div>
 
-                <div className="mt-8 rounded-[1.7rem] border border-white/10 bg-white/[0.03] p-4">
-                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
+                <div className="mt-8 rounded-[1.7rem] border border-emerald-900/10 dark:border-white/10 bg-emerald-900/5 dark:bg-white/[0.03] p-4">
+                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-800/70 dark:text-slate-400">
                     Signed in as
                   </p>
-                  <p className="mt-3 text-lg font-bold text-white">{user?.name || "Admin"}</p>
-                  <p className="text-sm text-slate-400">
+                  <p className="mt-3 text-lg font-bold text-emerald-950 dark:text-white">{user?.name || "Admin"}</p>
+                  <p className="text-sm text-emerald-800/70 dark:text-slate-400">
                     {activeItem?.label || "Dashboard"} workspace
                   </p>
                 </div>
@@ -120,7 +122,7 @@ const AdminLayout = () => {
                         className={`flex items-center gap-3 rounded-2xl px-4 py-3.5 text-[0.95rem] font-bold transition-all duration-300 ${
                           isActive
                             ? "bg-gradient-to-r from-emerald-500/20 to-emerald-500/5 text-emerald-400 border border-emerald-500/20 shadow-[0_4px_20px_-4px_rgba(16,185,129,0.2)]"
-                            : "border border-transparent text-wayanad-muted hover:text-white hover:bg-white/[0.03] hover:border-white/5"
+                            : "border border-transparent text-wayanad-muted hover:text-emerald-950 hover:dark:hover:text-white hover:bg-emerald-900/5 hover:dark:hover:bg-white/[0.03] hover:border-emerald-900/5 hover:dark:hover:border-white/5"
                         }`}
                       >
                         <Icon size={18} className={isActive ? "text-emerald-400" : "text-wayanad-muted"} />

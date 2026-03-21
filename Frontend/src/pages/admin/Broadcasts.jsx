@@ -173,23 +173,23 @@ const Broadcasts = () => {
         }
       />
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 mb-6">
-        <AdminSurface className="p-5">
-          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300/75">Active Alerts</p>
-          <p className="mt-3 text-3xl font-black text-white">{summary.activeCount || 0}</p>
-          <p className="mt-2 text-sm text-slate-300/75">Official alerts still within their active window.</p>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 mb-8">
+        <AdminSurface className="p-6">
+          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-400/80">Active Alerts</p>
+          <p className="mt-3 text-4xl font-black text-emerald-950 dark:text-white">{summary.activeCount || 0}</p>
+          <p className="mt-2 text-[0.95rem] text-emerald-800 dark:text-slate-300/80 leading-snug">Official alerts still within their active window.</p>
         </AdminSurface>
-        <AdminSurface className="p-5">
-          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300/75">Official Broadcasts</p>
-          <p className="mt-3 text-3xl font-black text-white">{summary.officialCount || 0}</p>
-          <p className="mt-2 text-sm text-slate-300/75">Dispatches created by admin or authority teams.</p>
+        <AdminSurface className="p-6">
+          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-400/80">Official Broadcasts</p>
+          <p className="mt-3 text-4xl font-black text-emerald-950 dark:text-white">{summary.officialCount || 0}</p>
+          <p className="mt-2 text-[0.95rem] text-emerald-800 dark:text-slate-300/80 leading-snug">Dispatches created by admin or authority teams.</p>
         </AdminSurface>
-        <AdminSurface className="p-5">
-          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300/75">Latest Official Dispatch</p>
-          <p className="mt-3 text-lg font-black text-white">
+        <AdminSurface className="p-6">
+          <p className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-400/80">Latest Official Dispatch</p>
+          <p className="mt-3 text-xl font-black text-emerald-950 dark:text-white">
             {summary.latestOfficial?.title || "No official broadcast yet"}
           </p>
-          <p className="mt-2 text-sm text-slate-300/75">
+          <p className="mt-2 text-[0.95rem] text-emerald-800 dark:text-slate-300/80 leading-snug">
             {summary.latestOfficial?.targetSummary || "Broadcasts you create here will appear in this feed."}
           </p>
         </AdminSurface>
@@ -198,50 +198,50 @@ const Broadcasts = () => {
       <div className="grid gap-4 xl:grid-cols-[1.05fr_1fr]">
         <AdminSurface id="admin-broadcast-composer" className="p-5 md:p-6">
           <div className="flex items-center gap-3 mb-6">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-emerald-300">
+            <div className="rounded-2xl border border-emerald-900/10 dark:border-white/10 bg-emerald-900/5 dark:bg-white/[0.03] p-3 text-emerald-300">
               <Send size={18} />
             </div>
             <div>
               <p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300/75">
                 Compose Alert
               </p>
-              <h2 className="mt-2 text-2xl font-black text-white">Dispatch Broadcast</h2>
+              <h2 className="mt-2 text-2xl font-black text-emerald-950 dark:text-white">Dispatch Broadcast</h2>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="grid gap-5 md:grid-cols-2">
               <label className="space-y-2">
-                <span className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Title</span>
+                <span className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-800/70 dark:text-slate-400/90 ml-2">Title</span>
                 <input
                   value={formData.title}
                   onChange={(event) => setFormData((current) => ({ ...current, title: event.target.value }))}
-                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
+                  className="w-full rounded-[1.2rem] border border-transparent bg-emerald-900/5 dark:bg-white/[0.03] px-4 py-3.5 text-sm text-emerald-950 dark:text-white outline-none focus:border-emerald-500/30 focus:bg-emerald-500/5 transition-all placeholder:text-emerald-900/60 dark:text-slate-500"
                   placeholder="Emergency power maintenance"
                 />
               </label>
 
               <label className="space-y-2">
-                <span className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Location Label</span>
+                <span className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-800/70 dark:text-slate-400/90 ml-2">Location Label</span>
                 <input
                   value={formData.location}
                   onChange={(event) => setFormData((current) => ({ ...current, location: event.target.value }))}
-                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
+                  className="w-full rounded-[1.2rem] border border-transparent bg-emerald-900/5 dark:bg-white/[0.03] px-4 py-3.5 text-sm text-emerald-950 dark:text-white outline-none focus:border-emerald-500/30 focus:bg-emerald-500/5 transition-all placeholder:text-emerald-900/60 dark:text-slate-500"
                   placeholder="Sector B and surrounding wards"
                 />
               </label>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-5 md:grid-cols-2">
               <label className="space-y-2">
-                <span className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Category</span>
+                <span className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-800/70 dark:text-slate-400/90 ml-2">Category</span>
                 <select
                   value={formData.type}
                   onChange={(event) => setFormData((current) => ({ ...current, type: event.target.value }))}
-                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none"
+                  className="w-full rounded-[1.2rem] border border-transparent bg-emerald-900/5 dark:bg-white/[0.03] px-4 py-3.5 text-sm text-emerald-950 dark:text-white outline-none focus:border-emerald-500/30 transition-all"
                 >
                   {BROADCAST_CATEGORY_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value} className="bg-slate-950">
+                    <option key={option.value} value={option.value} className="bg-emerald-50 dark:bg-slate-950">
                       {option.label}
                     </option>
                   ))}
@@ -249,14 +249,14 @@ const Broadcasts = () => {
               </label>
 
               <label className="space-y-2">
-                <span className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Severity</span>
+                <span className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-800/70 dark:text-slate-400/90 ml-2">Severity</span>
                 <select
                   value={formData.severity}
                   onChange={(event) => setFormData((current) => ({ ...current, severity: event.target.value }))}
-                  className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none"
+                  className="w-full rounded-[1.2rem] border border-transparent bg-emerald-900/5 dark:bg-white/[0.03] px-4 py-3.5 text-sm text-emerald-950 dark:text-white outline-none focus:border-emerald-500/30 transition-all"
                 >
                   {BROADCAST_SEVERITY_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value} className="bg-slate-950">
+                    <option key={option.value} value={option.value} className="bg-emerald-50 dark:bg-slate-950">
                       {option.label}
                     </option>
                   ))}
@@ -265,17 +265,17 @@ const Broadcasts = () => {
             </div>
 
             <label className="space-y-2 block">
-              <span className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-400">Message</span>
+              <span className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-800/70 dark:text-slate-400/90 ml-2">Message</span>
               <textarea
                 value={formData.message}
                 onChange={(event) => setFormData((current) => ({ ...current, message: event.target.value }))}
-                rows={6}
-                className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none placeholder:text-slate-500"
+                rows={5}
+                className="w-full rounded-[1.2rem] border border-transparent bg-emerald-900/5 dark:bg-white/[0.03] px-4 py-3.5 text-sm text-emerald-950 dark:text-white outline-none focus:border-emerald-500/30 focus:bg-emerald-500/5 transition-all placeholder:text-emerald-900/60 dark:text-slate-500"
                 placeholder="Describe the issue, the affected area, and any action the public should take."
               />
             </label>
 
-            <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.03] p-4">
+            <div className="rounded-[1.5rem] border border-transparent bg-emerald-900/5 dark:bg-white/[0.02] hover:bg-emerald-900/5 hover:dark:hover:bg-white/[0.03] transition-colors p-5">
               <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
@@ -283,7 +283,7 @@ const Broadcasts = () => {
                   className={`rounded-2xl px-4 py-3 text-sm font-bold transition-all ${
                     !isTargeted
                       ? "bg-sky-500/15 text-sky-100 border border-sky-400/25"
-                      : "bg-black/20 text-slate-300 border border-white/10"
+                      : "bg-emerald-900/5 dark:bg-black/20 text-emerald-800 dark:text-slate-300 border border-emerald-900/10 dark:border-white/10"
                   }`}
                 >
                   Global broadcast
@@ -294,14 +294,14 @@ const Broadcasts = () => {
                   className={`rounded-2xl px-4 py-3 text-sm font-bold transition-all ${
                     isTargeted
                       ? "bg-emerald-500/15 text-emerald-100 border border-emerald-400/25"
-                      : "bg-black/20 text-slate-300 border border-white/10"
+                      : "bg-emerald-900/5 dark:bg-black/20 text-emerald-800 dark:text-slate-300 border border-emerald-900/10 dark:border-white/10"
                   }`}
                 >
                   Proximity targeted
                 </button>
               </div>
 
-              <p className="mt-3 text-sm text-slate-300/75">
+              <p className="mt-3 text-sm text-emerald-800 dark:text-slate-300/75">
                 {isTargeted
                   ? "Only residents inside the selected radius will receive the notification."
                   : "Everyone receiving official broadcasts will see this alert."}
@@ -361,36 +361,36 @@ const Broadcasts = () => {
         <div className="space-y-4">
           <AdminSurface className="p-5 md:p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-emerald-300">
+              <div className="rounded-2xl border border-emerald-900/10 dark:border-white/10 bg-emerald-900/5 dark:bg-white/[0.03] p-3 text-emerald-300">
                 <Radio size={18} />
               </div>
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300/75">
                   Broadcast Feed
                 </p>
-                <h2 className="mt-2 text-2xl font-black text-white">Active and History</h2>
+                <h2 className="mt-2 text-2xl font-black text-emerald-950 dark:text-white">Active and History</h2>
               </div>
             </div>
 
             <div className="grid gap-3 md:grid-cols-[1.2fr_0.8fr_0.8fr]">
-              <label className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 flex items-center gap-3">
-                <Search size={16} className="text-slate-400" />
+              <label className="rounded-2xl border border-emerald-900/10 dark:border-white/10 bg-emerald-900/5 dark:bg-black/20 px-4 py-3 flex items-center gap-3">
+                <Search size={16} className="text-emerald-800/70 dark:text-slate-400" />
                 <input
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder="Search title, message, or area"
-                  className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-500"
+                  className="w-full bg-transparent text-sm text-emerald-950 dark:text-white outline-none placeholder:text-emerald-900/60 dark:text-slate-500"
                 />
               </label>
 
               <select
                 value={severityFilter}
                 onChange={(event) => setSeverityFilter(event.target.value)}
-                className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none"
+                className="rounded-2xl border border-emerald-900/10 dark:border-white/10 bg-emerald-900/5 dark:bg-black/20 px-4 py-3 text-sm text-emerald-950 dark:text-white outline-none"
               >
                 <option value="all">All severity</option>
                 {BROADCAST_SEVERITY_OPTIONS.map((option) => (
-                  <option key={option.value} value={option.value} className="bg-slate-950">
+                  <option key={option.value} value={option.value} className="bg-emerald-50 dark:bg-slate-950">
                     {option.label}
                   </option>
                 ))}
@@ -399,10 +399,10 @@ const Broadcasts = () => {
               <select
                 value={activityFilter}
                 onChange={(event) => setActivityFilter(event.target.value)}
-                className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none"
+                className="rounded-2xl border border-emerald-900/10 dark:border-white/10 bg-emerald-900/5 dark:bg-black/20 px-4 py-3 text-sm text-emerald-950 dark:text-white outline-none"
               >
                 {ACTIVITY_FILTERS.map((option) => (
-                  <option key={option.value} value={option.value} className="bg-slate-950">
+                  <option key={option.value} value={option.value} className="bg-emerald-50 dark:bg-slate-950">
                     {option.label}
                   </option>
                 ))}
@@ -431,85 +431,89 @@ const Broadcasts = () => {
             />
           ) : (
             <>
-              <section className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-black text-white">Active alerts</h3>
-                  <span className="text-sm text-slate-400">{activeBroadcasts.length}</span>
+              <section className="space-y-4">
+                <div className="flex items-center justify-between ml-2">
+                  <h3 className="text-[1.3rem] font-black text-emerald-950 dark:text-white">Active alerts</h3>
+                  <span className="text-sm font-bold text-emerald-800/70 dark:text-slate-400">{activeBroadcasts.length}</span>
                 </div>
                 {activeBroadcasts.length === 0 ? (
-                  <AdminSurface className="p-5 text-sm text-slate-400">
+                  <AdminSurface className="p-6 text-sm text-emerald-800/70 dark:text-slate-400/80">
                     No broadcasts are currently active.
                   </AdminSurface>
                 ) : (
-                  activeBroadcasts.map((broadcast) => (
-                    <AdminSurface key={broadcast._id} className="p-5">
-                      <div className="flex flex-wrap items-center gap-2 mb-3">
-                        <span className={`rounded-xl px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] ${severityBadgeClass(broadcast.severity)}`}>
-                          {broadcast.severity}
-                        </span>
-                        <span className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-white">
-                          {broadcast.targetScope}
-                        </span>
-                      </div>
-                      <p className="text-lg font-black text-white">{broadcast.title}</p>
-                      <p className="mt-2 text-sm text-slate-300/80">{broadcast.message}</p>
-                      <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                        <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">
-                            Reach
-                          </p>
-                          <p className="mt-2 text-sm font-bold text-white">{broadcast.targetSummary}</p>
+                  <div className="space-y-3">
+                    {activeBroadcasts.map((broadcast) => (
+                      <AdminSurface key={broadcast._id} className="p-6 border border-transparent hover:border-emerald-900/5 hover:dark:hover:border-white/5 transition-all">
+                        <div className="flex flex-wrap items-center gap-2 mb-4">
+                          <span className={`rounded-xl px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] ${severityBadgeClass(broadcast.severity)}`}>
+                            {broadcast.severity}
+                          </span>
+                          <span className="rounded-xl border border-emerald-900/5 dark:border-white/5 bg-emerald-900/10 dark:bg-white/[0.04] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-800 dark:text-slate-300">
+                            {broadcast.targetScope}
+                          </span>
                         </div>
-                        <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                          <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">
-                            Window
-                          </p>
-                          <p className="mt-2 text-sm font-bold text-white">{formatAdminRelativeTime(broadcast.createdAt)}</p>
-                          <p className="mt-1 text-xs text-slate-500">
-                            Expires {formatAdminDateTime(broadcast.expiresAt)}
-                          </p>
+                        <p className="text-xl font-black text-emerald-950 dark:text-white">{broadcast.title}</p>
+                        <p className="mt-2 text-[0.95rem] text-emerald-800 dark:text-slate-300/80 leading-relaxed">{broadcast.message}</p>
+                        <div className="mt-5 grid gap-4 lg:grid-cols-2">
+                          <div className="rounded-[1.2rem] bg-emerald-900/5 dark:bg-white/[0.03] p-4">
+                            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-900/60 dark:text-slate-500">
+                              Reach
+                            </p>
+                            <p className="mt-2 text-sm font-bold text-emerald-950 dark:text-white">{broadcast.targetSummary}</p>
+                          </div>
+                          <div className="rounded-[1.2rem] bg-emerald-900/5 dark:bg-white/[0.03] p-4">
+                            <p className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-900/60 dark:text-slate-500">
+                              Window
+                            </p>
+                            <p className="mt-2 text-sm font-bold text-emerald-950 dark:text-white">{formatAdminRelativeTime(broadcast.createdAt)}</p>
+                            <p className="mt-1 text-xs text-emerald-900/60 dark:text-slate-500">
+                              Expires {formatAdminDateTime(broadcast.expiresAt)}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    </AdminSurface>
-                  ))
+                      </AdminSurface>
+                    ))}
+                  </div>
                 )}
               </section>
 
-              <section className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-black text-white">History</h3>
-                  <span className="text-sm text-slate-400">{historicalBroadcasts.length}</span>
+              <section className="space-y-4">
+                <div className="flex items-center justify-between ml-2">
+                  <h3 className="text-[1.3rem] font-black text-emerald-950 dark:text-white">History</h3>
+                  <span className="text-sm font-bold text-emerald-800/70 dark:text-slate-400">{historicalBroadcasts.length}</span>
                 </div>
                 {historicalBroadcasts.length === 0 ? (
-                  <AdminSurface className="p-5 text-sm text-slate-400">
+                  <AdminSurface className="p-6 text-sm text-emerald-800/70 dark:text-slate-400/80">
                     No older broadcasts match the current filters.
                   </AdminSurface>
                 ) : (
-                  historicalBroadcasts.map((broadcast) => (
-                    <AdminSurface key={broadcast._id} className="p-5">
-                      <div className="flex flex-wrap items-center gap-2 mb-3">
-                        <span className={`rounded-xl px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] ${severityBadgeClass(broadcast.severity)}`}>
-                          {broadcast.severity}
-                        </span>
-                        <span className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-white">
-                          {broadcast.targetScope}
-                        </span>
-                      </div>
-                      <p className="text-lg font-black text-white">{broadcast.title}</p>
-                      <p className="mt-2 text-sm text-slate-300/80">{broadcast.message}</p>
-                      <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-400">
-                        <span className="inline-flex items-center gap-2">
-                          <MapPin size={14} />
-                          {broadcast.location}
-                        </span>
-                        <span className="inline-flex items-center gap-2">
-                          <Target size={14} />
-                          {broadcast.targetSummary}
-                        </span>
-                        <span>{formatAdminDateTime(broadcast.createdAt)}</span>
-                      </div>
-                    </AdminSurface>
-                  ))
+                  <div className="space-y-3">
+                    {historicalBroadcasts.map((broadcast) => (
+                      <AdminSurface key={broadcast._id} className="p-6 border border-transparent hover:border-emerald-900/5 hover:dark:hover:border-white/5 transition-all">
+                        <div className="flex flex-wrap items-center gap-2 mb-4">
+                          <span className={`rounded-xl px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] ${severityBadgeClass(broadcast.severity)}`}>
+                            {broadcast.severity}
+                          </span>
+                          <span className="rounded-xl border border-emerald-900/5 dark:border-white/5 bg-emerald-900/10 dark:bg-white/[0.04] px-3 py-1.5 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-800 dark:text-slate-300">
+                            {broadcast.targetScope}
+                          </span>
+                        </div>
+                        <p className="text-xl font-black text-emerald-950 dark:text-white">{broadcast.title}</p>
+                        <p className="mt-2 text-[0.95rem] text-emerald-800 dark:text-slate-300/80 leading-relaxed min-w-0">{broadcast.message}</p>
+                        <div className="mt-5 flex flex-wrap gap-4 text-xs font-bold text-emerald-900/60 dark:text-slate-500">
+                          <span className="inline-flex items-center gap-2">
+                            <MapPin size={14} className="text-emerald-800/70 dark:text-slate-400" />
+                            {broadcast.location}
+                          </span>
+                          <span className="inline-flex items-center gap-2">
+                            <Target size={14} className="text-emerald-800/70 dark:text-slate-400" />
+                            {broadcast.targetSummary}
+                          </span>
+                          <span>{formatAdminDateTime(broadcast.createdAt)}</span>
+                        </div>
+                      </AdminSurface>
+                    ))}
+                  </div>
                 )}
               </section>
             </>

@@ -140,31 +140,31 @@ const AdminUsers = () => {
             <p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300/75">
               {card.title}
             </p>
-            <p className="mt-3 text-3xl font-black text-white">{card.value}</p>
-            <p className="mt-2 text-sm text-slate-300/75">{card.description}</p>
+            <p className="mt-3 text-3xl font-black text-emerald-950 dark:text-white">{card.value}</p>
+            <p className="mt-2 text-sm text-emerald-800 dark:text-slate-300/75">{card.description}</p>
           </AdminSurface>
         ))}
       </div>
 
       <AdminSurface className="p-4 md:p-5 mb-6">
         <div className="grid gap-3 lg:grid-cols-[1.6fr_0.8fr]">
-          <label className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 flex items-center gap-3">
-            <Search size={16} className="text-slate-400" />
+          <label className="rounded-2xl border border-emerald-900/10 dark:border-white/10 bg-emerald-900/5 dark:bg-black/20 px-4 py-3 flex items-center gap-3">
+            <Search size={16} className="text-emerald-800/70 dark:text-slate-400" />
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search by name, email, or department"
-              className="w-full bg-transparent text-sm text-white outline-none placeholder:text-slate-500"
+              className="w-full bg-transparent text-sm text-emerald-950 dark:text-white outline-none placeholder:text-emerald-900/60 dark:text-slate-500"
             />
           </label>
 
           <select
             value={roleFilter}
             onChange={(event) => setRoleFilter(event.target.value)}
-            className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-white outline-none"
+            className="rounded-2xl border border-emerald-900/10 dark:border-white/10 bg-emerald-900/5 dark:bg-black/20 px-4 py-3 text-sm text-emerald-950 dark:text-white outline-none"
           >
             {ROLE_OPTIONS.map((option) => (
-              <option key={option.value} value={option.value} className="bg-slate-950">
+              <option key={option.value} value={option.value} className="bg-emerald-50 dark:bg-slate-950">
                 {option.label}
               </option>
             ))}
@@ -193,7 +193,7 @@ const AdminUsers = () => {
         />
       ) : (
         <AdminSurface className="overflow-hidden">
-          <div className="hidden md:grid grid-cols-[1.6fr_0.9fr_0.8fr_0.8fr_1fr] gap-4 border-b border-white/10 px-6 py-4 text-[11px] font-black uppercase tracking-[0.22em] text-slate-400">
+          <div className="hidden md:grid grid-cols-[1.6fr_0.9fr_0.8fr_0.8fr_1fr] gap-4 border-b border-emerald-900/10 dark:border-white/10 px-6 py-4 text-[11px] font-black uppercase tracking-[0.22em] text-emerald-800/70 dark:text-slate-400">
             <span>User</span>
             <span>Department</span>
             <span>Role</span>
@@ -216,12 +216,12 @@ const AdminUsers = () => {
                 >
                   <div>
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-sm font-black text-white">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-emerald-900/10 dark:border-white/10 bg-emerald-900/10 dark:bg-white/[0.04] text-sm font-black text-emerald-950 dark:text-white">
                         {entry.name?.charAt(0)?.toUpperCase() || "U"}
                       </div>
                       <div>
-                        <p className="font-bold text-white">{entry.name}</p>
-                        <p className="text-xs text-slate-500">{entry.email}</p>
+                        <p className="font-bold text-emerald-950 dark:text-white">{entry.name}</p>
+                        <p className="text-xs text-emerald-900/60 dark:text-slate-500">{entry.email}</p>
                       </div>
                     </div>
                     {isSelf ? (
@@ -230,7 +230,7 @@ const AdminUsers = () => {
                   </div>
 
                   <div className="md:pt-1">
-                    <p className="text-sm font-bold text-white">{departmentLabel}</p>
+                    <p className="text-sm font-bold text-emerald-950 dark:text-white">{departmentLabel}</p>
                     {!entry.department && entry.role !== "admin" ? (
                       <p className="mt-2 text-xs text-amber-300/80">
                         No department assigned
@@ -245,17 +245,17 @@ const AdminUsers = () => {
                       onChange={(event) => handleRoleChange(entry, event.target.value)}
                       className={`w-full rounded-xl px-3 py-2 text-xs font-black uppercase tracking-[0.18em] outline-none ${roleBadgeClass(entry.role)} disabled:cursor-not-allowed disabled:opacity-70`}
                     >
-                      <option value="user" className="bg-slate-950 text-white">
+                      <option value="user" className="bg-emerald-50 dark:bg-slate-950 text-emerald-950 dark:text-white">
                         Resident
                       </option>
                       <option
                         value="authority"
-                        className="bg-slate-950 text-white"
+                        className="bg-emerald-50 dark:bg-slate-950 text-emerald-950 dark:text-white"
                         disabled={!canPromoteToAuthority && entry.role !== "authority"}
                       >
                         Authority
                       </option>
-                      <option value="admin" className="bg-slate-950 text-white">
+                      <option value="admin" className="bg-emerald-50 dark:bg-slate-950 text-emerald-950 dark:text-white">
                         Admin
                       </option>
                     </select>
@@ -268,15 +268,15 @@ const AdminUsers = () => {
                   </div>
 
                   <div className="md:pt-1">
-                    <p className="text-sm font-bold text-white">{formatAdminDate(entry.createdAt)}</p>
-                    <p className="mt-2 text-xs text-slate-500">Account created</p>
+                    <p className="text-sm font-bold text-emerald-950 dark:text-white">{formatAdminDate(entry.createdAt)}</p>
+                    <p className="mt-2 text-xs text-emerald-900/60 dark:text-slate-500">Account created</p>
                   </div>
 
                   <div className="md:pt-1">
-                    <p className="text-sm font-bold text-white">
+                    <p className="text-sm font-bold text-emerald-950 dark:text-white">
                       {entry.lastLogin ? formatAdminRelativeTime(entry.lastLogin) : "Never"}
                     </p>
-                    <p className="mt-2 text-xs text-slate-500">
+                    <p className="mt-2 text-xs text-emerald-900/60 dark:text-slate-500">
                       {entry.lastLogin ? "Most recent sign-in" : "No login recorded yet"}
                     </p>
                   </div>

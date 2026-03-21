@@ -36,7 +36,7 @@ const CustomDropdown = ({ options, value, onChange, placeholder, isUrgent = fals
                     e.stopPropagation();
                     setIsOpen(!isOpen);
                 }}
-                className={`w-full bg-[#020617] border border-white/10 text-white rounded-[10px] px-4 py-3 focus:outline-none focus:border-blue-400 transition-all font-bold flex items-center justify-between group ${isUrgent ? 'text-red-400' : ''}`}
+                className={`w-full bg-[#020617] border border-emerald-900/10 dark:border-white/10 text-emerald-950 dark:text-white rounded-[10px] px-4 py-3 focus:outline-none focus:border-blue-400 transition-all font-bold flex items-center justify-between group ${isUrgent ? 'text-red-400' : ''}`}
             >
                 <span className={!value ? "text-gray-700 font-bold" : ""}>
                     {value || placeholder}
@@ -50,7 +50,7 @@ const CustomDropdown = ({ options, value, onChange, placeholder, isUrgent = fals
                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className="absolute z-[60] left-0 right-0 mt-2 bg-[#020617] border border-white/10 rounded-xl shadow-2xl overflow-hidden py-1 backdrop-blur-3xl"
+                        className="absolute z-[60] left-0 right-0 mt-2 bg-[#020617] border border-emerald-900/10 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden py-1 backdrop-blur-3xl"
                     >
                         {options.map((opt) => (
                             <div
@@ -60,8 +60,8 @@ const CustomDropdown = ({ options, value, onChange, placeholder, isUrgent = fals
                                     setIsOpen(false);
                                 }}
                                 className={`px-4 py-3 text-sm font-bold cursor-pointer transition-colors ${value === opt.value
-                                    ? "bg-sky-400/15 text-white"
-                                    : "text-[#e2e2e0] hover:bg-white/5 active:bg-white/10"
+                                    ? "bg-sky-400/15 text-emerald-950 dark:text-white"
+                                    : "text-[#e2e2e0] hover:bg-emerald-900/5 hover:dark:hover:bg-white/5 active:bg-emerald-900/10 dark:bg-white/10"
                                     }`}
                             >
                                 {opt.label}
@@ -236,7 +236,7 @@ const AuthorityBroadcastAlerts = () => {
             {/* HEADER */}
             <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
                 <div>
-                    <h1 className="text-4xl font-black text-white mb-2 tracking-tight flex items-center gap-3">
+                    <h1 className="text-4xl font-black text-emerald-950 dark:text-white mb-2 tracking-tight flex items-center gap-3">
                         <Megaphone className={theme.text} size={36} />
                         Broadcast Alerts
                     </h1>
@@ -257,7 +257,7 @@ const AuthorityBroadcastAlerts = () => {
                     animate={{ opacity: 1, y: 0 }}
                     className="lg:col-span-12 xl:col-span-8"
                 >
-                    <div className="bg-[#020617] border border-white/10 rounded-2xl p-6 md:p-8 backdrop-blur-xl relative overflow-hidden group shadow-2xl">
+                    <div className="bg-[#020617] border border-emerald-900/10 dark:border-white/10 rounded-2xl p-6 md:p-8 backdrop-blur-xl relative overflow-hidden group shadow-2xl">
                         {/* Subtle background glow */}
                         <div className={`absolute -top-24 -right-24 w-64 h-64 ${theme.bg} rounded-full blur-[100px] pointer-events-none group-hover:opacity-100 opacity-50 transition-opacity`}></div>
 
@@ -297,7 +297,7 @@ const AuthorityBroadcastAlerts = () => {
                                                     required
                                                     value={formData.customTitle}
                                                     onChange={(e) => setFormData({ ...formData, customTitle: e.target.value })}
-                                                    className="w-full bg-[#020617] border border-white/10 text-white rounded-[10px] px-4 py-3 focus:outline-none focus:border-blue-400 transition-all font-bold placeholder:text-gray-700"
+                                                    className="w-full bg-[#020617] border border-emerald-900/10 dark:border-white/10 text-emerald-950 dark:text-white rounded-[10px] px-4 py-3 focus:outline-none focus:border-blue-400 transition-all font-bold placeholder:text-gray-700"
                                                     placeholder="Enter custom alert title"
                                                 />
                                             </motion.div>
@@ -342,7 +342,7 @@ const AuthorityBroadcastAlerts = () => {
                                         type="text"
                                         value={formData.location}
                                         onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                        className="w-full bg-[#020617] border border-white/10 text-white rounded-[10px] pl-12 pr-4 py-3 focus:outline-none focus:border-blue-400 transition-all font-bold placeholder:text-gray-700"
+                                        className="w-full bg-[#020617] border border-emerald-900/10 dark:border-white/10 text-emerald-950 dark:text-white rounded-[10px] pl-12 pr-4 py-3 focus:outline-none focus:border-blue-400 transition-all font-bold placeholder:text-gray-700"
                                         placeholder="e.g. Sector B, Main Road Area"
                                     />
                                 </div>
@@ -359,7 +359,7 @@ const AuthorityBroadcastAlerts = () => {
                                     rows="4"
                                     value={formData.message}
                                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                                    className="w-full bg-[#020617] border border-white/10 text-white rounded-[10px] px-4 py-3 focus:outline-none focus:border-blue-400 transition-all font-bold placeholder:text-gray-700 resize-none leading-relaxed"
+                                    className="w-full bg-[#020617] border border-emerald-900/10 dark:border-white/10 text-emerald-950 dark:text-white rounded-[10px] px-4 py-3 focus:outline-none focus:border-blue-400 transition-all font-bold placeholder:text-gray-700 resize-none leading-relaxed"
                                     placeholder="Provide clear details about the situation..."
                                 />
                             </div>
@@ -378,8 +378,8 @@ const AuthorityBroadcastAlerts = () => {
 
                 {/* QUICK TIPS / STATS */}
                 <div className="lg:col-span-12 xl:col-span-4 space-y-6">
-                    <div className="bg-[#020617] border border-white/10 rounded-2xl p-6 backdrop-blur-xl h-full shadow-2xl">
-                        <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                    <div className="bg-[#020617] border border-emerald-900/10 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl h-full shadow-2xl">
+                        <h3 className="text-lg font-bold text-emerald-950 dark:text-white mb-6 flex items-center gap-2">
                             <Info size={20} className="text-sky-400" />
                             Broadcast Protocol
                         </h3>
@@ -408,9 +408,9 @@ const AuthorityBroadcastAlerts = () => {
                     animate={{ opacity: 1, y: 0 }}
                     className="lg:col-span-12"
                 >
-                    <div className="bg-[#020617] border border-white/10 rounded-2xl overflow-hidden backdrop-blur-xl shadow-2xl">
-                        <div className="p-6 border-b border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <h2 className="text-xl font-black text-white flex items-center gap-3">
+                    <div className="bg-[#020617] border border-emerald-900/10 dark:border-white/10 rounded-2xl overflow-hidden backdrop-blur-xl shadow-2xl">
+                        <div className="p-6 border-b border-emerald-900/10 dark:border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <h2 className="text-xl font-black text-emerald-950 dark:text-white flex items-center gap-3">
                                 <Clock className="text-gray-400" size={24} />
                                 Broadcast History
                             </h2>
@@ -419,7 +419,7 @@ const AuthorityBroadcastAlerts = () => {
                                 <input
                                     type="text"
                                     placeholder="Search alerts..."
-                                    className="bg-black/40 border border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-sky-500/50 text-white font-medium"
+                                    className="bg-black/40 border border-emerald-900/10 dark:border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-sky-500/50 text-emerald-950 dark:text-white font-medium"
                                 />
                             </div>
                         </div>
@@ -427,7 +427,7 @@ const AuthorityBroadcastAlerts = () => {
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="bg-white/[0.02] text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
+                                    <tr className="bg-emerald-900/5 dark:bg-white/[0.02] text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
                                         <th className="px-6 py-4">Alert Title</th>
                                         <th className="px-6 py-4">Alert Type</th>
                                         <th className="px-6 py-4">Authority</th>
@@ -438,9 +438,9 @@ const AuthorityBroadcastAlerts = () => {
                                 </thead>
                                 <tbody className="divide-y divide-white/5">
                                     {historyAlerts.length > 0 ? historyAlerts.map((alert, i) => (
-                                        <tr key={alert.id || i} className="group hover:bg-white/[0.02] transition-colors">
+                                        <tr key={alert.id || i} className="group hover:bg-emerald-900/5 hover:dark:hover:bg-white/[0.02] transition-colors">
                                             <td className="px-6 py-4">
-                                                <p className="text-sm font-bold text-white group-hover:text-sky-400 transition-colors">
+                                                <p className="text-sm font-bold text-emerald-950 dark:text-white group-hover:text-sky-400 transition-colors">
                                                     {alert.title}
                                                 </p>
                                             </td>
@@ -511,7 +511,7 @@ const AuthorityBroadcastAlerts = () => {
                             <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-8 text-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
                                 <CheckCircle size={40} />
                             </div>
-                            <h2 className="text-3xl font-black text-white mb-3 tracking-tight">
+                            <h2 className="text-3xl font-black text-emerald-950 dark:text-white mb-3 tracking-tight">
                                 Broadcast Dispatched!
                             </h2>
                             <p className="text-gray-400 mb-8 font-medium text-sm">

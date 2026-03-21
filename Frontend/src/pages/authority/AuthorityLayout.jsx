@@ -21,6 +21,7 @@ import { useAuth } from "../../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNotificationFeed } from "../../hooks/useNotificationFeed";
 import NotificationToastStack from "../../components/NotificationToastStack";
+import ThemeToggle from "../../components/ThemeToggle";
 
 const AuthorityLayout = () => {
     const location = useLocation();
@@ -148,7 +149,7 @@ const AuthorityLayout = () => {
             relative flex items-center gap-4 px-5 py-4 rounded-xl transition-all duration-300 group overflow-hidden
             ${isActive
                             ? `${theme.accentBg} ${theme.accentText} font-bold border ${theme.accentBorder} ${theme.accentGlow}`
-                            : "text-gray-400 hover:bg-white/5 hover:text-white border border-transparent"
+                            : "text-gray-400 hover:bg-emerald-900/5 hover:dark:hover:bg-white/5 hover:text-emerald-950 hover:dark:hover:text-white border border-transparent"
                         }
           `}
                 >
@@ -172,7 +173,7 @@ const AuthorityLayout = () => {
     };
 
     return (
-        <div className={`flex min-h-screen bg-[#020617] text-white font-sans selection:bg-${theme.accent}-500/30 overflow-hidden relative`}>
+        <div className={`flex min-h-screen bg-[#020617] text-emerald-950 dark:text-white font-sans selection:bg-${theme.accent}-500/30 overflow-hidden relative`}>
             {/* BACKGROUND ELEMENTS */}
             <div className="fixed inset-0 z-0 pointer-events-none">
                 <div className={`absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-${theme.accent}-600/10 rounded-full blur-[150px] animate-blob`}></div>
@@ -186,7 +187,7 @@ const AuthorityLayout = () => {
 
             {/* MOBILE TOGGLE */}
             <button
-                className="lg:hidden fixed top-6 right-6 z-50 p-3 bg-neutral-900/80 backdrop-blur-md rounded-xl border border-white/10"
+                className="lg:hidden fixed top-6 right-6 z-50 p-3 bg-neutral-900/80 backdrop-blur-md rounded-xl border border-emerald-900/10 dark:border-white/10"
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             >
                 {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
@@ -199,14 +200,14 @@ const AuthorityLayout = () => {
                         initial={{ x: -300, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         exit={{ x: -300, opacity: 0 }}
-                        className="w-72 bg-[#020617]/80 backdrop-blur-2xl border-r border-white/10 flex flex-col justify-between min-h-screen p-6 fixed z-40 shadow-2xl lg:shadow-none lg:relative"
+                        className="w-72 bg-[#020617]/80 backdrop-blur-2xl border-r border-emerald-900/10 dark:border-white/10 flex flex-col justify-between min-h-screen p-6 fixed z-40 shadow-2xl lg:shadow-none lg:relative"
                     >
                         <div>
                             {/* Brand Logo */}
                             <div className="flex items-center gap-4 mb-12 px-2 mt-2">
                                 <div className="relative group cursor-pointer">
                                     <div className={`absolute -inset-1 bg-gradient-to-r from-${theme.accent}-400 to-blue-500 rounded-xl blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200`}></div>
-                                    <div className="relative w-12 h-12 rounded-xl bg-neutral-950 flex items-center justify-center text-sky-400 font-black text-xl border border-white/10 shadow-2xl overflow-hidden">
+                                    <div className="relative w-12 h-12 rounded-xl bg-neutral-950 flex items-center justify-center text-sky-400 font-black text-xl border border-emerald-900/10 dark:border-white/10 shadow-2xl overflow-hidden">
                                         <theme.icon size={24} className={`${theme.accentText} ${theme.iconGlow}`} />
                                     </div>
                                 </div>
@@ -249,7 +250,7 @@ const AuthorityLayout = () => {
                         </div>
 
                         {/* Logout Button */}
-                        <div className="pt-6 border-t border-white/10">
+                        <div className="pt-6 border-t border-emerald-900/10 dark:border-white/10">
                             <button
                                 onClick={handleLogout}
                                 className="w-full flex items-center gap-2 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-all font-bold group"
@@ -268,18 +269,19 @@ const AuthorityLayout = () => {
             {/* CONTENT WRAPPER */}
             <div className={`flex-1 flex flex-col h-screen overflow-hidden relative z-10 transition-all duration-300 ${isSidebarOpen ? "" : "lg:ml-0"}`}>
                 {/* TOP HEADER BAR */}
-                <header className="h-16 w-full bg-[#020617] border-b border-white/10 px-8 flex items-center justify-between shrink-0">
+                <header className="h-16 w-full bg-[#020617] border-b border-emerald-900/10 dark:border-white/10 px-8 flex items-center justify-between shrink-0">
                     <div className="flex flex-col">
                         <span className="text-xs uppercase tracking-widest text-gray-400">AUTHORITY</span>
-                        <span className="text-white font-semibold leading-tight">{theme.name}</span>
+                        <span className="text-emerald-950 dark:text-white font-semibold leading-tight">{theme.name}</span>
                     </div>
 
                     <div className="flex items-center gap-4">
+                        <ThemeToggle />
                         <div className="relative">
                             <button
                                 id="notifications-dropdown-trigger"
                                 onClick={toggleNotificationsPanel}
-                                className={`relative p-2 transition-colors ${isNotificationsOpen ? "text-white" : "text-gray-400 hover:text-white"}`}
+                                className={`relative p-2 transition-colors ${isNotificationsOpen ? "text-emerald-950 dark:text-white" : "text-gray-400 hover:text-emerald-950 hover:dark:hover:text-white"}`}
                             >
                                 <Bell size={20} />
                                 {unreadCount > 0 && (
@@ -293,10 +295,10 @@ const AuthorityLayout = () => {
                                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        className="absolute right-0 mt-2 w-80 bg-[#020617] border border-white/10 rounded-xl shadow-2xl z-50 backdrop-blur-3xl overflow-hidden"
+                                        className="absolute right-0 mt-2 w-80 bg-[#020617] border border-emerald-900/10 dark:border-white/10 rounded-xl shadow-2xl z-50 backdrop-blur-3xl overflow-hidden"
                                     >
-                                        <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between bg-white/5">
-                                            <h3 className="text-sm font-bold text-white">Notifications</h3>
+                                        <div className="px-4 py-3 border-b border-emerald-900/5 dark:border-white/5 flex items-center justify-between bg-emerald-900/5 dark:bg-white/5">
+                                            <h3 className="text-sm font-bold text-emerald-950 dark:text-white">Notifications</h3>
                                             {unreadCount > 0 && (
                                                 <span className={`${theme.accentBg} ${theme.accentText} text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider`}>
                                                     {unreadCount} New
@@ -310,17 +312,17 @@ const AuthorityLayout = () => {
                                                     <div
                                                         key={n.id}
                                                         onClick={() => n.unread && markAsRead(n.id)}
-                                                        className={`px-4 py-4 border-b border-white/5 hover:bg-white/[0.02] transition-colors cursor-pointer relative group ${n.unread ? "bg-white/[0.01]" : ""}`}
+                                                        className={`px-4 py-4 border-b border-emerald-900/5 dark:border-white/5 hover:bg-emerald-900/5 hover:dark:hover:bg-white/[0.02] transition-colors cursor-pointer relative group ${n.unread ? "bg-white/[0.01]" : ""}`}
                                                     >
                                                         {n.unread && (
                                                             <div className={`absolute top-5 left-1 w-1 h-6 rounded-full ${theme.activePill}`}></div>
                                                         )}
                                                         <div className="flex items-start gap-3">
-                                                            <div className={`mt-1 p-1.5 rounded-lg ${n.unread ? theme.accentBg : "bg-white/5"}`}>
+                                                            <div className={`mt-1 p-1.5 rounded-lg ${n.unread ? theme.accentBg : "bg-emerald-900/5 dark:bg-white/5"}`}>
                                                                 <Bell size={14} className={n.unread ? theme.accentText : "text-gray-400"} />
                                                             </div>
                                                             <div className="flex-1">
-                                                                <p className={`text-sm font-bold ${n.unread ? "text-white" : "text-gray-300"}`}>
+                                                                <p className={`text-sm font-bold ${n.unread ? "text-emerald-950 dark:text-white" : "text-gray-300"}`}>
                                                                     {n.title}
                                                                 </p>
                                                                 <p className="text-xs text-gray-400 mt-0.5 line-clamp-2">
@@ -341,10 +343,10 @@ const AuthorityLayout = () => {
                                             )}
                                         </div>
 
-                                        <div className="px-4 py-2 text-center bg-white/5 border-t border-white/5">
+                                        <div className="px-4 py-2 text-center bg-emerald-900/5 dark:bg-white/5 border-t border-emerald-900/5 dark:border-white/5">
                                             <button
                                                 onClick={markAllAsRead}
-                                                className="text-[10px] font-bold text-gray-400 hover:text-white transition-colors uppercase tracking-widest"
+                                                className="text-[10px] font-bold text-gray-400 hover:text-emerald-950 hover:dark:hover:text-white transition-colors uppercase tracking-widest"
                                             >
                                                 Mark all as read
                                             </button>
@@ -360,7 +362,7 @@ const AuthorityLayout = () => {
                                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                                 className="flex items-center gap-2 cursor-pointer group"
                             >
-                                <div className="w-9 h-9 rounded-lg bg-white/5 group-hover:bg-white/10 flex items-center justify-center transition-colors">
+                                <div className="w-9 h-9 rounded-lg bg-emerald-900/5 dark:bg-white/5 group-hover:bg-emerald-900/10 hover:dark:hover:bg-white/10 flex items-center justify-center transition-colors">
                                     <User size={18} className="text-gray-300" />
                                 </div>
                                 <ChevronDown size={14} className={`text-gray-500 group-hover:text-gray-300 transition-transform duration-300 ${isProfileOpen ? "rotate-180" : ""}`} />
@@ -372,15 +374,15 @@ const AuthorityLayout = () => {
                                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        className="absolute right-0 mt-2 w-48 bg-[#020617] border border-white/10 rounded-xl shadow-2xl py-2 z-50 backdrop-blur-3xl overflow-hidden"
+                                        className="absolute right-0 mt-2 w-48 bg-[#020617] border border-emerald-900/10 dark:border-white/10 rounded-xl shadow-2xl py-2 z-50 backdrop-blur-3xl overflow-hidden"
                                     >
-                                        <div className="px-4 py-2 border-b border-white/5 bg-white/5 mb-1">
+                                        <div className="px-4 py-2 border-b border-emerald-900/5 dark:border-white/5 bg-emerald-900/5 dark:bg-white/5 mb-1">
                                             <p className={`text-[10px] font-bold ${theme.accentText} uppercase tracking-widest`}>Authority Access</p>
-                                            <p className="text-xs text-white font-medium truncate">{authUser?.email || `${theme.short.toLowerCase()}_admin@rise.ops`}</p>
+                                            <p className="text-xs text-emerald-950 dark:text-white font-medium truncate">{authUser?.email || `${theme.short.toLowerCase()}_admin@rise.ops`}</p>
                                         </div>
 
                                         <div
-                                            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer transition-colors"
+                                            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-emerald-900/5 hover:dark:hover:bg-white/5 hover:text-emerald-950 hover:dark:hover:text-white cursor-pointer transition-colors"
                                             onClick={() => {
                                                 setIsProfileOpen(false);
                                                 navigate(`/authority/${theme.short.toLowerCase()}/profile`);
@@ -396,7 +398,7 @@ const AuthorityLayout = () => {
                                         ].map((item) => (
                                             <div
                                                 key={item.label}
-                                                className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white cursor-pointer transition-colors"
+                                                className="flex items-center gap-3 px-4 py-2 text-sm text-gray-300 hover:bg-emerald-900/5 hover:dark:hover:bg-white/5 hover:text-emerald-950 hover:dark:hover:text-white cursor-pointer transition-colors"
                                                 onClick={() => {
                                                     setIsProfileOpen(false);
                                                     navigate(item.route);

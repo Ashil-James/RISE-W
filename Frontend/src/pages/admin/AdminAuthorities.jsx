@@ -127,35 +127,35 @@ const AdminAuthorities = () => {
                   className={`rounded-[1.8rem] border p-5 text-left transition-all ${
                     active
                       ? "border-emerald-400/25 bg-emerald-500/10"
-                      : "border-white/10 bg-white/[0.03] hover:border-white/20"
+                      : "border-emerald-900/10 dark:border-white/10 bg-emerald-900/5 dark:bg-white/[0.03] hover:border-emerald-900/20 hover:dark:hover:border-white/20"
                   }`}
                 >
                   <div className="flex items-center justify-between gap-3">
                     <AdminAuthorityBadge authority={authority.value} />
-                    <span className="text-sm font-bold text-white">{item?.activeCount || 0} active</span>
+                    <span className="text-sm font-bold text-emerald-950 dark:text-white">{item?.activeCount || 0} active</span>
                   </div>
 
                   <div className="mt-5 grid grid-cols-2 gap-3">
-                    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">
+                    <div className="rounded-2xl border border-emerald-900/10 dark:border-white/10 bg-emerald-900/5 dark:bg-black/20 p-4">
+                      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-900/60 dark:text-slate-500">
                         Reopened
                       </p>
-                      <p className="mt-2 text-2xl font-black text-white">{item?.reopenedCount || 0}</p>
+                      <p className="mt-2 text-2xl font-black text-emerald-950 dark:text-white">{item?.reopenedCount || 0}</p>
                     </div>
-                    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">
+                    <div className="rounded-2xl border border-emerald-900/10 dark:border-white/10 bg-emerald-900/5 dark:bg-black/20 p-4">
+                      <p className="text-[11px] font-black uppercase tracking-[0.18em] text-emerald-900/60 dark:text-slate-500">
                         Awaiting Citizen
                       </p>
-                      <p className="mt-2 text-2xl font-black text-white">{item?.awaitingCitizenCount || 0}</p>
+                      <p className="mt-2 text-2xl font-black text-emerald-950 dark:text-white">{item?.awaitingCitizenCount || 0}</p>
                     </div>
                   </div>
 
-                  <div className="mt-4 text-sm text-slate-300/75">
-                    <p className="font-bold text-white">
+                  <div className="mt-4 text-sm text-emerald-800 dark:text-slate-300/75">
+                    <p className="font-bold text-emerald-950 dark:text-white">
                       Oldest pending: {item?.oldestPendingCase?.reportId || "None"}
                     </p>
                     {item?.oldestPendingCase ? (
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="mt-1 text-xs text-emerald-900/60 dark:text-slate-500">
                         {item.oldestPendingCase.title}
                       </p>
                     ) : null}
@@ -172,12 +172,12 @@ const AdminAuthorities = () => {
           </div>
 
           <AdminSurface className="overflow-hidden">
-            <div className="flex flex-col gap-3 border-b border-white/10 px-5 py-5 md:flex-row md:items-center md:justify-between md:px-6">
+            <div className="flex flex-col gap-3 border-b border-emerald-900/10 dark:border-white/10 px-5 py-5 md:flex-row md:items-center md:justify-between md:px-6">
               <div>
                 <p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300/75">
                   Queue Preview
                 </p>
-                <h2 className="mt-2 text-2xl font-black text-white">
+                <h2 className="mt-2 text-2xl font-black text-emerald-950 dark:text-white">
                   {selectedWorkload?.authorityLabel || "Authority"} workload
                 </h2>
               </div>
@@ -207,7 +207,7 @@ const AdminAuthorities = () => {
                     key={incident.id}
                     type="button"
                     onClick={() => navigate(`/admin/incident/${incident.displayId}`)}
-                    className="w-full px-5 py-5 text-left transition-colors hover:bg-white/[0.03] md:px-6"
+                    className="w-full px-5 py-5 text-left transition-colors hover:bg-emerald-900/5 hover:dark:hover:bg-white/[0.03] md:px-6"
                   >
                     <div className="flex flex-wrap items-center gap-2 mb-3">
                       <span className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-300">
@@ -219,22 +219,22 @@ const AdminAuthorities = () => {
 
                     <div className="grid gap-4 lg:grid-cols-[1.6fr_1fr_0.9fr]">
                       <div>
-                        <p className="text-lg font-black text-white">{incident.title}</p>
-                        <p className="mt-2 text-sm text-slate-300/75">{incident.address || "Location unavailable"}</p>
-                        <p className="mt-2 text-xs text-slate-500">
+                        <p className="text-lg font-black text-emerald-950 dark:text-white">{incident.title}</p>
+                        <p className="mt-2 text-sm text-emerald-800 dark:text-slate-300/75">{incident.address || "Location unavailable"}</p>
+                        <p className="mt-2 text-xs text-emerald-900/60 dark:text-slate-500">
                           {incident.reporterName} · {formatAdminDateTime(incident.createdAt)}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-sm font-bold text-white">{incident.nextActionLabel}</p>
-                        <p className="mt-2 text-xs text-slate-400 line-clamp-3">
+                        <p className="text-sm font-bold text-emerald-950 dark:text-white">{incident.nextActionLabel}</p>
+                        <p className="mt-2 text-xs text-emerald-800/70 dark:text-slate-400 line-clamp-3">
                           {incident.latestUpdate?.note || "No update note available."}
                         </p>
                       </div>
 
                       <div className="flex items-start justify-between gap-4 lg:justify-end">
-                        <p className="text-sm text-slate-300/75">
+                        <p className="text-sm text-emerald-800 dark:text-slate-300/75">
                           {incident.supportCount} support
                         </p>
                         <AdminRowLink label="View Case" onClick={() => navigate(`/admin/incident/${incident.displayId}`)} />
