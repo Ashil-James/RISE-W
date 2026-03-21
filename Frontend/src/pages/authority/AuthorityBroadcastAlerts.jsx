@@ -36,7 +36,7 @@ const CustomDropdown = ({ options, value, onChange, placeholder, isUrgent = fals
                     e.stopPropagation();
                     setIsOpen(!isOpen);
                 }}
-                className={`w-full bg-[#020617] border border-emerald-900/10 dark:border-white/10 text-emerald-950 dark:text-white rounded-[10px] px-4 py-3 focus:outline-none focus:border-blue-400 transition-all font-bold flex items-center justify-between group ${isUrgent ? 'text-red-400' : ''}`}
+                className={`w-full bg-white/60 dark:bg-[#020617] border border-emerald-900/10 dark:border-white/10 text-emerald-950 dark:text-white rounded-[10px] px-4 py-3 focus:outline-none focus:border-blue-400 transition-all font-bold flex items-center justify-between group ${isUrgent ? 'text-red-400' : ''}`}
             >
                 <span className={!value ? "text-gray-700 font-bold" : ""}>
                     {value || placeholder}
@@ -50,7 +50,7 @@ const CustomDropdown = ({ options, value, onChange, placeholder, isUrgent = fals
                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className="absolute z-[60] left-0 right-0 mt-2 bg-[#020617] border border-emerald-900/10 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden py-1 backdrop-blur-3xl"
+                        className="absolute z-[60] left-0 right-0 mt-2 bg-white/60 dark:bg-[#020617] border border-emerald-900/10 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden py-1 backdrop-blur-3xl"
                     >
                         {options.map((opt) => (
                             <div
@@ -257,7 +257,7 @@ const AuthorityBroadcastAlerts = () => {
                     animate={{ opacity: 1, y: 0 }}
                     className="lg:col-span-12 xl:col-span-8"
                 >
-                    <div className="bg-[#020617] border border-emerald-900/10 dark:border-white/10 rounded-2xl p-6 md:p-8 backdrop-blur-xl relative overflow-hidden group shadow-2xl">
+                    <div className="bg-white/60 dark:bg-[#020617] border border-emerald-900/10 dark:border-white/10 rounded-2xl p-6 md:p-8 backdrop-blur-xl relative overflow-hidden group shadow-2xl">
                         {/* Subtle background glow */}
                         <div className={`absolute -top-24 -right-24 w-64 h-64 ${theme.bg} rounded-full blur-[100px] pointer-events-none group-hover:opacity-100 opacity-50 transition-opacity`}></div>
 
@@ -297,7 +297,7 @@ const AuthorityBroadcastAlerts = () => {
                                                     required
                                                     value={formData.customTitle}
                                                     onChange={(e) => setFormData({ ...formData, customTitle: e.target.value })}
-                                                    className="w-full bg-[#020617] border border-emerald-900/10 dark:border-white/10 text-emerald-950 dark:text-white rounded-[10px] px-4 py-3 focus:outline-none focus:border-blue-400 transition-all font-bold placeholder:text-gray-700"
+                                                    className="w-full bg-white/60 dark:bg-[#020617] border border-emerald-900/10 dark:border-white/10 text-emerald-950 dark:text-white rounded-[10px] px-4 py-3 focus:outline-none focus:border-blue-400 transition-all font-bold placeholder:text-gray-700"
                                                     placeholder="Enter custom alert title"
                                                 />
                                             </motion.div>
@@ -342,7 +342,7 @@ const AuthorityBroadcastAlerts = () => {
                                         type="text"
                                         value={formData.location}
                                         onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                        className="w-full bg-[#020617] border border-emerald-900/10 dark:border-white/10 text-emerald-950 dark:text-white rounded-[10px] pl-12 pr-4 py-3 focus:outline-none focus:border-blue-400 transition-all font-bold placeholder:text-gray-700"
+                                        className="w-full bg-white/60 dark:bg-[#020617] border border-emerald-900/10 dark:border-white/10 text-emerald-950 dark:text-white rounded-[10px] pl-12 pr-4 py-3 focus:outline-none focus:border-blue-400 transition-all font-bold placeholder:text-gray-700"
                                         placeholder="e.g. Sector B, Main Road Area"
                                     />
                                 </div>
@@ -359,7 +359,7 @@ const AuthorityBroadcastAlerts = () => {
                                     rows="4"
                                     value={formData.message}
                                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                                    className="w-full bg-[#020617] border border-emerald-900/10 dark:border-white/10 text-emerald-950 dark:text-white rounded-[10px] px-4 py-3 focus:outline-none focus:border-blue-400 transition-all font-bold placeholder:text-gray-700 resize-none leading-relaxed"
+                                    className="w-full bg-white/60 dark:bg-[#020617] border border-emerald-900/10 dark:border-white/10 text-emerald-950 dark:text-white rounded-[10px] px-4 py-3 focus:outline-none focus:border-blue-400 transition-all font-bold placeholder:text-gray-700 resize-none leading-relaxed"
                                     placeholder="Provide clear details about the situation..."
                                 />
                             </div>
@@ -378,7 +378,7 @@ const AuthorityBroadcastAlerts = () => {
 
                 {/* QUICK TIPS / STATS */}
                 <div className="lg:col-span-12 xl:col-span-4 space-y-6">
-                    <div className="bg-[#020617] border border-emerald-900/10 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl h-full shadow-2xl">
+                    <div className="bg-white/60 dark:bg-[#020617] border border-emerald-900/10 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl h-full shadow-2xl">
                         <h3 className="text-lg font-bold text-emerald-950 dark:text-white mb-6 flex items-center gap-2">
                             <Info size={20} className="text-sky-400" />
                             Broadcast Protocol
@@ -408,7 +408,7 @@ const AuthorityBroadcastAlerts = () => {
                     animate={{ opacity: 1, y: 0 }}
                     className="lg:col-span-12"
                 >
-                    <div className="bg-[#020617] border border-emerald-900/10 dark:border-white/10 rounded-2xl overflow-hidden backdrop-blur-xl shadow-2xl">
+                    <div className="bg-white/60 dark:bg-[#020617] border border-emerald-900/10 dark:border-white/10 rounded-2xl overflow-hidden backdrop-blur-xl shadow-2xl">
                         <div className="p-6 border-b border-emerald-900/10 dark:border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <h2 className="text-xl font-black text-emerald-950 dark:text-white flex items-center gap-3">
                                 <Clock className="text-gray-400" size={24} />
@@ -506,7 +506,7 @@ const AuthorityBroadcastAlerts = () => {
                             initial={{ scale: 0.8, y: 20 }}
                             animate={{ scale: 1, y: 0 }}
                             exit={{ scale: 0.8, y: 20 }}
-                            className="bg-[#020617] border border-emerald-500/30 p-10 rounded-[2.5rem] text-center max-w-sm w-full shadow-[0_0_80px_-10px_rgba(16,185,129,0.4)]"
+                            className="bg-white/60 dark:bg-[#020617] border border-emerald-500/30 p-10 rounded-[2.5rem] text-center max-w-sm w-full shadow-[0_0_80px_-10px_rgba(16,185,129,0.4)]"
                         >
                             <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-8 text-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
                                 <CheckCircle size={40} />

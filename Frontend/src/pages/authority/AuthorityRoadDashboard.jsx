@@ -17,7 +17,8 @@ import {
     ChevronDown,
     BarChart3,
     PieChart as PieChartIcon,
-    Activity
+    Activity,
+    ShieldCheck
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -343,13 +344,25 @@ const AuthorityRoadDashboard = () => {
                             ) : (
                                 <tr>
                                     <td colSpan={8} className="py-24 text-center">
-                                        <div className="flex flex-col items-center justify-center space-y-4 animate-fade-up">
-                                            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-orange-500/20 to-red-500/5 flex items-center justify-center mb-2 shadow-[0_0_40px_rgba(249,115,22,0.15)] ring-1 ring-orange-500/20">
-                                                <CheckCircle size={40} className="text-orange-500" />
+                                        <div className="flex flex-col items-center justify-center text-center py-8 animate-fade-in relative z-10">
+                                            {/* Animated Abstract Graphic */}
+                                            <div className="relative w-32 h-32 mb-8 flex items-center justify-center">
+                                                {/* Glowing Rings */}
+                                                <div className="absolute inset-0 rounded-full border border-orange-500/20 dark:border-orange-400/10 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]"></div>
+                                                <div className="absolute inset-4 rounded-full border border-orange-500/40 dark:border-orange-400/20 animate-[spin_4s_linear_infinite] border-t-transparent"></div>
+                                                <div className="absolute inset-4 rounded-full border border-red-500/40 dark:border-red-400/20 animate-[spin_5s_linear_infinite_reverse] border-b-transparent"></div>
+                                                
+                                                {/* Center Orb */}
+                                                <div className="relative w-16 h-16 rounded-full bg-gradient-to-tr from-orange-500 to-red-600 shadow-[0_0_40px_rgba(249,115,22,0.4)] flex items-center justify-center">
+                                                    <ShieldCheck size={32} className="text-white drop-shadow-md" />
+                                                </div>
                                             </div>
-                                            <h4 className="text-xl font-black text-emerald-950 dark:text-white tracking-tight">System Stable</h4>
-                                            <p className="text-[15px] font-medium text-emerald-900/60 dark:text-gray-400 max-w-sm">
-                                                All active parameters are within normal thresholds. No critical incident reports demand your immediate attention.
+
+                                            <h4 className="text-2xl font-black text-emerald-950 dark:text-white mb-3 tracking-tight gap-2 flex items-center justify-center">
+                                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Zero</span> Critical Incidents
+                                            </h4>
+                                            <p className="text-emerald-900/60 dark:text-gray-400 max-w-md text-[15px] font-medium leading-relaxed">
+                                                Outstanding work! Your queue is completely clear. All high-urgency infrastructure reports have been successfully addressed or triaged.
                                             </p>
                                         </div>
                                     </td>
@@ -387,7 +400,7 @@ const AuthorityRoadDashboard = () => {
                 <div className="relative">
                     <button
                         onClick={() => setIsFilterOpen(!isFilterOpen)}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-white/40 dark:bg-black/20 border border-white/60 dark:border-white/10 text-emerald-950 dark:text-white rounded-xl text-sm font-bold transition-all hover:bg-white/60 hover:dark:bg-white/5 shadow-lg backdrop-blur-xl ring-1 ring-white/50 dark:ring-white/5"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-white/70 dark:bg-black/20 border border-white/60 dark:border-white/10 text-emerald-950 dark:text-white rounded-xl text-sm font-bold transition-all hover:bg-white/60 hover:dark:bg-white/5 shadow-lg backdrop-blur-xl ring-1 ring-white/50 dark:ring-white/5"
                     >
                         <Filter size={16} className="text-orange-400" />
                         {timeRange}
@@ -400,7 +413,7 @@ const AuthorityRoadDashboard = () => {
                                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                className="absolute right-0 mt-2 w-48 bg-[#020617] border border-emerald-900/10 dark:border-white/10 rounded-xl shadow-2xl z-50 p-1 backdrop-blur-3xl"
+                                className="absolute right-0 mt-2 w-48 bg-white/90 dark:bg-[#020617] border border-white/60 dark:border-white/10 rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:shadow-2xl z-50 p-1 backdrop-blur-3xl ring-1 ring-white/50 dark:ring-0"
                             >
                                 {["Last 7 Days", "Last 30 Days", "Last 3 Months"].map((range) => (
                                     <button
@@ -452,7 +465,7 @@ const AuthorityRoadDashboard = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.1 }}
-                    className="bg-white/40 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-[2rem] p-8 backdrop-blur-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)] ring-1 ring-white/50 dark:ring-white/5"
+                    className="bg-white/70 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-[2rem] p-8 backdrop-blur-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)] ring-1 ring-white/50 dark:ring-white/5"
                 >
                     <div className="flex items-center gap-3 mb-8">
                         <div className="p-2 rounded-lg bg-orange-500/10">
@@ -482,7 +495,7 @@ const AuthorityRoadDashboard = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.2 }}
-                    className="bg-white/40 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-[2rem] p-8 backdrop-blur-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)] ring-1 ring-white/50 dark:ring-white/5"
+                    className="bg-white/70 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-[2rem] p-8 backdrop-blur-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)] ring-1 ring-white/50 dark:ring-white/5"
                 >
                     <div className="flex items-center gap-3 mb-8">
                         <div className="p-2 rounded-lg bg-orange-500/10">
@@ -516,7 +529,7 @@ const AuthorityRoadDashboard = () => {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 1.3 }}
-                    className="lg:col-span-2 bg-white/40 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-[2rem] p-8 backdrop-blur-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)] ring-1 ring-white/50 dark:ring-white/5"
+                    className="lg:col-span-2 bg-white/70 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-[2rem] p-8 backdrop-blur-2xl shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)] ring-1 ring-white/50 dark:ring-white/5"
                 >
                     <div className="flex items-center gap-3 mb-8">
                         <div className="p-2 rounded-lg bg-orange-500/10">

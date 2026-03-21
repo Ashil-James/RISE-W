@@ -173,7 +173,7 @@ const AuthorityLayout = () => {
     };
 
     return (
-        <div className={`flex min-h-screen bg-[#020617] text-emerald-950 dark:text-white font-sans selection:bg-${theme.accent}-500/30 overflow-hidden relative`}>
+        <div className={`flex min-h-screen bg-slate-50 dark:bg-[#020617] text-emerald-950 dark:text-white font-sans selection:bg-${theme.accent}-500/30 overflow-hidden relative`}>
             {/* BACKGROUND ELEMENTS */}
             <div className="fixed inset-0 z-0 pointer-events-none">
                 <div className={`absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-${theme.accent}-600/10 rounded-full blur-[150px] animate-blob`}></div>
@@ -187,10 +187,10 @@ const AuthorityLayout = () => {
 
             {/* MOBILE TOGGLE */}
             <button
-                className="lg:hidden fixed top-6 right-6 z-50 p-3 bg-neutral-900/80 backdrop-blur-md rounded-xl border border-emerald-900/10 dark:border-white/10"
+                className="lg:hidden fixed top-6 right-6 z-50 p-3 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md rounded-xl border border-emerald-900/10 dark:border-white/10"
                 onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             >
-                {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+                {isSidebarOpen ? <X size={24} className="text-emerald-950 dark:text-white" /> : <Menu size={24} className="text-emerald-950 dark:text-white" />}
             </button>
 
             {/* SIDEBAR */}
@@ -200,20 +200,20 @@ const AuthorityLayout = () => {
                         initial={{ x: -300, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         exit={{ x: -300, opacity: 0 }}
-                        className="w-72 bg-[#020617]/80 backdrop-blur-2xl border-r border-emerald-900/10 dark:border-white/10 flex flex-col justify-between min-h-screen p-6 fixed z-40 shadow-2xl lg:shadow-none lg:relative"
+                        className="w-72 bg-white/50 dark:bg-[#020617]/80 backdrop-blur-2xl border-r border-white/60 dark:border-white/10 flex flex-col justify-between min-h-screen p-6 fixed z-40 shadow-2xl lg:shadow-none lg:relative"
                     >
                         <div>
                             {/* Brand Logo */}
                             <div className="flex items-center gap-4 mb-12 px-2 mt-2">
                                 <div className="relative group cursor-pointer">
                                     <div className={`absolute -inset-1 bg-gradient-to-r from-${theme.accent}-400 to-blue-500 rounded-xl blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200`}></div>
-                                    <div className="relative w-12 h-12 rounded-xl bg-neutral-950 flex items-center justify-center text-sky-400 font-black text-xl border border-emerald-900/10 dark:border-white/10 shadow-2xl overflow-hidden">
+                                    <div className="relative w-12 h-12 rounded-xl bg-white dark:bg-neutral-950 flex items-center justify-center text-sky-400 font-black text-xl border border-emerald-900/10 dark:border-white/10 shadow-2xl overflow-hidden ring-1 ring-white/50 dark:ring-0">
                                         <theme.icon size={24} className={`${theme.accentText} ${theme.iconGlow}`} />
                                     </div>
                                 </div>
                                 <div>
-                                    <h2 className="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white via-sky-100 to-sky-300">
-                                        RISE<span className={`text-${theme.accent}-500`}>.OPS</span>
+                                    <h2 className="text-2xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-emerald-950 via-emerald-800 to-emerald-600 dark:from-white dark:via-sky-100 dark:to-sky-300">
+                                        RISE<span className={`text-${theme.accent}-500 dark:text-${theme.accent}-400`}>.OPS</span>
                                     </h2>
                                     <p className={`text-[10px] ${theme.accentText}/80 font-bold uppercase tracking-[0.2em] ${theme.iconGlow}`}>
                                         Authority Hub
@@ -269,7 +269,7 @@ const AuthorityLayout = () => {
             {/* CONTENT WRAPPER */}
             <div className={`flex-1 flex flex-col h-screen overflow-hidden relative z-10 transition-all duration-300 ${isSidebarOpen ? "" : "lg:ml-0"}`}>
                 {/* TOP HEADER BAR */}
-                <header className="h-16 w-full bg-[#020617] border-b border-emerald-900/10 dark:border-white/10 px-8 flex items-center justify-between shrink-0">
+                <header className="h-16 w-full bg-white/50 dark:bg-[#020617] border-b border-white/60 dark:border-white/10 px-8 flex items-center justify-between shrink-0 backdrop-blur-md">
                     <div className="flex flex-col">
                         <span className="text-xs uppercase tracking-widest text-gray-400">AUTHORITY</span>
                         <span className="text-emerald-950 dark:text-white font-semibold leading-tight">{theme.name}</span>
@@ -295,7 +295,7 @@ const AuthorityLayout = () => {
                                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        className="absolute right-0 mt-2 w-80 bg-[#020617] border border-emerald-900/10 dark:border-white/10 rounded-xl shadow-2xl z-50 backdrop-blur-3xl overflow-hidden"
+                                        className="absolute right-0 mt-2 w-80 bg-white/90 dark:bg-[#020617] border border-white/60 dark:border-white/10 rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:shadow-2xl z-50 backdrop-blur-3xl overflow-hidden ring-1 ring-white/50 dark:ring-0"
                                     >
                                         <div className="px-4 py-3 border-b border-emerald-900/5 dark:border-white/5 flex items-center justify-between bg-emerald-900/5 dark:bg-white/5">
                                             <h3 className="text-sm font-bold text-emerald-950 dark:text-white">Notifications</h3>
@@ -374,7 +374,7 @@ const AuthorityLayout = () => {
                                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                         animate={{ opacity: 1, y: 0, scale: 1 }}
                                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        className="absolute right-0 mt-2 w-48 bg-[#020617] border border-emerald-900/10 dark:border-white/10 rounded-xl shadow-2xl py-2 z-50 backdrop-blur-3xl overflow-hidden"
+                                        className="absolute right-0 mt-2 w-48 bg-white/90 dark:bg-[#020617] border border-white/60 dark:border-white/10 rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.12)] dark:shadow-2xl py-2 z-50 backdrop-blur-3xl overflow-hidden ring-1 ring-white/50 dark:ring-0"
                                     >
                                         <div className="px-4 py-2 border-b border-emerald-900/5 dark:border-white/5 bg-emerald-900/5 dark:bg-white/5 mb-1">
                                             <p className={`text-[10px] font-bold ${theme.accentText} uppercase tracking-widest`}>Authority Access</p>
