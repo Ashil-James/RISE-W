@@ -174,13 +174,11 @@ const AuthorityLayout = () => {
 
     return (
         <div className={`flex min-h-screen bg-slate-50 dark:bg-[#020617] text-emerald-950 dark:text-white font-sans selection:bg-${theme.accent}-500/30 overflow-hidden relative`}>
-            {/* BACKGROUND ELEMENTS */}
-            <div className="fixed inset-0 z-0 pointer-events-none">
-                <div className={`absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-${theme.accent}-600/10 rounded-full blur-[150px] animate-blob`}></div>
-                <div className="absolute bottom-[-10%] right-[-5%] w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-[130px] animate-blob delay-200"></div>
-                <div className={`absolute top-[30%] left-[20%] w-[400px] h-[400px] bg-${theme.accent}-400/5 rounded-full blur-[100px] animate-pulse-slow`}></div>
-                {/* Subtle Grid Overlay */}
-                <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,black,transparent)]"></div>
+            {/* OVERALL BACKGROUND */}
+            <div className="fixed inset-0 z-0 pointer-events-none bg-slate-50 dark:bg-[#020617]">
+                {/* Subtle Dot Grid Overlay for Bento styling */}
+                <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] dark:bg-[radial-gradient(#ffffff0a_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-50 via-transparent to-transparent dark:from-[#020617] dark:via-transparent dark:to-transparent" />
             </div>
 
             <NotificationToastStack toasts={toasts} onDismiss={dismissToast} />
