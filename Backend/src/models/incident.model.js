@@ -134,5 +134,7 @@ const incidentSchema = new mongoose.Schema(
 );
 
 incidentSchema.index({ location: "2dsphere" });
+incidentSchema.index({ reportedBy: 1 });
+incidentSchema.index({ upvotedBy: 1 });
 
 export const Incident = mongoose.model("Incident", incidentSchema);

@@ -507,10 +507,26 @@ export const checkNearbyIncidents = asyncHandler(async (req, res) => {
     // Filter by threshold and sort best matches first
     const results = scored
         .filter((inc) => inc.similarityScore >= SIMILARITY_THRESHOLD)
-        .sort((a, b) => b.similarityScore - a.similarityScore)
-        .slice(0, 5);
+        .sort((a, b) => b.similarityScore - a.similarityScore);
 
-    return res.status(200).json(new ApiResponse(200, results, "Nearby incidents checked"));
+    // Deduplicate by title to avoid showing the exact same issue multiple times
+    const uniqueResults = [];
+    const seenTitles = new Set();
+    for (const inc of results) {
+        const normalizedTitle = (inc.title || "").trim().toLowerCase();
+        if (!seenTitles.has(normalizedTitle)) {
+            uniqueResults.push(inc);
+            seenTitles.add(normalizedTitle);
+        } else {
+            // Aggregate upvotes for duplicates of the same title
+            const existing = uniqueResults.find(r => (r.title || "").trim().toLowerCase() === normalizedTitle);
+            if (existing) {
+                existing.upvotes = (existing.upvotes || 0) + (inc.upvotes || 0);
+            }
+        }
+    }
+
+    return res.status(200).json(new ApiResponse(200, uniqueResults.slice(0, 5), "Nearby incidents checked"));
 });
 
 // ── Incident DNA: Upvote an existing incident ──

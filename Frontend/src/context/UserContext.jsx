@@ -16,24 +16,30 @@ export const UserProvider = ({ children }) => {
   };
 
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem("wayanad_user");
-    if (savedUser) {
-      const parsed = JSON.parse(savedUser);
-      if (!parsed.stats) {
-        return { ...parsed, stats: defaultStats };
+    try {
+      const savedUser = localStorage.getItem("wayanad_user");
+      if (savedUser) {
+        const parsed = JSON.parse(savedUser);
+        if (!parsed.stats) {
+          return { ...parsed, stats: defaultStats };
+        }
+        return parsed;
       }
-      return parsed;
-    }
 
-    const authUser = localStorage.getItem("user");
-    if (authUser) {
-      const parsed = JSON.parse(authUser);
-      return {
-        ...parsed,
-        stats: defaultStats,
-        location: parsed.location || "Wayanad",
-        avatar: parsed.avatar || null
-      };
+      const authUser = localStorage.getItem("user");
+      if (authUser) {
+        const parsed = JSON.parse(authUser);
+        return {
+          ...parsed,
+          stats: defaultStats,
+          location: parsed.location || "Wayanad",
+          avatar: parsed.avatar || null
+        };
+      }
+    } catch (e) {
+      console.error("Failed to parse user from local storage", e);
+      localStorage.removeItem("wayanad_user");
+      localStorage.removeItem("user");
     }
 
     return null;
