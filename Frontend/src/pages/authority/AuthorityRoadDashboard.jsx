@@ -275,102 +275,105 @@ const AuthorityRoadDashboard = () => {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5, duration: 0.6 }}
-                className="glass-card border border-emerald-900/5 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-2xl relative group"
+                className="w-full relative min-h-[400px] flex flex-col"
             >
-                <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
-                <div className="p-8 border-b border-emerald-900/5 dark:border-white/5 flex items-center justify-between relative z-10">
-                    <h3 className="text-xl font-black text-emerald-950 dark:text-white flex items-center gap-3 tracking-tight">
-                        <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
-                            <span className="w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse shadow-[0_0_15px_rgba(249,115,22,0.8)]" />
+                {criticalIncidents.length > 0 ? (
+                    <div className="glass-card border border-emerald-900/5 dark:border-white/5 rounded-[2rem] overflow-hidden shadow-2xl relative group">
+                        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
+                        <div className="p-8 border-b border-emerald-900/5 dark:border-white/5 flex items-center justify-between relative z-10">
+                            <h3 className="text-xl font-black text-emerald-950 dark:text-white flex items-center gap-3 tracking-tight">
+                                <div className="w-10 h-10 rounded-xl bg-orange-500/10 flex items-center justify-center border border-orange-500/20">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-orange-500 animate-pulse shadow-[0_0_15px_rgba(249,115,22,0.8)]" />
+                                </div>
+                                Critical Action Board
+                            </h3>
                         </div>
-                        Critical Action Board
-                    </h3>
-                </div>
 
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-emerald-900/5 dark:bg-black/20 text-xs uppercase tracking-wider text-gray-500 font-bold border-b border-emerald-900/5 dark:border-white/5">
-                                <th className="px-6 py-4">Report ID</th>
-                                <th className="px-6 py-4">Category</th>
-                                <th className="px-6 py-4">Sub-Type</th>
-                                <th className="px-6 py-4">Location</th>
-                                <th className="px-6 py-4">Urgency</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4">Days Open</th>
-                                <th className="px-6 py-4 text-right">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-white/5">
-                            {loading ? (
-                                <tr>
-                                    <td colSpan={8} className="py-20 text-center text-gray-500">
-                                        <Loader2 className="animate-spin mx-auto mb-4" size={32} />
-                                        <p className="font-bold tracking-widest uppercase text-xs">Loading Critical Items...</p>
-                                    </td>
-                                </tr>
-                            ) : criticalIncidents.length > 0 ? (
-                                criticalIncidents.map((row) => (
-                                    <tr key={row.id} className="hover:bg-emerald-900/5 hover:dark:hover:bg-white/5 transition-colors group">
-                                        <td className="px-6 py-4 font-mono text-sm text-orange-400 font-bold">{row.reportId}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-300">{row.category}</td>
-                                        <td className="px-6 py-4 text-sm text-emerald-950 dark:text-white font-medium">{row.subtype}</td>
-                                        <td className="px-6 py-4 text-sm text-gray-400">{row.loc}</td>
-                                        <td className="px-6 py-4 text-sm font-black text-emerald-950 dark:text-white">{row.urg}</td>
-                                        <td className="px-6 py-4">
-                                            {row.urg >= 75 && row.status !== "Resolved" ? (
-                                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${STATUS_STYLES["High Urgency"]}`}>
-                                                    <AlertTriangle size={12} />
-                                                    HIGH URGENCY
-                                                </span>
-                                            ) : (
-                                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${STATUS_STYLES[row.status]}`}>
-                                                    {row.status === "Resolved" && <CheckCircle size={12} />}
-                                                    {row.status}
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 text-sm font-bold text-gray-300">{row.days}</td>
-                                        <td className="px-6 py-4 text-right">
-                                            <button
-                                                onClick={() => navigate(`/authority/road/case/${row.id}`)}
-                                                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-900/5 dark:bg-white/5 hover:bg-orange-500/20 text-gray-300 hover:text-orange-300 border border-emerald-900/10 dark:border-white/10 hover:border-orange-500/30 rounded-lg text-xs font-bold transition-all"
-                                            >
-                                                View <ArrowUpRight size={14} />
-                                            </button>
-                                        </td>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="bg-emerald-900/5 dark:bg-black/20 text-xs uppercase tracking-wider text-gray-500 font-bold border-b border-emerald-900/5 dark:border-white/5">
+                                        <th className="px-6 py-4">Report ID</th>
+                                        <th className="px-6 py-4">Category</th>
+                                        <th className="px-6 py-4">Sub-Type</th>
+                                        <th className="px-6 py-4">Location</th>
+                                        <th className="px-6 py-4">Urgency</th>
+                                        <th className="px-6 py-4">Status</th>
+                                        <th className="px-6 py-4">Days Open</th>
+                                        <th className="px-6 py-4 text-right">Action</th>
                                     </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td colSpan={8} className="py-24 text-center">
-                                        <div className="flex flex-col items-center justify-center text-center py-8 animate-fade-in relative z-10">
-                                            {/* Animated Abstract Graphic */}
-                                            <div className="relative w-32 h-32 mb-8 flex items-center justify-center">
-                                                {/* Glowing Rings */}
-                                                <div className="absolute inset-0 rounded-full border border-orange-500/20 dark:border-orange-400/10 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]"></div>
-                                                <div className="absolute inset-4 rounded-full border border-orange-500/40 dark:border-orange-400/20 animate-[spin_4s_linear_infinite] border-t-transparent"></div>
-                                                <div className="absolute inset-4 rounded-full border border-red-500/40 dark:border-red-400/20 animate-[spin_5s_linear_infinite_reverse] border-b-transparent"></div>
-                                                
-                                                {/* Center Orb */}
-                                                <div className="relative w-16 h-16 rounded-full bg-gradient-to-tr from-orange-500 to-red-600 shadow-[0_0_40px_rgba(249,115,22,0.4)] flex items-center justify-center">
-                                                    <ShieldCheck size={32} className="text-white drop-shadow-md" />
-                                                </div>
-                                            </div>
+                                </thead>
+                                <tbody className="divide-y divide-white/5">
+                                    {loading ? (
+                                        <tr>
+                                            <td colSpan={8} className="py-20 text-center text-gray-500">
+                                                <Loader2 className="animate-spin mx-auto mb-4" size={32} />
+                                                <p className="font-bold tracking-widest uppercase text-xs">Loading Critical Items...</p>
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        criticalIncidents.map((row) => (
+                                            <tr key={row.id} className="hover:bg-emerald-900/5 hover:dark:hover:bg-white/5 transition-colors group">
+                                                <td className="px-6 py-4 font-mono text-sm text-orange-400 font-bold">{row.reportId}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-300">{row.category}</td>
+                                                <td className="px-6 py-4 text-sm text-emerald-950 dark:text-white font-medium">{row.subtype}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-400">{row.loc}</td>
+                                                <td className="px-6 py-4 text-sm font-black text-emerald-950 dark:text-white">{row.urg}</td>
+                                                <td className="px-6 py-4">
+                                                    {row.urg >= 75 && row.status !== "Resolved" ? (
+                                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${STATUS_STYLES["High Urgency"]}`}>
+                                                            <AlertTriangle size={12} />
+                                                            HIGH URGENCY
+                                                        </span>
+                                                    ) : (
+                                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${STATUS_STYLES[row.status] || "text-gray-400 border-emerald-900/10 dark:border-white/10"}`}>
+                                                            {row.status === "Resolved" && <CheckCircle size={12} />}
+                                                            {row.status}
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm font-bold text-gray-300">{row.days}</td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <button
+                                                        onClick={() => navigate(`/authority/road/case/${row.id}`)}
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-900/5 dark:bg-white/5 hover:bg-orange-500/20 text-gray-300 hover:text-orange-300 border border-emerald-900/10 dark:border-white/10 hover:border-orange-500/30 rounded-lg text-xs font-bold transition-all"
+                                                    >
+                                                        View <ArrowUpRight size={14} />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="w-full py-24 flex flex-col items-center justify-center relative">
+                        {/* Abstract background glow */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-orange-500/5 to-transparent blur-3xl -z-10 pointer-events-none" />
+                        
+                        {/* Animated Abstract Graphic */}
+                        <div className="relative w-32 h-32 mb-8 flex items-center justify-center">
+                            {/* Glowing Rings */}
+                            <div className="absolute inset-0 rounded-full border border-orange-500/20 dark:border-orange-400/10 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]"></div>
+                            <div className="absolute inset-4 rounded-full border border-orange-500/40 dark:border-orange-400/20 animate-[spin_4s_linear_infinite] border-t-transparent"></div>
+                            <div className="absolute inset-4 rounded-full border border-red-500/40 dark:border-red-400/20 animate-[spin_5s_linear_infinite_reverse] border-b-transparent"></div>
+                            
+                            {/* Center Orb */}
+                            <div className="relative w-16 h-16 rounded-full bg-gradient-to-tr from-orange-500 to-red-600 shadow-[0_0_40px_rgba(249,115,22,0.4)] flex items-center justify-center">
+                                <ShieldCheck size={32} className="text-white drop-shadow-md" />
+                            </div>
+                        </div>
 
-                                            <h4 className="text-2xl font-black text-emerald-950 dark:text-white mb-3 tracking-tight gap-2 flex items-center justify-center">
-                                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Zero</span> Critical Incidents
-                                            </h4>
-                                            <p className="text-emerald-900/60 dark:text-gray-400 max-w-md text-[15px] font-medium leading-relaxed">
-                                                Outstanding work! Your queue is completely clear. All high-urgency infrastructure reports have been successfully addressed or triaged.
-                                            </p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                        <h4 className="text-2xl font-black text-emerald-950 dark:text-white mb-3 tracking-tight gap-2 flex items-center justify-center">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Zero</span> Critical Incidents
+                        </h4>
+                        <p className="text-emerald-900/60 dark:text-gray-400 max-w-md text-center text-[15px] font-medium leading-relaxed">
+                            Outstanding work! Your queue is completely clear. All high-urgency infrastructure reports have been successfully addressed or triaged.
+                        </p>
+                    </div>
+                )}
             </motion.div>
 
             {/* ══════════════════════════════════════════════════════════════════════

@@ -286,104 +286,105 @@ const AuthorityWaterDashboard = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="bg-white/70 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-2xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)] backdrop-blur-2xl ring-1 ring-white/50 dark:ring-white/5"
+                className="w-full relative min-h-[400px] flex flex-col"
             >
-                <div className="p-6 border-b border-emerald-900/10 dark:border-white/10 flex items-center justify-between">
-                    <h3 className="text-lg font-bold text-emerald-950 dark:text-white flex items-center gap-2">
-                        <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
-                        Critical Attention Items
-                    </h3>
-                </div>
+                {criticalItems.length > 0 ? (
+                    <div className="bg-white/70 dark:bg-black/20 border border-white/60 dark:border-white/10 rounded-2xl overflow-hidden shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.2)] backdrop-blur-2xl ring-1 ring-white/50 dark:ring-white/5">
+                        <div className="p-6 border-b border-emerald-900/10 dark:border-white/10 flex items-center justify-between">
+                            <h3 className="text-lg font-bold text-emerald-950 dark:text-white flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-sky-400 animate-pulse shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
+                                Critical Attention Items
+                            </h3>
+                        </div>
 
-                <div className="overflow-x-auto min-h-[200px]">
-                    {loading ? (
-                        <div className="flex flex-col items-center justify-center h-48 text-sky-400">
-                            <Loader2 size={32} className="animate-spin mb-4" />
-                            <span className="text-sm font-bold tracking-widest uppercase">Fetching Diagnostics...</span>
-                        </div>
-                    ) : error ? (
-                        <div className="flex flex-col items-center justify-center h-48 text-red-400">
-                            <AlertTriangle size={32} className="mb-4" />
-                            <span className="text-sm font-bold uppercase">Failed to synchronize: {error}</span>
-                        </div>
-                    ) : (
-                        <table className="w-full text-left border-collapse">
-                            <thead>
-                                <tr className="bg-emerald-900/5 dark:bg-black/20 text-xs uppercase tracking-wider text-gray-500 font-bold border-b border-emerald-900/5 dark:border-white/5">
-                                    <th className="px-6 py-4">Report ID</th>
-                                    <th className="px-6 py-4">Category</th>
-                                    <th className="px-6 py-4">Sub-Type</th>
-                                    <th className="px-6 py-4">Location</th>
-                                    <th className="px-6 py-4">Urgency</th>
-                                    <th className="px-6 py-4">Status</th>
-                                    <th className="px-6 py-4">Days Open</th>
-                                    <th className="px-6 py-4 text-right">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-white/5">
-                                {criticalItems.length > 0 ? (
-                                    criticalItems.map((row) => (
-                                        <tr key={row.id} className="hover:bg-emerald-900/5 hover:dark:hover:bg-white/5 transition-colors group">
-                                            <td className="px-6 py-4 font-mono text-sm text-sky-400 font-bold">{row.ref}</td>
-                                            <td className="px-6 py-4 text-sm text-gray-300">{row.category}</td>
-                                            <td className="px-6 py-4 text-sm text-emerald-950 dark:text-white font-medium">{row.subtype}</td>
-                                            <td className="px-6 py-4 text-sm text-gray-400">{row.loc}</td>
-                                            <td className="px-6 py-4 text-sm font-black text-emerald-950 dark:text-white">{row.urg}</td>
-                                            <td className="px-6 py-4">
-                                                {row.urg >= 75 && row.status !== "Resolved" && row.status !== "Work Completed" ? (
-                                                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${STATUS_STYLES["High Urgency"]}`}>
-                                                        <AlertTriangle size={12} />
-                                                        HIGH URGENCY
-                                                    </span>
-                                                ) : (
-                                                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${STATUS_STYLES[row.status] || STATUS_STYLES["New"]}`}>
-                                                        {(row.status === "Resolved" || row.status === "Work Completed") && <CheckCircle size={12} />}
-                                                        {row.status}
-                                                    </span>
-                                                )}
-                                            </td>
-                                            <td className="px-6 py-4 text-sm font-bold text-gray-300">{row.days}</td>
-                                            <td className="px-6 py-4 text-right">
-                                                <button
-                                                    onClick={() => navigate(`/authority/water/case/${row.id}`)}
-                                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-900/5 dark:bg-white/5 hover:bg-sky-500/20 text-gray-300 hover:text-sky-300 border border-emerald-900/10 dark:border-white/10 hover:border-sky-500/30 rounded-lg text-xs font-bold transition-all"
-                                                >
-                                                    View <ArrowUpRight size={14} />
-                                                </button>
-                                            </td>
+                        <div className="overflow-x-auto min-h-[200px]">
+                            {loading ? (
+                                <div className="flex flex-col items-center justify-center h-48 text-sky-400">
+                                    <Loader2 size={32} className="animate-spin mb-4" />
+                                    <span className="text-sm font-bold tracking-widest uppercase">Fetching Diagnostics...</span>
+                                </div>
+                            ) : error ? (
+                                <div className="flex flex-col items-center justify-center h-48 text-red-400">
+                                    <AlertTriangle size={32} className="mb-4" />
+                                    <span className="text-sm font-bold uppercase">Failed to synchronize: {error}</span>
+                                </div>
+                            ) : (
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr className="bg-emerald-900/5 dark:bg-black/20 text-xs uppercase tracking-wider text-gray-500 font-bold border-b border-emerald-900/5 dark:border-white/5">
+                                            <th className="px-6 py-4">Report ID</th>
+                                            <th className="px-6 py-4">Category</th>
+                                            <th className="px-6 py-4">Sub-Type</th>
+                                            <th className="px-6 py-4">Location</th>
+                                            <th className="px-6 py-4">Urgency</th>
+                                            <th className="px-6 py-4">Status</th>
+                                            <th className="px-6 py-4">Days Open</th>
+                                            <th className="px-6 py-4 text-right">Action</th>
                                         </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan={8} className="py-24 text-center">
-                                            <div className="flex flex-col items-center justify-center text-center py-8 animate-fade-in relative z-10">
-                                                {/* Animated Abstract Graphic */}
-                                                <div className="relative w-32 h-32 mb-8 flex items-center justify-center">
-                                                    {/* Glowing Rings */}
-                                                    <div className="absolute inset-0 rounded-full border border-sky-500/20 dark:border-sky-400/10 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]"></div>
-                                                    <div className="absolute inset-4 rounded-full border border-sky-500/40 dark:border-sky-400/20 animate-[spin_4s_linear_infinite] border-t-transparent"></div>
-                                                    <div className="absolute inset-4 rounded-full border border-blue-500/40 dark:border-blue-400/20 animate-[spin_5s_linear_infinite_reverse] border-b-transparent"></div>
-                                                    
-                                                    {/* Center Orb */}
-                                                    <div className="relative w-16 h-16 rounded-full bg-gradient-to-tr from-sky-500 to-blue-600 shadow-[0_0_40px_rgba(14,165,233,0.4)] flex items-center justify-center">
-                                                        <ShieldCheck size={32} className="text-white drop-shadow-md" />
-                                                    </div>
-                                                </div>
+                                    </thead>
+                                    <tbody className="divide-y divide-white/5">
+                                        {criticalItems.map((row) => (
+                                            <tr key={row.id} className="hover:bg-emerald-900/5 hover:dark:hover:bg-white/5 transition-colors group">
+                                                <td className="px-6 py-4 font-mono text-sm text-sky-400 font-bold">{row.ref}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-300">{row.category}</td>
+                                                <td className="px-6 py-4 text-sm text-emerald-950 dark:text-white font-medium">{row.subtype}</td>
+                                                <td className="px-6 py-4 text-sm text-gray-400">{row.loc}</td>
+                                                <td className="px-6 py-4 text-sm font-black text-emerald-950 dark:text-white">{row.urg}</td>
+                                                <td className="px-6 py-4">
+                                                    {row.urg >= 75 && row.status !== "Resolved" && row.status !== "Work Completed" ? (
+                                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${STATUS_STYLES["High Urgency"]}`}>
+                                                            <AlertTriangle size={12} />
+                                                            HIGH URGENCY
+                                                        </span>
+                                                    ) : (
+                                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${STATUS_STYLES[row.status] || STATUS_STYLES["New"]}`}>
+                                                            {(row.status === "Resolved" || row.status === "Work Completed") && <CheckCircle size={12} />}
+                                                            {row.status}
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm font-bold text-gray-300">{row.days}</td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <button
+                                                        onClick={() => navigate(`/authority/water/case/${row.id}`)}
+                                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-900/5 dark:bg-white/5 hover:bg-sky-500/20 text-gray-300 hover:text-sky-300 border border-emerald-900/10 dark:border-white/10 hover:border-sky-500/30 rounded-lg text-xs font-bold transition-all"
+                                                    >
+                                                        View <ArrowUpRight size={14} />
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="w-full py-24 flex flex-col items-center justify-center relative">
+                        {/* Abstract background glow */}
+                        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-sky-500/5 to-transparent blur-3xl -z-10 pointer-events-none" />
+                        
+                        {/* Animated Abstract Graphic */}
+                        <div className="relative w-32 h-32 mb-8 flex items-center justify-center">
+                            {/* Glowing Rings */}
+                            <div className="absolute inset-0 rounded-full border border-sky-500/20 dark:border-sky-400/10 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite]"></div>
+                            <div className="absolute inset-4 rounded-full border border-sky-500/40 dark:border-sky-400/20 animate-[spin_4s_linear_infinite] border-t-transparent"></div>
+                            <div className="absolute inset-4 rounded-full border border-blue-500/40 dark:border-blue-400/20 animate-[spin_5s_linear_infinite_reverse] border-b-transparent"></div>
+                            
+                            {/* Center Orb */}
+                            <div className="relative w-16 h-16 rounded-full bg-gradient-to-tr from-sky-500 to-blue-600 shadow-[0_0_40px_rgba(14,165,233,0.4)] flex items-center justify-center">
+                                <ShieldCheck size={32} className="text-white drop-shadow-md" />
+                            </div>
+                        </div>
 
-                                                <h4 className="text-2xl font-black text-emerald-950 dark:text-white mb-3 tracking-tight gap-2 flex items-center justify-center">
-                                                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-blue-600">Zero</span> Critical Incidents
-                                                </h4>
-                                                <p className="text-emerald-900/60 dark:text-gray-400 max-w-md text-[15px] font-medium leading-relaxed">
-                                                    Outstanding work! Your queue is completely clear. All high-urgency infrastructure reports have been successfully addressed or triaged.
-                                                </p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    )}
-                </div>
+                        <h4 className="text-2xl font-black text-emerald-950 dark:text-white mb-3 tracking-tight gap-2 flex items-center justify-center">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-500 to-blue-600">Zero</span> Critical Incidents
+                        </h4>
+                        <p className="text-emerald-900/60 dark:text-gray-400 max-w-md text-center text-[15px] font-medium leading-relaxed">
+                            Outstanding work! Your queue is completely clear. All high-urgency infrastructure reports have been successfully addressed or triaged.
+                        </p>
+                    </div>
+                )}
             </motion.div>
 
             {/* ══════════════════════════════════════════════════════════════════════
