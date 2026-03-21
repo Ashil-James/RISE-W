@@ -6,7 +6,6 @@ import NotificationsDropdown from "./NotificationsDropdown";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { useUser } from "../context/UserContext";
 import { motion } from "framer-motion";
-import { detectLanguageFromCoordinates } from "../utils/detectLanguage";
 import { useTranslation } from "react-i18next";
 
 const NAV_ITEMS = [
@@ -20,21 +19,6 @@ const Layout = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
-  const [langAutoDetected, setLangAutoDetected] = useState(false);
-
-  // Auto-detect language from user's GPS coordinates on mount
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          const lang = await detectLanguageFromCoordinates(pos.coords.latitude, pos.coords.longitude);
-          if (lang !== "en") setLangAutoDetected(true);
-        },
-        () => {} // silently fail if user denies
-      );
-    }
-  }, []);
-
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -105,7 +89,7 @@ const Layout = () => {
           {/* Right */}
           <div className="flex items-center gap-4">
             <NotificationsDropdown />
-            <LanguageSwitcher autoDetected={langAutoDetected} />
+            <LanguageSwitcher />
             <ThemeToggle />
             <Link to="/profile" className="relative group">
               <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-emerald-400 to-cyan-400 opacity-0 group-hover:opacity-40 blur-md transition-opacity duration-500"></div>

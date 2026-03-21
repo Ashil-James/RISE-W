@@ -9,7 +9,7 @@ const LANGUAGES = [
   { code: "ml", label: "മലയാളം", flag: "🇮🇳" },
 ];
 
-const LanguageSwitcher = ({ autoDetected }) => {
+const LanguageSwitcher = () => {
   const { i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -69,11 +69,6 @@ const LanguageSwitcher = ({ autoDetected }) => {
                 {i18n.language === lang.code && <Check size={14} className="text-emerald-500" />}
               </button>
             ))}
-            {autoDetected && (
-              <div className="px-4 py-2 border-t border-white/5 text-[10px] text-wayanad-muted text-center">
-                Auto-detected from your location
-              </div>
-            )}
           </motion.div>
         )}
       </AnimatePresence>

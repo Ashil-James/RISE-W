@@ -174,67 +174,63 @@ const Home = () => {
       </motion.div>
 
       {/* ── Report Button & My Cases ── */}
-      <motion.div variants={fadeUp} className="w-full max-w-3xl mb-8 space-y-6">
-        <Link to="/report" className="block w-full">
-          <motion.div
-            whileHover={{ y: -2 }}
-            whileTap={{ scale: 0.98 }}
-            className="group relative w-full p-4 rounded-3xl font-bold text-white flex items-center justify-between gap-3 overflow-hidden transition-all shadow-lg border border-rose-500/40"
-            style={{
-              background: "linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(244, 63, 94, 0.2))",
-            }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out" />
-            <div className="flex items-center gap-3 relative z-10 px-2">
-              <div className="w-10 h-10 rounded-full bg-rose-500 flex items-center justify-center shadow-lg shadow-rose-500/30">
-                <Plus size={20} strokeWidth={3} className="text-white" />
-              </div>
-              <span className="text-base sm:text-lg font-black text-rose-50">{t("home.reportBtn")}</span>
-            </div>
-            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center relative z-10 group-hover:bg-rose-500 transition-colors">
-              <ArrowRight size={18} className="text-white group-hover:translate-x-0.5 transition-transform" />
-            </div>
-          </motion.div>
-        </Link>
+      <motion.div variants={fadeUp} className="w-full max-w-3xl mb-10 space-y-6">
+        <div className="flex justify-center w-full mb-8">
+          <Link to="/report" className="block w-full max-w-sm">
+            <motion.button
+              whileHover={{ y: -2, scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="group relative w-full h-14 rounded-[1.5rem] font-black text-lg text-white flex items-center justify-center gap-2 overflow-hidden transition-all shadow-[0_8px_30px_-5px_rgba(244,63,94,0.4)] hover:shadow-[0_12px_40px_-5px_rgba(244,63,94,0.5)] border border-rose-500/50"
+              style={{
+                background: "linear-gradient(135deg, #ef4444, #f43f5e)",
+              }}
+            >
+              <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out skew-x-12" />
+              <Plus size={20} strokeWidth={3} className="relative z-10 group-hover:rotate-90 transition-transform duration-300" />
+              <span className="relative z-10 tracking-wide">{t("home.reportBtn")}</span>
+            </motion.button>
+          </Link>
+        </div>
 
         {/* My Cases Section */}
-        <div className="glass-card rounded-[1.8rem] p-5 border border-white/5">
-          <div className="flex items-center justify-between mb-4 px-1">
-            <h2 className="text-base font-black text-wayanad-text flex items-center gap-2">
-              <Archive size={16} className="text-emerald-500" /> 
+        <div className="glass-card rounded-[2rem] p-6 lg:p-8 border border-white/5 shadow-2xl">
+          <div className="flex items-center justify-between pb-5 border-b border-white/5 mb-5">
+            <h2 className="text-lg md:text-xl font-black text-wayanad-text flex items-center gap-2.5">
+              <Archive size={20} className="text-emerald-500" /> 
               {t("home.myCasesTitle")}
             </h2>
             <Link
               to="/my-reports"
-              className="text-xs font-bold text-emerald-500 flex items-center gap-1 hover:text-emerald-400 transition-colors"
+              className="text-sm font-bold text-emerald-500 flex items-center gap-1.5 hover:text-emerald-400 transition-colors border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 rounded-xl hover:bg-emerald-500/20"
             >
               {t("home.openTracker")}
-              <ChevronRight size={14} />
+              <ChevronRight size={16} />
             </Link>
           </div>
 
           {reportsLoading ? (
-            <div className="animate-pulse flex gap-4">
-              <div className="h-10 border border-white/5 rounded-xl flex-1 bg-white/5" />
-              <div className="h-10 border border-white/5 rounded-xl flex-1 bg-white/5" />
+            <div className="animate-pulse flex flex-col gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="h-20 border border-white/5 rounded-2xl bg-white/5" />
+                ))}
+              </div>
             </div>
           ) : (
-            <div className="flex flex-col gap-4">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <div className="flex flex-col gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
                 {summaryCards.map((card) => (
                   <div
                     key={card.label}
-                    className="flex flex-col px-3 py-2.5 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-colors"
+                    className="flex flex-col items-center justify-center text-center p-4 rounded-[1.2rem] border border-white/5 bg-white/[0.015] hover:bg-white/[0.03] transition-colors"
                   >
-                    <div className="flex items-center gap-2 mb-1">
-                      <div className={`p-1 rounded-md ${card.bg} ${card.tint}`}>
-                        <card.icon size={12} strokeWidth={2.5} />
-                      </div>
-                      <span className="text-lg font-black text-wayanad-text leading-none">
-                        {card.value}
-                      </span>
+                    <div className={`p-2 rounded-xl mb-3 ${card.bg} ${card.tint}`}>
+                      <card.icon size={18} strokeWidth={2} />
                     </div>
-                    <span className="text-[9px] uppercase tracking-wider text-wayanad-muted font-bold truncate">
+                    <span className="text-2xl font-black text-wayanad-text leading-none mb-1.5">
+                      {card.value}
+                    </span>
+                    <span className="text-[10px] uppercase tracking-widest text-wayanad-muted font-black truncate max-w-full">
                       {card.label}
                     </span>
                   </div>
@@ -242,32 +238,39 @@ const Home = () => {
               </div>
 
               {caseSummary.mostRecentlyUpdated && (
-                <div className="pt-4 border-t border-white/5">
-                  <p className="text-[10px] uppercase tracking-wider text-wayanad-muted font-bold mb-2 px-1">
-                    Most Recently Updated
-                  </p>
+                <div className="mt-2 text-center md:text-left">
                   <Link
                     to={`/my-reports/${caseSummary.mostRecentlyUpdated.id}`}
-                    className="group block"
+                    className="group flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 md:p-5 rounded-2xl border border-white/10 bg-white/[0.02] hover:bg-white/[0.04] hover:border-emerald-500/30 transition-all shadow-md"
                   >
-                    <div className="flex items-center justify-between gap-4 p-3 rounded-xl border border-white/5 bg-white/[0.01] hover:bg-white/[0.03] hover:border-emerald-500/30 transition-colors">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md shrink-0 ${caseSummary.mostRecentlyUpdated.statusColor}`}>
+                    <div className="flex flex-col md:flex-row md:items-center gap-4 min-w-0 flex-1">
+                      <div className="flex items-center gap-3">
+                        <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg shrink-0 ${caseSummary.mostRecentlyUpdated.statusColor}`}>
                           {caseSummary.mostRecentlyUpdated.status}
                         </span>
-                        <div className="min-w-0">
-                          <h3 className="text-sm font-bold text-wayanad-text truncate">
-                            {caseSummary.mostRecentlyUpdated.issue}
-                          </h3>
-                          <div className="flex items-center gap-2 mt-0.5 text-[11px] text-wayanad-muted">
-                            <span className="truncate">{caseSummary.mostRecentlyUpdated.authorityLabel}</span>
-                            <span className="w-1 h-1 rounded-full bg-white/20 shrink-0" />
-                            <span>{caseSummary.mostRecentlyUpdated.lastUpdatedLabel}</span>
-                          </div>
-                        </div>
+                        <div className="h-1 w-1 rounded-full bg-white/20 hidden md:block" />
+                        <span className="text-[10px] font-mono font-bold text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded-lg border border-emerald-500/20 shrink-0">
+                          {caseSummary.mostRecentlyUpdated.displayId}
+                        </span>
                       </div>
-                      <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/10 group-hover:text-emerald-500 transition-colors">
-                        <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+                      
+                      <div className="h-1 w-1 rounded-full bg-white/20 hidden md:block" />
+                      
+                      <div className="min-w-0">
+                        <h3 className="text-base font-bold text-wayanad-text truncate">
+                          {caseSummary.mostRecentlyUpdated.issue}
+                        </h3>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between sm:justify-end gap-5 pl-2 md:pl-0">
+                      <div className="flex items-center gap-2 text-xs font-medium text-wayanad-muted shrink-0">
+                        <span className="truncate max-w-[120px]">{caseSummary.mostRecentlyUpdated.authorityLabel}</span>
+                        <span className="w-1 h-1 rounded-full bg-white/20 shrink-0" />
+                        <span className="shrink-0">{caseSummary.mostRecentlyUpdated.lastUpdatedLabel}</span>
+                      </div>
+                      <div className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/10 group-hover:text-emerald-500 group-hover:border-emerald-500/30 transition-colors">
+                        <ChevronRight size={16} className="group-hover:translate-x-0.5 transition-transform" />
                       </div>
                     </div>
                   </Link>

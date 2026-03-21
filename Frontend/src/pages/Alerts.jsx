@@ -14,7 +14,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAlerts } from "../context/AlertContext";
 
 const ICONS = {
@@ -70,6 +70,10 @@ const AlertCard = ({ alert, onOpen }) => {
 
   return (
     <motion.button
+      layout
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.15 } }}
       whileHover={{ y: -2, scale: 1.005 }}
       whileTap={{ scale: 0.99 }}
       onClick={interactive ? () => onOpen(alert) : undefined}
@@ -318,95 +322,124 @@ const Alerts = () => {
         </motion.div>
       ) : (
         <>
-          {featuredAlert && (
-            <motion.div variants={fadeUp} className="glass-card rounded-[1.8rem] p-6 relative overflow-hidden border border-red-500/30 group mb-6">
-              <div
-                className="absolute top-0 right-0 h-64 w-64 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"
-                style={{ background: featuredAlert.type === "critical" ? "rgba(239,68,68,0.15)" : "rgba(16,185,129,0.15)" }}
-              />
+          <AnimatePresence mode="popLayout">
+            {featuredAlert && (
+              <motion.div
+                key={`featured-${featuredAlert.id}`}
+                layout
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.15 } }}
+                className="glass-card rounded-[1.8rem] p-6 relative overflow-hidden border border-red-500/30 group mb-6"
+              >
+                <div
+                  className="absolute top-0 right-0 h-64 w-64 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"
+                  style={{ background: featuredAlert.type === "critical" ? "rgba(239,68,68,0.15)" : "rgba(16,185,129,0.15)" }}
+                />
 
-              <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md ${getAccent(featuredAlert.type).soft} ${getAccent(featuredAlert.type).text}`}>
-                      Featured {featuredAlert.severityLabel}
-                    </span>
-                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md ${
-                      featuredAlert.isOfficial ? "bg-emerald-500/10 text-emerald-400" : "bg-cyan-500/10 text-cyan-400"
-                    }`}>
-                      {featuredAlert.sourceLabel}
-                    </span>
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-white/5 text-wayanad-muted">
-                      {featuredAlert.categoryLabel}
-                    </span>
-                  </div>
+                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md ${getAccent(featuredAlert.type).soft} ${getAccent(featuredAlert.type).text}`}>
+                        Featured {featuredAlert.severityLabel}
+                      </span>
+                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md ${
+                        featuredAlert.isOfficial ? "bg-emerald-500/10 text-emerald-400" : "bg-cyan-500/10 text-cyan-400"
+                      }`}>
+                        {featuredAlert.sourceLabel}
+                      </span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-white/5 text-wayanad-muted">
+                        {featuredAlert.categoryLabel}
+                      </span>
+                    </div>
 
-                  <h2 className="text-xl font-bold text-wayanad-text mb-2 truncate">
-                    {featuredAlert.title}
-                  </h2>
-                  <p className="text-sm text-wayanad-text/80 line-clamp-1 max-w-2xl">
-                    {featuredAlert.message}
-                  </p>
-
-                  <div className="flex items-center gap-3 mt-3 text-xs text-wayanad-muted">
-                    <span className="flex items-center gap-1.5">
-                      <MapPin size={12} className="text-white/40" />
-                      <span className="truncate">{featuredAlert.location}</span>
-                    </span>
-                    <span className="w-1 h-1 rounded-full bg-white/20 shrink-0" />
-                    <span>{featuredAlert.createdAtLabel}</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-4 border-t md:border-t-0 md:border-l border-white/10 pt-4 md:pt-0 md:pl-6 shrink-0 md:min-w-[160px]">
-                  <div className="text-left md:text-right">
-                    <p className="text-lg font-bold text-wayanad-text">{featuredAlert.relativeTime}</p>
-                    <p className="text-[11px] uppercase tracking-wider text-red-400 font-bold mt-1">
-                      {featuredAlert.isActive ? "Active now" : "Older update"}
+                    <h2 className="text-xl font-bold text-wayanad-text mb-2 truncate">
+                      {featuredAlert.title}
+                    </h2>
+                    <p className="text-sm text-wayanad-text/80 line-clamp-1 max-w-2xl">
+                      {featuredAlert.message}
                     </p>
+
+                    <div className="flex items-center gap-3 mt-3 text-xs text-wayanad-muted">
+                      <span className="flex items-center gap-1.5">
+                        <MapPin size={12} className="text-white/40" />
+                        <span className="truncate">{featuredAlert.location}</span>
+                      </span>
+                      <span className="w-1 h-1 rounded-full bg-white/20 shrink-0" />
+                      <span>{featuredAlert.createdAtLabel}</span>
+                    </div>
                   </div>
 
-                  {featuredAlert.actionTarget && (
-                    <button
-                      onClick={() => openAlertAction(featuredAlert)}
-                      className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-bold text-white bg-white/5 hover:bg-emerald-500 hover:text-white transition-colors border border-white/10 hover:border-emerald-500"
-                    >
-                      {featuredAlert.actionLabel}
-                      <ChevronRight size={16} />
-                    </button>
-                  )}
+                  <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-4 border-t md:border-t-0 md:border-l border-white/10 pt-4 md:pt-0 md:pl-6 shrink-0 md:min-w-[160px]">
+                    <div className="text-left md:text-right">
+                      <p className="text-lg font-bold text-wayanad-text">{featuredAlert.relativeTime}</p>
+                      <p className="text-[11px] uppercase tracking-wider text-red-400 font-bold mt-1">
+                        {featuredAlert.isActive ? "Active now" : "Older update"}
+                      </p>
+                    </div>
+
+                    {featuredAlert.actionTarget && (
+                      <button
+                        onClick={() => openAlertAction(featuredAlert)}
+                        className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-bold text-white bg-white/5 hover:bg-emerald-500 hover:text-white transition-colors border border-white/10 hover:border-emerald-500"
+                      >
+                        {featuredAlert.actionLabel}
+                        <ChevronRight size={16} />
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          )}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          {activeAlerts.length > 0 && (
-            <motion.div variants={fadeUp} className="space-y-4">
-              <div className="flex items-center gap-2">
-                <AlertTriangle size={16} className="text-red-400" />
-                <h3 className="text-lg font-black text-wayanad-text tracking-tight">Active Now</h3>
-              </div>
-              <div className="space-y-4">
-                {activeAlerts.map((alert) => (
-                  <AlertCard key={alert.id} alert={alert} onOpen={openAlertAction} />
-                ))}
-              </div>
-            </motion.div>
-          )}
+          <AnimatePresence mode="popLayout">
+            {activeAlerts.length > 0 && (
+              <motion.div
+                key="active-alerts-section"
+                layout
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.15 } }}
+                className="space-y-4 mb-6"
+              >
+                <div className="flex items-center gap-2">
+                  <AlertTriangle size={16} className="text-red-400" />
+                  <h3 className="text-lg font-black text-wayanad-text tracking-tight">Active Now</h3>
+                </div>
+                <motion.div layout className="space-y-4 relative">
+                  <AnimatePresence mode="popLayout">
+                    {activeAlerts.map((alert) => (
+                      <AlertCard key={alert.id} alert={alert} onOpen={openAlertAction} />
+                    ))}
+                  </AnimatePresence>
+                </motion.div>
+              </motion.div>
+            )}
 
-          {olderAlerts.length > 0 && (
-            <motion.div variants={fadeUp} className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Info size={16} className="text-wayanad-muted" />
-                <h3 className="text-lg font-black text-wayanad-text tracking-tight">Earlier Updates</h3>
-              </div>
-              <div className="space-y-4 opacity-95">
-                {olderAlerts.map((alert) => (
-                  <AlertCard key={alert.id} alert={alert} onOpen={openAlertAction} />
-                ))}
-              </div>
-            </motion.div>
-          )}
+            {olderAlerts.length > 0 && (
+              <motion.div
+                key="older-alerts-section"
+                layout
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.15 } }}
+                className="space-y-4"
+              >
+                <div className="flex items-center gap-2">
+                  <Info size={16} className="text-wayanad-muted" />
+                  <h3 className="text-lg font-black text-wayanad-text tracking-tight">Earlier Updates</h3>
+                </div>
+                <motion.div layout className="space-y-4 opacity-95 relative">
+                  <AnimatePresence mode="popLayout">
+                    {olderAlerts.map((alert) => (
+                      <AlertCard key={alert.id} alert={alert} onOpen={openAlertAction} />
+                    ))}
+                  </AnimatePresence>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </>
       )}
     </motion.div>
