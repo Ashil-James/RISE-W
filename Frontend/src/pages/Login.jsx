@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Mail, Lock, ArrowRight, ShieldCheck, Leaf, Droplets, Zap, Construction } from "lucide-react";
+import { Mail, Lock, ArrowRight, ShieldCheck, Leaf, Droplets, Zap, Construction, Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import ThemeToggle from "../components/ThemeToggle";
@@ -19,6 +19,7 @@ const Login = () => {
     email: "",
     password: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   const getTheme = () => {
     switch (authorityType?.toLowerCase()) {
@@ -187,19 +188,26 @@ const Login = () => {
                     Forgot Password?
                   </a>
                 </div>
-                <div className="relative group">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                    <Lock className="h-5 w-5 text-emerald-800/40 dark:text-slate-500 transition-colors duration-300 group-focus-within:text-emerald-500 group-focus-within:scale-110" />
+                  <div className="relative group">
+                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                      <Lock className="h-5 w-5 text-emerald-800/40 dark:text-slate-500 transition-colors duration-300 group-focus-within:text-emerald-500 group-focus-within:scale-110" />
+                    </div>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required
+                      className={`block w-full rounded-2xl border border-emerald-900/10 dark:border-white/5 bg-white/80 dark:bg-white/[0.03] py-4 pl-12 pr-12 text-[15px] font-medium text-emerald-950 dark:text-white placeholder-emerald-900/30 dark:placeholder-slate-600 outline-none transition-all duration-300 ${theme.ring} focus:ring-2 focus:border-transparent focus:bg-white dark:focus:bg-[#061e16] focus:shadow-[0_4px_20px_rgba(16,185,129,0.15)] hover:bg-white dark:hover:bg-white/[0.05]`}
+                      placeholder="••••••••"
+                      value={formData.password}
+                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 flex items-center pr-4 text-emerald-800/40 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors focus:outline-none"
+                    >
+                      {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    </button>
                   </div>
-                  <input
-                    type="password"
-                    required
-                    className={`block w-full rounded-2xl border border-emerald-900/10 dark:border-white/5 bg-white/80 dark:bg-white/[0.03] py-4 pl-12 pr-4 text-[15px] font-medium text-emerald-950 dark:text-white placeholder-emerald-900/30 dark:placeholder-slate-600 outline-none transition-all duration-300 ${theme.ring} focus:ring-2 focus:border-transparent focus:bg-white dark:focus:bg-[#061e16] focus:shadow-[0_4px_20px_rgba(16,185,129,0.15)] hover:bg-white dark:hover:bg-white/[0.05]`}
-                    placeholder="••••••••"
-                    value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  />
-                </div>
               </div>
             </div>
 

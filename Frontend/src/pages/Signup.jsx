@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { User, Mail, Lock, Phone, ArrowRight, ShieldCheck, Map as MapIcon, Loader2 } from "lucide-react";
+import { User, Mail, Lock, Phone, ArrowRight, ShieldCheck, Map as MapIcon, Loader2, Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import ThemeToggle from "../components/ThemeToggle";
@@ -19,6 +19,7 @@ const Signup = () => {
     email: "",
     password: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [location, setLocation] = useState(null);
   const [locationName, setLocationName] = useState("");
   const [showMap, setShowMap] = useState(false);
@@ -324,14 +325,21 @@ const Signup = () => {
                   <Lock className={iconClasses} />
                 </div>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   name="password"
                   required
-                  className={inputClasses}
+                  className={`${inputClasses} pr-12`}
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={handleChange}
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 flex items-center pr-4 text-emerald-800/40 dark:text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors focus:outline-none"
+                >
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                </button>
               </div>
             </div>
 
