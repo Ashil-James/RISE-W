@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { User, Mail, Lock, Phone, ArrowRight, Leaf, Map as MapIcon, Loader2 } from "lucide-react";
+import { User, Mail, Lock, Phone, ArrowRight, ShieldCheck, Map as MapIcon, Loader2 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import ThemeToggle from "../components/ThemeToggle";
@@ -74,8 +74,6 @@ const Signup = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Native geolocating handled in LocationPickerMap component now.
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -105,73 +103,91 @@ const Signup = () => {
       navigate("/");
     } catch (err) {
       setError(
-        err.response && err.response.data.message
-          ? err.response.data.message
-          : "Error creating account"
+        err.response?.data?.message || "Error creating account"
       );
     }
   };
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden flex items-center justify-center p-4">
-      {/* --- BACKGROUND BLOBS --- */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10">
-        <div className="absolute top-10 left-10 w-72 h-72 bg-emerald-400/30 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div className="absolute top-10 right-10 w-72 h-72 bg-teal-400/30 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob delay-200"></div>
-        <div className="absolute -bottom-8 left-1/2 w-80 h-80 bg-green-400/30 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob delay-300"></div>
+    <div className="relative flex min-h-screen w-full items-center justify-center overflow-hidden bg-slate-50 dark:bg-[#020e0b] p-4 sm:p-6 lg:p-8 transition-colors duration-500">
+      
+      {/* MAGNIFICENT SOFT MESH GRADIENT BACKGROUND */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Top Left Organic Glow */}
+        <div className="absolute -top-[20%] -left-[10%] h-[70vw] w-[70vw] max-h-[800px] max-w-[800px] rounded-full bg-emerald-400/20 dark:bg-emerald-600/10 blur-[100px] sm:blur-[140px] mix-blend-multiply dark:mix-blend-screen animate-blob" />
+        {/* Bottom Right organic glow */}
+        <div className="absolute -bottom-[20%] -right-[10%] h-[60vw] w-[60vw] max-h-[700px] max-w-[700px] rounded-full bg-teal-400/20 dark:bg-teal-600/10 blur-[100px] sm:blur-[140px] mix-blend-multiply dark:mix-blend-screen animate-blob delay-200" />
+        {/* Center subtle bridge */}
+        <div className="absolute top-[20%] left-[20%] h-[50vw] w-[50vw] max-h-[500px] max-w-[500px] rounded-full bg-cyan-400/10 dark:bg-cyan-600/5 blur-[100px] mix-blend-multiply dark:mix-blend-screen animate-blob delay-500" />
       </div>
 
-      {/* Theme Toggle */}
-      <div className="absolute top-6 right-6 z-20">
+      <div className="absolute top-6 right-6 z-50">
         <ThemeToggle />
       </div>
 
-      {/* --- MAIN CARD --- */}
-      <div className="w-full max-w-lg animate-fade-up">
-        <div
-          className="
-          bg-wayanad-panel 
-          backdrop-blur-xl 
-          border border-wayanad-border 
-          rounded-3xl shadow-2xl 
-          p-8 md:p-10
-        "
-        >
-          {/* Header */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-500 shadow-lg text-white mb-4 transform hover:rotate-12 transition-transform duration-300">
-              <Leaf className="w-7 h-7" />
-            </div>
-            <h2 className="text-3xl font-bold text-wayanad-text tracking-tight">
-              Join the Community
-            </h2>
-            <p className="text-wayanad-muted mt-2">
-              Create your account to contribute to Wayanad
-            </p>
-            {error && (
-              <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded relative" role="alert">
-                <span className="block sm:inline">{error}</span>
+      {/* CENTRAL GLASS CONTAINER */}
+      <div className="relative z-10 flex w-full max-w-[1100px] flex-col overflow-hidden rounded-[2.5rem] border border-white/60 dark:border-white/10 bg-white/40 dark:bg-white/[0.02] shadow-[0_8px_40px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_40px_rgba(0,0,0,0.4)] backdrop-blur-2xl lg:flex-row animate-fade-up">
+
+        {/* LEFT PANE: Info & Branding */}
+        <div className="relative flex flex-col justify-between p-10 lg:w-[45%] lg:p-14 border-b lg:border-b-0 lg:border-r border-white/40 dark:border-white/5">
+          <div>
+            <div className="mb-6 inline-flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25">
+                <ShieldCheck className="h-6 w-6" />
               </div>
-            )}
+              <span className="text-xl font-black tracking-widest text-emerald-950 dark:text-white uppercase mt-1">
+                RISE
+              </span>
+            </div>
+            
+            <h1 className="mt-8 text-4xl font-black tracking-tight text-emerald-950 dark:text-white lg:text-5xl leading-[1.1]">
+              Join the <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-teal-500 dark:from-emerald-400 dark:to-teal-300">
+                Community.
+              </span>
+            </h1>
+            <p className="mt-6 text-[1.05rem] font-medium leading-relaxed text-emerald-800 dark:text-emerald-100/70">
+              Create your account to report issues, receive real-time local alerts, and contribute to building a safer environment.
+            </p>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Name Fields (Side by Side) */}
+          <div className="mt-12 hidden lg:block">
+            <div className="flex items-center gap-4">
+              <div className="flex -space-x-4">
+                <div className="h-10 w-10 rounded-full border-2 border-white dark:border-[#07221d] bg-emerald-200 dark:bg-emerald-800" />
+                <div className="h-10 w-10 rounded-full border-2 border-white dark:border-[#07221d] bg-teal-200 dark:bg-teal-800" />
+                <div className="h-10 w-10 rounded-full border-2 border-white dark:border-[#07221d] bg-cyan-200 dark:bg-cyan-800" />
+              </div>
+              <p className="text-sm font-bold text-emerald-900/60 dark:text-emerald-300/60">
+                Join 10,000+ residents.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT PANE: The Form */}
+        <div className="flex flex-col justify-center bg-white/60 dark:bg-black/20 p-8 lg:w-[55%] lg:p-12">
+          <form onSubmit={handleSubmit} className="w-full max-w-[480px] mx-auto space-y-5">
+            {error && (
+              <div className="rounded-2xl border border-red-500/20 bg-red-50 dark:bg-red-500/10 p-4 text-sm font-bold text-red-600 dark:text-red-400">
+                {error}
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label className="block text-sm font-medium text-wayanad-text mb-2 ml-1">
+                <label className="mb-2 block text-sm font-bold text-emerald-900 dark:text-slate-300">
                   First Name
                 </label>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-wayanad-muted group-focus-within:text-emerald-500 transition-colors" />
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                    <User className="h-5 w-5 text-emerald-800/40 dark:text-slate-500 transition-colors group-focus-within:text-emerald-500" />
                   </div>
                   <input
                     type="text"
                     name="firstName"
                     required
-                    className="block w-full pl-10 pr-3 py-3 bg-white/50 dark:bg-black/20 border border-wayanad-border rounded-xl text-wayanad-text placeholder-wayanad-muted/70 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 outline-none transition-all duration-200"
+                    className="block w-full rounded-2xl border border-emerald-900/10 dark:border-white/10 bg-white dark:bg-white/[0.02] py-3.5 pl-11 pr-4 text-[15px] font-medium text-emerald-950 dark:text-white placeholder-emerald-900/30 dark:placeholder-slate-500 outline-none transition-all focus:ring-emerald-500 focus:ring-2 focus:border-transparent focus:shadow-[0_4px_20px_rgba(16,185,129,0.1)]"
                     placeholder="John"
                     value={formData.firstName}
                     onChange={handleChange}
@@ -180,18 +196,18 @@ const Signup = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-wayanad-text mb-2 ml-1">
+                <label className="mb-2 block text-sm font-bold text-emerald-900 dark:text-slate-300">
                   Last Name
                 </label>
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <User className="h-5 w-5 text-wayanad-muted group-focus-within:text-emerald-500 transition-colors" />
+                  <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                    <User className="h-5 w-5 text-emerald-800/40 dark:text-slate-500 transition-colors group-focus-within:text-emerald-500" />
                   </div>
                   <input
                     type="text"
                     name="lastName"
                     required
-                    className="block w-full pl-10 pr-3 py-3 bg-white/50 dark:bg-black/20 border border-wayanad-border rounded-xl text-wayanad-text placeholder-wayanad-muted/70 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 outline-none transition-all duration-200"
+                    className="block w-full rounded-2xl border border-emerald-900/10 dark:border-white/10 bg-white dark:bg-white/[0.02] py-3.5 pl-11 pr-4 text-[15px] font-medium text-emerald-950 dark:text-white placeholder-emerald-900/30 dark:placeholder-slate-500 outline-none transition-all focus:ring-emerald-500 focus:ring-2 focus:border-transparent focus:shadow-[0_4px_20px_rgba(16,185,129,0.1)]"
                     placeholder="Doe"
                     value={formData.lastName}
                     onChange={handleChange}
@@ -200,20 +216,19 @@ const Signup = () => {
               </div>
             </div>
 
-            {/* Phone Number */}
             <div>
-              <label className="block text-sm font-medium text-wayanad-text mb-2 ml-1">
+              <label className="mb-2 block text-sm font-bold text-emerald-900 dark:text-slate-300">
                 Phone Number
               </label>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Phone className="h-5 w-5 text-wayanad-muted group-focus-within:text-emerald-500 transition-colors" />
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                  <Phone className="h-5 w-5 text-emerald-800/40 dark:text-slate-500 transition-colors group-focus-within:text-emerald-500" />
                 </div>
                 <input
                   type="tel"
                   name="phone"
                   required
-                  className="block w-full pl-10 pr-3 py-3 bg-white/50 dark:bg-black/20 border border-wayanad-border rounded-xl text-wayanad-text placeholder-wayanad-muted/70 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 outline-none transition-all duration-200"
+                  className="block w-full rounded-2xl border border-emerald-900/10 dark:border-white/10 bg-white dark:bg-white/[0.02] py-3.5 pl-11 pr-4 text-[15px] font-medium text-emerald-950 dark:text-white placeholder-emerald-900/30 dark:placeholder-slate-500 outline-none transition-all focus:ring-emerald-500 focus:ring-2 focus:border-transparent focus:shadow-[0_4px_20px_rgba(16,185,129,0.1)]"
                   placeholder="+91 98765 43210"
                   value={formData.phone}
                   onChange={handleChange}
@@ -221,93 +236,88 @@ const Signup = () => {
               </div>
             </div>
 
-            {/* Email Address */}
             <div>
-              <label className="block text-sm font-medium text-wayanad-text mb-2 ml-1">
+              <label className="mb-2 block text-sm font-bold text-emerald-900 dark:text-slate-300">
                 Email Address
               </label>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-wayanad-muted group-focus-within:text-emerald-500 transition-colors" />
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                  <Mail className="h-5 w-5 text-emerald-800/40 dark:text-slate-500 transition-colors group-focus-within:text-emerald-500" />
                 </div>
                 <input
                   type="email"
                   name="email"
                   required
-                  className="block w-full pl-10 pr-3 py-3 bg-white/50 dark:bg-black/20 border border-wayanad-border rounded-xl text-wayanad-text placeholder-wayanad-muted/70 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 outline-none transition-all duration-200"
-                  placeholder="john@example.com"
+                  className="block w-full rounded-2xl border border-emerald-900/10 dark:border-white/10 bg-white dark:bg-white/[0.02] py-3.5 pl-11 pr-4 text-[15px] font-medium text-emerald-950 dark:text-white placeholder-emerald-900/30 dark:placeholder-slate-500 outline-none transition-all focus:ring-emerald-500 focus:ring-2 focus:border-transparent focus:shadow-[0_4px_20px_rgba(16,185,129,0.1)]"
+                  placeholder="name@example.com"
                   value={formData.email}
                   onChange={handleChange}
                 />
               </div>
             </div>
 
-            {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-wayanad-text mb-2 ml-1">
-                Password
-              </label>
+              <div className="mb-2 flex items-center justify-between">
+                <label className="block text-sm font-bold text-emerald-900 dark:text-slate-300">
+                  Password
+                </label>
+                <span className="text-xs font-semibold text-emerald-800/60 dark:text-slate-500">Min 8 chars</span>
+              </div>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-wayanad-muted group-focus-within:text-emerald-500 transition-colors" />
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                  <Lock className="h-5 w-5 text-emerald-800/40 dark:text-slate-500 transition-colors group-focus-within:text-emerald-500" />
                 </div>
                 <input
                   type="password"
                   name="password"
                   required
-                  className="block w-full pl-10 pr-3 py-3 bg-white/50 dark:bg-black/20 border border-wayanad-border rounded-xl text-wayanad-text placeholder-wayanad-muted/70 focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 outline-none transition-all duration-200"
+                  className="block w-full rounded-2xl border border-emerald-900/10 dark:border-white/10 bg-white dark:bg-white/[0.02] py-3.5 pl-11 pr-4 text-[15px] font-medium text-emerald-950 dark:text-white placeholder-emerald-900/30 dark:placeholder-slate-500 outline-none transition-all focus:ring-emerald-500 focus:ring-2 focus:border-transparent focus:shadow-[0_4px_20px_rgba(16,185,129,0.1)]"
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={handleChange}
                 />
               </div>
-              <p className="mt-2 text-xs text-wayanad-muted text-right">
-                Must be at least 8 characters
-              </p>
             </div>
 
-            {/* Location (Auto-detected but adjustable) */}
             <div>
-              <label className="block text-sm font-medium text-wayanad-text mb-2 ml-1">
+              <label className="mb-2 block text-sm font-bold text-emerald-900 dark:text-slate-300">
                 Your Location <span className="text-red-500">*</span>
               </label>
 
               {isDetecting ? (
-                <div className="flex items-center justify-center gap-3 py-3 px-4 bg-emerald-500/5 border border-emerald-500/20 rounded-xl text-emerald-600 dark:text-emerald-400 animate-pulse">
+                <div className="flex w-full items-center justify-center gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-50 dark:bg-emerald-500/10 py-3.5 px-4 text-emerald-600 dark:text-emerald-400 animate-pulse">
                   <Loader2 className="animate-spin" size={18} />
-                  <span className="font-medium">Detecting your location...</span>
+                  <span className="text-[15px] font-bold">Detecting your location...</span>
                 </div>
               ) : !showMap ? (
                 <div className="flex flex-col gap-2">
-                  <div className="flex gap-3">
+                  <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={() => setShowMap(true)}
-                      className="flex-1 flex items-center justify-center gap-2 py-3 px-4 bg-white/50 dark:bg-black/20 border border-wayanad-border rounded-xl text-wayanad-text hover:bg-emerald-50 dark:hover:bg-emerald-900/20 hover:border-emerald-300 transition-all focus:ring-2 focus:ring-emerald-500/50"
+                      className="flex-1 flex items-center justify-center gap-2 rounded-2xl border border-emerald-900/10 dark:border-white/10 bg-white dark:bg-white/[0.02] py-3.5 px-4 text-[15px] font-bold text-emerald-950 dark:text-white transition-all hover:bg-emerald-50 dark:hover:bg-white/[0.04] hover:shadow-[0_4px_20px_rgba(16,185,129,0.1)]"
                     >
                       <MapIcon size={18} className="text-emerald-500" />
-                      <span className="font-medium whitespace-nowrap">
-                        {location ? "Adjust Location" : "Pick on Map"}
-                      </span>
+                      <span>{location ? "Adjust Location" : "Pick on Map"}</span>
                     </button>
                     <button
                       type="button"
                       onClick={detectLocation}
-                      className="p-3 bg-white/50 dark:bg-black/20 border border-wayanad-border rounded-xl text-wayanad-text hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all"
+                      className="flex items-center justify-center rounded-2xl border border-emerald-900/10 dark:border-white/10 bg-white dark:bg-white/[0.02] p-3.5 text-emerald-950 dark:text-white transition-all hover:bg-emerald-50 dark:hover:bg-white/[0.04] hover:shadow-[0_4px_20px_rgba(16,185,129,0.1)]"
                       title="Refresh Location"
                     >
                       <Loader2 size={18} className={isDetecting ? "animate-spin" : ""} />
                     </button>
                   </div>
                   {locationName && (
-                    <div className="px-4 py-2.5 bg-emerald-500/5 border border-emerald-500/10 rounded-xl text-xs text-wayanad-text flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                      <span className="truncate font-medium">{locationName}</span>
+                    <div className="mt-1 flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-500/10 py-2.5 px-4 text-xs font-bold text-emerald-900 dark:text-emerald-300">
+                      <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                      <span className="truncate">{locationName}</span>
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="w-full h-[360px] animate-fade-up">
+                <div className="w-full h-[280px] overflow-hidden rounded-2xl border border-emerald-900/10 dark:border-white/10 shadow-[0_4px_20px_rgba(16,185,129,0.1)] animate-fade-up">
                   <LocationPickerMap 
                     location={location}
                     setLocation={setLocation}
@@ -319,30 +329,19 @@ const Signup = () => {
               )}
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
-              className="w-full flex items-center justify-center py-3.5 px-4 
-                bg-gradient-to-r from-emerald-600 to-teal-600 
-                hover:from-emerald-700 hover:to-teal-700
-                text-white font-semibold rounded-xl shadow-lg 
-                shadow-emerald-500/30 hover:shadow-emerald-500/40
-                transform hover:-translate-y-0.5 active:translate-y-0
-                transition-all duration-200 mt-2"
+              className="group mt-8 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 py-4 text-[15px] font-bold text-white shadow-xl shadow-emerald-500/25 transition-all hover:-translate-y-0.5 hover:shadow-[0_12px_30px_rgba(16,185,129,0.3)] active:translate-y-0 disabled:opacity-70"
             >
               Create Account
-              <ArrowRight className="ml-2 h-5 w-5" />
+              <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
             </button>
           </form>
 
-          {/* Footer */}
-          <div className="mt-8 text-center">
-            <p className="text-sm text-wayanad-muted">
+          <div className="mt-8 text-center sm:text-left mx-auto w-full max-w-[480px]">
+            <p className="text-[15px] font-medium text-emerald-900/60 dark:text-slate-400">
               Already have an account?{" "}
-              <Link
-                to="/login"
-                className="font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 hover:underline transition-all"
-              >
+              <Link to="/login" className="font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 hover:underline">
                 Sign In
               </Link>
             </p>
