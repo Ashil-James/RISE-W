@@ -9,17 +9,17 @@ import {
     Info,
     ChevronRight,
     Search,
-    Filter
+    Filter,
+    ShieldAlert
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { useAuth } from "../../context/AuthContext";
 import { useAlerts } from "../../context/AlertContext";
 
-const CustomDropdown = ({ options, value, onChange, placeholder, isUrgent = false }) => {
+const CustomDropdown = ({ options, value, onChange, placeholder, theme, isUrgent = false }) => {
     const [isOpen, setIsOpen] = useState(false);
 
-    // Close on click outside
     useEffect(() => {
         const handleClickOutside = () => setIsOpen(false);
         if (isOpen) {
@@ -36,12 +36,12 @@ const CustomDropdown = ({ options, value, onChange, placeholder, isUrgent = fals
                     e.stopPropagation();
                     setIsOpen(!isOpen);
                 }}
-                className={`w-full bg-white/60 dark:bg-[#020617] border border-emerald-900/10 dark:border-white/10 text-emerald-950 dark:text-white rounded-[10px] px-4 py-3 focus:outline-none focus:border-blue-400 transition-all font-bold flex items-center justify-between group ${isUrgent ? 'text-red-400' : ''}`}
+                className={`w-full bg-slate-50 dark:bg-[#020617]/50 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-xl px-4 py-3.5 focus:outline-none ${theme.ring} transition-all font-bold flex items-center justify-between group shadow-sm ${isUrgent ? 'text-red-500 dark:text-red-400' : ''}`}
             >
-                <span className={!value ? "text-gray-700 font-bold" : ""}>
+                <span className={!value ? "text-slate-400 font-medium" : ""}>
                     {value || placeholder}
                 </span>
-                <ChevronRight size={18} className={`text-gray-500 transition-transform duration-300 ${isOpen ? "rotate-90" : ""}`} />
+                <ChevronRight size={18} className={`text-slate-400 transition-transform duration-300 ${isOpen ? "rotate-90" : ""}`} />
             </button>
 
             <AnimatePresence>
@@ -50,7 +50,7 @@ const CustomDropdown = ({ options, value, onChange, placeholder, isUrgent = fals
                         initial={{ opacity: 0, y: 10, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                        className="absolute z-[60] left-0 right-0 mt-2 bg-white/60 dark:bg-[#020617] border border-emerald-900/10 dark:border-white/10 rounded-xl shadow-2xl overflow-hidden py-1 backdrop-blur-3xl"
+                        className="absolute z-[60] left-0 right-0 mt-2 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-white/10 rounded-xl shadow-xl overflow-hidden py-1 backdrop-blur-3xl"
                     >
                         {options.map((opt) => (
                             <div
@@ -60,8 +60,8 @@ const CustomDropdown = ({ options, value, onChange, placeholder, isUrgent = fals
                                     setIsOpen(false);
                                 }}
                                 className={`px-4 py-3 text-sm font-bold cursor-pointer transition-colors ${value === opt.value
-                                    ? "bg-sky-400/15 text-emerald-950 dark:text-white"
-                                    : "text-[#e2e2e0] hover:bg-emerald-900/5 hover:dark:hover:bg-white/5 active:bg-emerald-900/10 dark:bg-white/10"
+                                    ? `${theme.bg} ${theme.text}`
+                                    : "text-slate-600 dark:text-gray-300 hover:bg-slate-50 hover:dark:bg-white/5"
                                     }`}
                             >
                                 {opt.label}
@@ -95,7 +95,6 @@ const AuthorityBroadcastAlerts = () => {
         }
     }, [formData.title]);
 
-
     // Authority Type Determination
     const isPower = authUser?.department === "ELECTRICITY" || window.location.pathname.includes("/power");
     const isRoad = authUser?.department === "CIVIL" || window.location.pathname.includes("/road");
@@ -104,11 +103,12 @@ const AuthorityBroadcastAlerts = () => {
     const authorityName = isPower ? "Power Authority" : isRoad ? "Road Infrastructure Authority" : "Water Authority";
     const authorityShort = isPower ? "Power" : isRoad ? "Road" : "Water";
 
+    // Theme object updated for glassmorphism
     const theme = isPower
-        ? { accent: "amber", text: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" }
+        ? { accent: "amber", text: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-500/10", border: "border-amber-200 dark:border-amber-500/20", button: "bg-amber-500 hover:bg-amber-600 text-white shadow-amber-500/25", ring: "focus:ring-amber-500/50 focus:border-amber-500/50" }
         : isRoad
-            ? { accent: "orange", text: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20" }
-            : { accent: "sky", text: "text-sky-400", bg: "bg-sky-500/10", border: "border-sky-500/20" };
+            ? { accent: "orange", text: "text-orange-600 dark:text-orange-400", bg: "bg-orange-50 dark:bg-orange-500/10", border: "border-orange-200 dark:border-orange-500/20", button: "bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/25", ring: "focus:ring-orange-500/50 focus:border-orange-500/50" }
+            : { accent: "sky", text: "text-sky-600 dark:text-sky-400", bg: "bg-sky-50 dark:bg-sky-500/10", border: "border-sky-200 dark:border-sky-500/20", button: "bg-sky-500 hover:bg-sky-600 text-white shadow-sky-500/25", ring: "focus:ring-sky-500/50 focus:border-sky-500/50" };
 
     const suggestedTitles = isPower
         ? ["Power Outage Alert", "Transformer Maintenance", "Grid Failure Warning", "High Voltage Safety Alert"]
@@ -128,39 +128,18 @@ const AuthorityBroadcastAlerts = () => {
                     const data = await response.json();
 
                     const address = data.address || {};
-
-                    const place =
-                        address.amenity ||
-                        address.building ||
-                        address.shop ||
-                        "";
-
-                    const area =
-                        address.village ||
-                        address.suburb ||
-                        address.town ||
-                        "";
-
-                    const city =
-                        address.city ||
-                        address.county ||
-                        "";
+                    const place = address.amenity || address.building || address.shop || "";
+                    const area = address.village || address.suburb || address.town || "";
+                    const city = address.city || address.county || "";
 
                     const shortLocation = `${place}, ${area}, ${city}`
                         .replace(/^,|,$/g, "")
                         .replace(/,,+/g, ",");
 
-                    setFormData(prev => ({
-                        ...prev,
-                        location: shortLocation
-                    }));
-
+                    setFormData(prev => ({ ...prev, location: shortLocation }));
                 } catch (error) {
                     console.error("Reverse geocoding failed:", error);
-                    setFormData(prev => ({
-                        ...prev,
-                        location: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`
-                    }));
+                    setFormData(prev => ({ ...prev, location: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}` }));
                 } finally {
                     setLocationLoading(false);
                 }
@@ -175,17 +154,11 @@ const AuthorityBroadcastAlerts = () => {
     };
 
     const handleSubmit = async (e) => {
-
         e.preventDefault();
         setLoading(true);
         try {
             const user = JSON.parse(localStorage.getItem("user"));
-            const config = {
-                headers: {
-                    Authorization: `Bearer ${user.token}`,
-                },
-            };
-
+            const config = { headers: { Authorization: `Bearer ${user.token}` } };
             const dataToPost = {
                 title: formData.title === "Other" ? formData.customTitle : formData.title,
                 type: formData.title,
@@ -194,7 +167,6 @@ const AuthorityBroadcastAlerts = () => {
                 message: formData.message,
                 isAuthority: true
             };
-
 
             await axios.post("/api/v1/broadcasts", dataToPost, config);
 
@@ -214,101 +186,108 @@ const AuthorityBroadcastAlerts = () => {
         }
     };
 
-    // Filter alerts for history box
     const historyAlerts = allAlerts.filter(a => {
-        // Must be an authority broadcast
         if (!a.isAuthority) return false;
-
-        // Power Authority: show only power alerts
         if (isPower && a.backendType === 'POWER_ALERT') return true;
-
-        // Road Authority: show road, block, and wildlife alerts
         if (isRoad && (a.backendType === 'ROAD_ALERT' || a.backendType === 'ROAD_BLOCK' || a.backendType === 'WILDLIFE_ALERT')) return true;
-
-        // Water Authority: show only water alerts
         if (isWater && a.backendType === 'WATER_ALERT') return true;
-
         return false;
     });
 
     return (
-        <div className="space-y-10 pb-20">
-            {/* HEADER */}
-            <div className="flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
-                <div>
-                    <h1 className="text-4xl font-black text-emerald-950 dark:text-white mb-2 tracking-tight flex items-center gap-3">
-                        <Megaphone className={theme.text} size={36} />
-                        Broadcast Alerts
-                    </h1>
-                    <p className="text-gray-400 max-w-xl text-lg font-medium">
-                        Dispatch official notifications and emergency warnings to all citizens.
-                    </p>
+        <div className="space-y-8 pb-16">
+            {/* COMPONENT HEADER */}
+            <motion.div 
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="relative overflow-hidden rounded-3xl bg-white dark:bg-white/[0.02] p-8 md:p-10 border border-slate-200 dark:border-white/5 shadow-sm"
+            >
+                <div className={`absolute top-0 right-0 w-80 h-80 ${theme.bg} blur-3xl -mx-20 -my-20 rounded-full opacity-50 dark:opacity-20`} />
+                <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+                    <div>
+                        <div className="flex items-center gap-3 mb-4">
+                            <span className={`px-3 py-1 rounded-full ${theme.bg} ${theme.text} text-[10px] font-black uppercase tracking-widest border ${theme.border}`}>
+                                Dispatch Center
+                            </span>
+                            <span className="text-slate-500 dark:text-white/40 text-xs font-bold uppercase tracking-widest flex items-center gap-1.5">
+                                <ShieldAlert size={14} /> {authorityName}
+                            </span>
+                        </div>
+                        <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight mb-2 flex items-center gap-4">
+                            <div className={`p-3 rounded-2xl ${theme.bg} ${theme.text}`}>
+                                <Megaphone size={32} />
+                            </div>
+                            Broadcast Alerts
+                        </h1>
+                        <p className="text-slate-500 dark:text-gray-400 font-medium text-sm md:text-base max-w-lg mt-4">
+                            Dispatch official notifications, emergency warnings, and priority bulletins instantly to the municipal population.
+                        </p>
+                    </div>
+                    
+                    <div className="hidden md:flex flex-col items-end">
+                        <div className={`flex items-center gap-2 px-4 py-2 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-full text-slate-600 dark:text-gray-300 text-xs font-black tracking-widest uppercase`}>
+                            <div className={`w-2 h-2 ${theme.bg.split(' ')[0].replace('bg-', 'bg-').split('/')[0].replace('50', '500')} rounded-full animate-pulse`}></div>
+                            Official Authorized System
+                        </div>
+                    </div>
                 </div>
-                <div className={`flex items-center gap-2 px-4 py-2 ${theme.bg} border ${theme.border} rounded-full ${theme.text} text-xs font-black tracking-widest uppercase`}>
-                    <div className={`w-2 h-2 ${isPower ? 'bg-amber-500' : isRoad ? 'bg-orange-500' : 'bg-sky-500'} rounded-full animate-pulse`}></div>
-                    Official Authorized System
-                </div>
-            </div>
+            </motion.div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* BROADCAST FORM */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
                     className="lg:col-span-12 xl:col-span-8"
                 >
-                    <div className="bg-white/60 dark:bg-[#020617] border border-emerald-900/10 dark:border-white/10 rounded-2xl p-6 md:p-8 backdrop-blur-xl relative overflow-hidden group shadow-2xl">
-                        {/* Subtle background glow */}
-                        <div className={`absolute -top-24 -right-24 w-64 h-64 ${theme.bg} rounded-full blur-[100px] pointer-events-none group-hover:opacity-100 opacity-50 transition-opacity`}></div>
-
+                    <div className="bg-white dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-3xl p-6 md:p-8 backdrop-blur-xl shadow-sm">
                         <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                {/* Alert Title Custom Dropdown */}
-                                <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-black text-gray-500 uppercase tracking-widest ml-1">
-                                            Alert Title
-                                        </label>
-                                        <CustomDropdown
-                                            options={[
-                                                ...suggestedTitles.map(t => ({ label: t, value: t })),
-                                                { label: "Other", value: "Other" }
-                                            ]}
-                                            value={formData.title}
-                                            onChange={(val) => setFormData({ ...formData, title: val })}
-                                            placeholder="Select Alert Type"
-                                        />
-                                    </div>
-
-                                    {/* Conditional Custom Title Input */}
-                                    <AnimatePresence>
-                                        {formData.title === "Other" && (
-                                            <motion.div
-                                                initial={{ opacity: 0, height: 0 }}
-                                                animate={{ opacity: 1, height: "auto" }}
-                                                exit={{ opacity: 0, height: 0 }}
-                                                className="space-y-2 overflow-hidden"
-                                            >
-                                                <label className="text-xs font-black text-gray-500 uppercase tracking-widest ml-1">
-                                                    Custom Alert Title
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    required
-                                                    value={formData.customTitle}
-                                                    onChange={(e) => setFormData({ ...formData, customTitle: e.target.value })}
-                                                    className="w-full bg-white/60 dark:bg-[#020617] border border-emerald-900/10 dark:border-white/10 text-emerald-950 dark:text-white rounded-[10px] px-4 py-3 focus:outline-none focus:border-blue-400 transition-all font-bold placeholder:text-gray-700"
-                                                    placeholder="Enter custom alert title"
-                                                />
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
+                                {/* Alert Title */}
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-widest ml-1">
+                                        Alert Title
+                                    </label>
+                                    <CustomDropdown
+                                        options={[
+                                            ...suggestedTitles.map(t => ({ label: t, value: t })),
+                                            { label: "Other", value: "Other" }
+                                        ]}
+                                        value={formData.title}
+                                        onChange={(val) => setFormData({ ...formData, title: val })}
+                                        placeholder="Select Alert Type"
+                                        theme={theme}
+                                    />
                                 </div>
 
+                                {/* Custom Title Input */}
+                                <AnimatePresence>
+                                    {formData.title === "Other" && (
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: "auto" }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            className="space-y-2 overflow-hidden col-span-1 md:col-span-2"
+                                        >
+                                            <label className="text-[10px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-widest ml-1 mt-2">
+                                                Custom Alert Title
+                                            </label>
+                                            <input
+                                                type="text"
+                                                required
+                                                value={formData.customTitle}
+                                                onChange={(e) => setFormData({ ...formData, customTitle: e.target.value })}
+                                                className={`w-full bg-slate-50 dark:bg-[#020617]/50 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-xl px-4 py-3.5 focus:outline-none ${theme.ring} transition-all font-bold placeholder:text-slate-400 shadow-sm`}
+                                                placeholder="Enter custom alert title"
+                                            />
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
 
-                                {/* Priority Level Custom Dropdown */}
+                                {/* Priority Level */}
                                 <div className="space-y-2">
-                                    <label className="text-xs font-black text-gray-500 uppercase tracking-widest ml-1">
+                                    <label className="text-[10px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-widest ml-1">
                                         Priority Level
                                     </label>
                                     <CustomDropdown
@@ -319,13 +298,14 @@ const AuthorityBroadcastAlerts = () => {
                                         ]}
                                         value={formData.priority}
                                         onChange={(val) => setFormData({ ...formData, priority: val })}
+                                        theme={theme}
                                         isUrgent={formData.priority === 'Urgent'}
                                     />
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-black text-gray-500 uppercase tracking-widest ml-1">
+                                <label className="text-[10px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-widest ml-1">
                                     Affected Area (Optional)
                                 </label>
                                 <div className="relative group/location">
@@ -333,25 +313,24 @@ const AuthorityBroadcastAlerts = () => {
                                         type="button"
                                         onClick={handleDetectLocation}
                                         disabled={locationLoading}
-                                        className={`absolute left-3 top-2.5 p-1 text-gray-600 hover:text-sky-400 hover:bg-sky-400/10 rounded-lg transition-all z-20 group-hover/location:text-sky-400 disabled:opacity-50`}
+                                        className={`absolute left-3 top-3 p-1 text-slate-400 hover:${theme.text} hover:${theme.bg} rounded-lg transition-all z-20 group-hover/location:${theme.text} disabled:opacity-50`}
                                         title="Detect current location"
                                     >
-                                        <MapPin size={20} className={locationLoading ? "animate-spin text-sky-400" : ""} />
+                                        <MapPin size={20} className={locationLoading ? `animate-spin ${theme.text}` : ""} />
                                     </button>
                                     <input
                                         type="text"
                                         value={formData.location}
                                         onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                        className="w-full bg-white/60 dark:bg-[#020617] border border-emerald-900/10 dark:border-white/10 text-emerald-950 dark:text-white rounded-[10px] pl-12 pr-4 py-3 focus:outline-none focus:border-blue-400 transition-all font-bold placeholder:text-gray-700"
+                                        className={`w-full bg-slate-50 dark:bg-[#020617]/50 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-xl pl-12 pr-4 py-3.5 focus:outline-none ${theme.ring} transition-all font-medium placeholder:text-slate-400 shadow-sm`}
                                         placeholder="e.g. Sector B, Main Road Area"
                                     />
                                 </div>
                             </div>
 
-
                             {/* Alert Message */}
                             <div className="space-y-2">
-                                <label className="text-xs font-black text-gray-500 uppercase tracking-widest ml-1">
+                                <label className="text-[10px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-widest ml-1">
                                     Alert Message
                                 </label>
                                 <textarea
@@ -359,135 +338,148 @@ const AuthorityBroadcastAlerts = () => {
                                     rows="4"
                                     value={formData.message}
                                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                                    className="w-full bg-white/60 dark:bg-[#020617] border border-emerald-900/10 dark:border-white/10 text-emerald-950 dark:text-white rounded-[10px] px-4 py-3 focus:outline-none focus:border-blue-400 transition-all font-bold placeholder:text-gray-700 resize-none leading-relaxed"
+                                    className={`w-full bg-slate-50 dark:bg-[#020617]/50 border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white rounded-xl px-4 py-3.5 focus:outline-none ${theme.ring} transition-all font-medium placeholder:text-slate-400 resize-none leading-relaxed shadow-sm`}
                                     placeholder="Provide clear details about the situation..."
                                 />
                             </div>
 
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="px-6 py-4 rounded-xl bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 border border-blue-500/20 font-black transition-all flex items-center justify-center gap-3 w-full md:w-auto min-w-[200px] group active:scale-95 disabled:opacity-50"
-                            >
-                                <Send size={20} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-                                {loading ? "Dispatching..." : "Send Broadcast"}
-                            </button>
+                            <div className="pt-2">
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className={`px-8 py-4 rounded-xl ${theme.button} font-black transition-all flex items-center justify-center gap-3 w-full md:w-auto min-w-[200px] group active:scale-95 disabled:opacity-50 tracking-wider shadow-lg`}
+                                >
+                                    <Send size={20} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                                    {loading ? "Dispatching Protocol..." : "Send Broadcast"}
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </motion.div>
 
-                {/* QUICK TIPS / STATS */}
-                <div className="lg:col-span-12 xl:col-span-4 space-y-6">
-                    <div className="bg-white/60 dark:bg-[#020617] border border-emerald-900/10 dark:border-white/10 rounded-2xl p-6 backdrop-blur-xl h-full shadow-2xl">
-                        <h3 className="text-lg font-bold text-emerald-950 dark:text-white mb-6 flex items-center gap-2">
-                            <Info size={20} className="text-sky-400" />
+                {/* QUICK TIPS */}
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="lg:col-span-12 xl:col-span-4"
+                >
+                    <div className="bg-white dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-3xl p-6 md:p-8 backdrop-blur-xl h-full shadow-sm">
+                        <h3 className="text-lg font-black text-slate-900 dark:text-white mb-6 flex items-center gap-3">
+                            <div className={`p-2 rounded-lg ${theme.bg} ${theme.text}`}>
+                                <Info size={18} />
+                            </div>
                             Broadcast Protocol
                         </h3>
-                        <div className="space-y-4">
+                        <div className="space-y-5">
                             {[
-                                { title: "Urgent Alerts", text: "Highlighted in Red on user feeds. Use for immediate danger or critical outages." },
-                                { title: "Targeted Areas", text: "Specify locations to help residents determine if they are affected." },
-                                { title: "Clarity", text: "Keep messages concise but include expected resolution times if known." },
-                                { title: "Reach", text: "Alerts are sent to all active users via the main dashboard banner." }
+                                { title: "Urgent Alerts", text: "Highlighted in Red on user feeds. Use for immediate danger or critical outages.", color: "bg-red-500" },
+                                { title: "Targeted Areas", text: "Specify locations to help residents determine if they are affected.", color: theme.bg.split(' ')[0].replace('bg-', 'bg-').split('/')[0].replace('50', '500') },
+                                { title: "Clarity", text: "Keep messages concise but include expected resolution times if known.", color: theme.bg.split(' ')[0].replace('bg-', 'bg-').split('/')[0].replace('50', '500') },
+                                { title: "Reach", text: "Alerts are sent to all active users via the main dashboard banner instantly.", color: theme.bg.split(' ')[0].replace('bg-', 'bg-').split('/')[0].replace('50', '500') }
                             ].map((tip, i) => (
-                                <div key={i} className="flex gap-4">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-sky-500 mt-2 flex-shrink-0"></div>
+                                <div key={i} className="flex gap-4 group">
+                                    <div className={`w-1.5 h-1.5 rounded-full ${tip.color} mt-2 flex-shrink-0 group-hover:scale-150 transition-transform`}></div>
                                     <div>
-                                        <p className="text-sm font-bold text-gray-200 uppercase tracking-tight">{tip.title}</p>
-                                        <p className="text-xs text-gray-500 mt-1 leading-relaxed">{tip.text}</p>
+                                        <p className="text-sm font-black text-slate-800 dark:text-gray-200 uppercase tracking-tight mb-1">{tip.title}</p>
+                                        <p className="text-xs text-slate-500 dark:text-gray-400 leading-relaxed font-medium">{tip.text}</p>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     </div>
-                </div>
+                </motion.div>
 
-                {/* BROADCAST HISTORY TABLE */}
+                {/* BROADCAST HISTORY GRID */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
                     className="lg:col-span-12"
                 >
-                    <div className="bg-white/60 dark:bg-[#020617] border border-emerald-900/10 dark:border-white/10 rounded-2xl overflow-hidden backdrop-blur-xl shadow-2xl">
-                        <div className="p-6 border-b border-emerald-900/10 dark:border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <h2 className="text-xl font-black text-emerald-950 dark:text-white flex items-center gap-3">
-                                <Clock className="text-gray-400" size={24} />
+                    <div className="bg-white dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-3xl overflow-hidden backdrop-blur-xl shadow-sm">
+                        <div className="p-6 md:p-8 border-b border-slate-200 dark:border-white/5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-3">
+                                <div className="p-2 bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-gray-400 rounded-xl">
+                                    <Clock size={20} />
+                                </div>
                                 Broadcast History
                             </h2>
                             <div className="relative">
-                                <Search className="absolute left-3 top-2.5 text-gray-500" size={16} />
+                                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                                 <input
                                     type="text"
                                     placeholder="Search alerts..."
-                                    className="bg-black/40 border border-emerald-900/10 dark:border-white/10 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-sky-500/50 text-emerald-950 dark:text-white font-medium"
+                                    className={`w-full md:w-64 bg-slate-50 dark:bg-black/40 border border-slate-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:outline-none ${theme.ring} transition-colors text-slate-900 dark:text-white font-medium placeholder:text-slate-400 shadow-inner`}
                                 />
                             </div>
                         </div>
 
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-left border-collapse">
-                                <thead>
-                                    <tr className="bg-emerald-900/5 dark:bg-white/[0.02] text-[10px] font-black uppercase tracking-[0.2em] text-gray-500">
-                                        <th className="px-6 py-4">Alert Title</th>
-                                        <th className="px-6 py-4">Alert Type</th>
-                                        <th className="px-6 py-4">Authority</th>
-                                        <th className="px-6 py-4">Priority</th>
-                                        <th className="px-6 py-4">Affected Area</th>
-                                        <th className="px-6 py-4 text-right">Date Sent</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-white/5">
-                                    {historyAlerts.length > 0 ? historyAlerts.map((alert, i) => (
-                                        <tr key={alert.id || i} className="group hover:bg-emerald-900/5 hover:dark:hover:bg-white/[0.02] transition-colors">
-                                            <td className="px-6 py-4">
-                                                <p className="text-sm font-bold text-emerald-950 dark:text-white group-hover:text-sky-400 transition-colors">
-                                                    {alert.title}
-                                                </p>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="text-xs font-bold text-gray-400">
-                                                    {alert.category}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="flex items-center gap-2">
-                                                    <div className={`w-2 h-2 rounded-full ${isPower ? 'bg-amber-500' : isRoad ? 'bg-orange-500' : 'bg-sky-500'}`}></div>
-                                                    <span className="text-xs font-bold text-gray-400">{authorityShort} Official</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className={`text-[10px] font-black uppercase px-2 py-1 rounded-md tracking-wider ${alert.type === 'critical' ? 'bg-red-500/10 text-red-500' :
-                                                    alert.type === 'warning' ? 'bg-amber-500/10 text-amber-500' :
-                                                        'bg-sky-500/10 text-sky-500'
-                                                    }`}>
-                                                    {alert.type === 'critical' ? 'Urgent' : alert.type === 'warning' ? 'Important' : 'Normal'}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">{alert.location}</p>
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <p className="text-xs font-mono text-gray-500">
-                                                    {new Date(alert.time).toLocaleDateString()}
-                                                </p>
-                                                <p className="text-[10px] text-gray-600">
-                                                    {new Date(alert.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </p>
-                                            </td>
-                                        </tr>
+                        <div className="p-6">
+                            <div className="flex flex-col gap-3">
+                                <div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-2 text-[10px] uppercase tracking-widest text-slate-500 dark:text-gray-400 font-bold">
+                                    <div className="col-span-3">Alert Details</div>
+                                    <div className="col-span-2">Authority</div>
+                                    <div className="col-span-2">Priority</div>
+                                    <div className="col-span-3">Affected Area</div>
+                                    <div className="col-span-2 text-right">Date Sent</div>
+                                </div>
 
-                                    )) : (
-                                        <tr>
-                                            <td colSpan="6" className="px-6 py-20 text-center">
-                                                <div className="flex flex-col items-center gap-4 opacity-20">
-                                                    <Megaphone size={48} className="text-gray-400" />
-                                                    <p className="text-gray-400 font-bold tracking-widest uppercase text-xs">No broadcast history found</p>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
+                                {historyAlerts.length > 0 ? historyAlerts.map((alert, i) => (
+                                    <motion.div 
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: i * 0.05 }}
+                                        key={alert.id || i} 
+                                        className={`group grid grid-cols-1 lg:grid-cols-12 gap-4 items-center px-6 py-5 bg-white dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 hover:border-${theme.accent}-500/30 rounded-2xl transition-all shadow-sm hover:shadow-md cursor-default`}
+                                    >
+                                        <div className="col-span-3 flex flex-col">
+                                            <span className={`text-sm font-black text-slate-900 dark:text-white group-hover:${theme.text} transition-colors uppercase truncate pr-4`}>
+                                                {alert.title}
+                                            </span>
+                                            <span className="text-xs text-slate-500 dark:text-gray-500 font-medium truncate">
+                                                {alert.category || "General Broadcast"}
+                                            </span>
+                                        </div>
+                                        
+                                        <div className="col-span-2">
+                                            <div className="flex items-center gap-2">
+                                                <div className={`w-2 h-2 rounded-full ${theme.bg.split(' ')[0].replace('bg-', 'bg-').split('/')[0].replace('50', '500')}`}></div>
+                                                <span className="text-xs font-bold text-slate-600 dark:text-gray-400">{authorityShort} Official</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="col-span-2">
+                                            <span className={`inline-flex items-center gap-1.5 text-[10px] font-black uppercase px-2.5 py-1.5 rounded-lg tracking-wider ${
+                                                alert.type === 'critical' ? 'bg-red-50 text-red-600 border border-red-200 dark:bg-red-500/10 dark:text-red-400 dark:border-red-500/20' :
+                                                alert.type === 'warning' ? 'bg-amber-50 text-amber-600 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20' :
+                                                'bg-sky-50 text-sky-600 border border-sky-200 dark:bg-sky-500/10 dark:text-sky-400 dark:border-sky-500/20'
+                                            }`}>
+                                                {alert.type === 'critical' ? 'Urgent' : alert.type === 'warning' ? 'Important' : 'Normal'}
+                                            </span>
+                                        </div>
+
+                                        <div className="col-span-3">
+                                            <p className="text-xs font-bold text-slate-500 dark:text-gray-400 uppercase tracking-widest line-clamp-1 pr-4">{alert.location}</p>
+                                        </div>
+
+                                        <div className="col-span-2 flex flex-col lg:items-end">
+                                            <p className="text-xs font-bold text-slate-800 dark:text-gray-300 tabular-nums">
+                                                {new Date(alert.time).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                            </p>
+                                            <p className="text-[10px] text-slate-400 dark:text-gray-500 font-medium uppercase mt-0.5 tabular-nums">
+                                                {new Date(alert.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </p>
+                                        </div>
+                                    </motion.div>
+                                )) : (
+                                    <div className="flex flex-col items-center justify-center p-12 bg-slate-50 dark:bg-white/[0.02] border border-slate-200 dark:border-white/5 rounded-2xl text-slate-500">
+                                        <Megaphone size={32} className="mb-4 text-slate-300 dark:text-white/10" />
+                                        <span className="text-sm font-bold tracking-widest text-slate-400 uppercase">No Broadcast History Found</span>
+                                        <p className="text-xs mt-2 text-slate-400 dark:text-gray-500">Alerts dispatched will appear here.</p>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </motion.div>
@@ -500,29 +492,30 @@ const AuthorityBroadcastAlerts = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4"
+                        className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 dark:bg-black/80 backdrop-blur-sm p-4"
                     >
                         <motion.div
-                            initial={{ scale: 0.8, y: 20 }}
-                            animate={{ scale: 1, y: 0 }}
-                            exit={{ scale: 0.8, y: 20 }}
-                            className="bg-white/60 dark:bg-[#020617] border border-emerald-500/30 p-10 rounded-[2.5rem] text-center max-w-sm w-full shadow-[0_0_80px_-10px_rgba(16,185,129,0.4)]"
+                            initial={{ scale: 0.9, y: 20, opacity: 0 }}
+                            animate={{ scale: 1, y: 0, opacity: 1 }}
+                            exit={{ scale: 0.9, y: 20, opacity: 0 }}
+                            className="bg-white dark:bg-[#020617] border border-emerald-500/30 p-10 rounded-3xl text-center max-w-sm w-full shadow-2xl relative overflow-hidden"
                         >
-                            <div className="w-20 h-20 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-8 text-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
-                                <CheckCircle size={40} />
+                            <div className="absolute top-0 inset-x-0 h-1 bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.5)]"></div>
+                            <div className="w-20 h-20 bg-emerald-50 dark:bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-6 text-emerald-500 border border-emerald-100 dark:border-emerald-500/20">
+                                <CheckCircle size={40} className="drop-shadow-md" />
                             </div>
-                            <h2 className="text-3xl font-black text-emerald-950 dark:text-white mb-3 tracking-tight">
-                                Broadcast Dispatched!
+                            <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">
+                                Broadcast Dispatched
                             </h2>
-                            <p className="text-gray-400 mb-8 font-medium text-sm">
-                                Your official alert has been successfully broadcasted to all citizens in the township.
+                            <p className="text-slate-500 dark:text-gray-400 mb-8 font-medium text-sm leading-relaxed">
+                                Your official alert has been successfully broadcasted and pushed to citizens.
                             </p>
-                            <div className="w-full h-1 bg-neutral-800 rounded-full overflow-hidden">
+                            <div className="w-full h-1.5 bg-slate-100 dark:bg-white/5 rounded-full overflow-hidden">
                                 <motion.div
                                     initial={{ width: "0%" }}
                                     animate={{ width: "100%" }}
-                                    transition={{ duration: 3 }}
-                                    className="h-full bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,1)]"
+                                    transition={{ duration: 3, ease: "linear" }}
+                                    className="h-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]"
                                 />
                             </div>
                         </motion.div>
