@@ -6,7 +6,6 @@ import {
     Menu,
     X,
     Droplets,
-    TableProperties,
     Bell,
     User,
     ChevronDown,
@@ -230,12 +229,7 @@ const AuthorityLayout = () => {
                                         <NavItem
                                             to={`/authority/${theme.short.toLowerCase()}/dashboard`}
                                             icon={LayoutDashboard}
-                                            label="Dashboard"
-                                        />
-                                        <NavItem
-                                            to={`/authority/${theme.short.toLowerCase()}/matrix`}
-                                            icon={TableProperties}
-                                            label="Complaint Matrix"
+                                            label="Command Center"
                                         />
                                         <NavItem
                                             to={`/authority/${theme.short.toLowerCase()}/broadcasts`}

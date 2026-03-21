@@ -35,13 +35,10 @@ import AdminIncidentDetail from "./pages/admin/AdminIncidentDetail";
 // --- AUTHORITY PAGES ---
 import AuthorityLayout from "./pages/authority/AuthorityLayout";
 import AuthorityWaterDashboard from "./pages/authority/AuthorityWaterDashboard";
-import AuthorityWaterMatrix from "./pages/authority/AuthorityWaterMatrix";
 import AuthorityWaterCase from "./pages/authority/AuthorityWaterCase";
 import AuthorityPowerDashboard from "./pages/authority/AuthorityPowerDashboard";
-import AuthorityPowerMatrix from "./pages/authority/AuthorityPowerMatrix";
 import AuthorityPowerCase from "./pages/authority/AuthorityPowerCase";
 import AuthorityRoadDashboard from "./pages/authority/AuthorityRoadDashboard";
-import AuthorityRoadMatrix from "./pages/authority/AuthorityRoadMatrix";
 import AuthorityRoadCase from "./pages/authority/AuthorityRoadCase";
 import AuthorityProfile from "./pages/authority/AuthorityProfile";
 import AuthoritySettings from "./pages/authority/AuthoritySettings";
@@ -115,7 +112,6 @@ function App() {
 
                   {/* Water Authority */}
                   <Route path="water/dashboard" element={<AuthorityWaterDashboard />} />
-                  <Route path="water/matrix" element={<AuthorityWaterMatrix />} />
                   <Route path="water/case/:id" element={<AuthorityWaterCase />} />
                   <Route path="water/profile" element={<AuthorityProfile />} />
                   <Route path="water/settings" element={<AuthoritySettings />} />
@@ -125,7 +121,6 @@ function App() {
 
                   {/* Power Authority */}
                   <Route path="power/dashboard" element={<AuthorityPowerDashboard />} />
-                  <Route path="power/matrix" element={<AuthorityPowerMatrix />} />
                   <Route path="power/case/:id" element={<AuthorityPowerCase />} />
                   <Route path="power/profile" element={<AuthorityProfile />} />
                   <Route path="power/settings" element={<AuthoritySettings />} />
@@ -135,7 +130,6 @@ function App() {
 
                   {/* Road Infrastructure Authority */}
                   <Route path="road/dashboard" element={<AuthorityRoadDashboard />} />
-                  <Route path="road/matrix" element={<AuthorityRoadMatrix />} />
                   <Route path="road/case/:id" element={<AuthorityRoadCase />} />
                   <Route path="road/profile" element={<AuthorityProfile />} />
                   <Route path="road/settings" element={<AuthoritySettings />} />
