@@ -8,7 +8,7 @@ import {
 } from "../../utils/adminPortal";
 
 export const surfaceClassName =
-  "rounded-[1.8rem] border border-white/10 bg-[linear-gradient(135deg,rgba(9,14,24,0.82),rgba(9,14,24,0.62))] backdrop-blur-2xl shadow-[0_18px_70px_-28px_rgba(0,0,0,0.65)]";
+  "rounded-[2rem] border border-white/5 bg-white/[0.02] backdrop-blur-3xl shadow-[0_8px_30px_rgba(0,0,0,0.12)]";
 
 export const AdminSurface = ({ children, className = "" }) => (
   <div className={`${surfaceClassName} ${className}`}>{children}</div>
@@ -45,10 +45,10 @@ export const AdminActionButton = ({
 }) => {
   const variants = {
     primary:
-      "bg-gradient-to-r from-emerald-500 to-cyan-500 text-slate-950 shadow-[0_16px_45px_-18px_rgba(16,185,129,0.8)]",
-    secondary: "border border-white/10 bg-white/[0.04] text-white hover:border-emerald-400/30",
-    subtle: "border border-white/10 bg-black/20 text-slate-200 hover:text-white",
-    danger: "border border-red-500/20 bg-red-500/10 text-red-200 hover:border-red-400/40",
+      "bg-gradient-to-r from-emerald-500 to-cyan-500 text-slate-950 shadow-[0_12px_35px_-12px_rgba(16,185,129,0.7)] hover:shadow-[0_16px_45px_-12px_rgba(16,185,129,0.9)] hover:brightness-110",
+    secondary: "border border-white/10 bg-white/[0.03] text-white hover:border-emerald-400/30 hover:bg-white/[0.06]",
+    subtle: "border border-transparent bg-transparent text-slate-400 hover:text-white hover:bg-white/[0.04]",
+    danger: "border border-red-500/20 bg-red-500/10 text-red-300 hover:border-red-400/40 hover:text-red-200",
   };
 
   return (
@@ -74,42 +74,42 @@ export const AdminStatCard = ({
   onClick,
 }) => {
   const tones = {
-    emerald: "from-emerald-500/16 to-cyan-500/12 text-emerald-200",
-    amber: "from-amber-500/16 to-orange-500/12 text-amber-200",
-    rose: "from-rose-500/16 to-red-500/12 text-rose-200",
-    sky: "from-sky-500/16 to-cyan-500/12 text-sky-200",
-    slate: "from-slate-500/16 to-slate-300/8 text-slate-200",
+    emerald: "bg-emerald-500/[0.03] border-emerald-500/10 text-emerald-300 group-hover:border-emerald-500/30",
+    amber: "bg-amber-500/[0.03] border-amber-500/10 text-amber-300 group-hover:border-amber-500/30",
+    rose: "bg-rose-500/[0.03] border-rose-500/10 text-rose-300 group-hover:border-rose-500/30",
+    sky: "bg-sky-500/[0.03] border-sky-500/10 text-sky-300 group-hover:border-sky-500/30",
+    slate: "bg-white/[0.02] border-white/5 text-slate-300 group-hover:border-white/20",
   };
 
   const body = (
-    <AdminSurface className={`h-full p-5 bg-gradient-to-br ${tones[tone] || tones.emerald}`}>
+    <div className={`h-full rounded-[2rem] p-6 transition-all duration-300 border ${tones[tone] || tones.emerald}`}>
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-300/75">
+          <p className="text-[11px] font-black uppercase tracking-[0.2em] opacity-75">
             {title}
           </p>
-          <p className="mt-3 text-3xl font-black text-white">{value}</p>
+          <p className="mt-2 text-4xl font-black text-white">{value}</p>
           {description ? (
-            <p className="mt-2 text-sm text-slate-300/80">{description}</p>
+            <p className="mt-3 text-sm text-slate-400/90 leading-snug">{description}</p>
           ) : null}
         </div>
         {Icon ? (
-          <div className="rounded-2xl border border-white/10 bg-black/20 p-3 text-white">
-            <Icon size={18} />
+          <div className={`rounded-full p-3 ${tones[tone] || tones.emerald} bg-opacity-20 backdrop-blur-md border border-white/10`}>
+            <Icon size={20} />
           </div>
         ) : null}
       </div>
-    </AdminSurface>
+    </div>
   );
 
   if (!onClick) return body;
 
   return (
     <motion.button
-      whileHover={{ y: -2 }}
-      whileTap={{ scale: 0.99 }}
+      whileHover={{ y: -2, scale: 1.01 }}
+      whileTap={{ scale: 0.98 }}
       onClick={onClick}
-      className="text-left"
+      className="text-left w-full h-full group"
     >
       {body}
     </motion.button>

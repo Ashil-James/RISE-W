@@ -166,12 +166,12 @@ const AdminDashboard = () => {
 
           <div className="grid gap-4 xl:grid-cols-[1.45fr_1fr]">
             <AdminSurface className="overflow-hidden">
-              <div className="flex items-center justify-between gap-3 border-b border-white/10 px-5 py-5 md:px-6">
+              <div className="flex items-center justify-between gap-3 border-b border-white/5 px-6 py-6 md:px-8">
                 <div>
-                  <p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300/75">
+                  <p className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-400/80">
                     Needs Attention
                   </p>
-                  <h2 className="mt-2 text-2xl font-black text-white">Priority Queue</h2>
+                  <h2 className="mt-1 text-[1.6rem] font-black text-white">Priority Queue</h2>
                 </div>
                 <AdminActionButton variant="subtle" onClick={() => openWorkspace({ bucket: "needs_attention" })}>
                   View All
@@ -187,47 +187,47 @@ const AdminDashboard = () => {
                   />
                 </div>
               ) : (
-                <div className="divide-y divide-white/6">
+                <div className="p-4 space-y-2">
                   {queue.map((incident) => (
                     <button
                       key={incident.id}
                       type="button"
                       onClick={() => navigate(`/admin/incident/${incident.displayId}`)}
-                      className="w-full px-5 py-5 text-left transition-colors hover:bg-white/[0.03] md:px-6"
+                      className="w-full rounded-2xl p-5 text-left transition-all duration-300 hover:bg-white/[0.03] group border border-transparent hover:border-white/5 md:px-6"
                     >
                       <div className="flex flex-wrap items-center gap-2 mb-3">
-                        <span className="rounded-xl border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-emerald-300">
+                        <span className="rounded-[0.5rem] border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-[10px] font-black uppercase tracking-[0.15em] text-emerald-400">
                           {incident.displayId}
                         </span>
                         <AdminStatusBadge status={incident.status} />
                         <AdminUrgencyBadge urgency={incident.urgencyLevel} />
                       </div>
 
-                      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div className="min-w-0">
-                          <p className="text-lg font-black text-white">{incident.title}</p>
-                          <p className="mt-2 text-sm text-slate-300/75">
+                          <p className="text-[1.1rem] font-black text-white group-hover:text-emerald-300 transition-colors">{incident.title}</p>
+                          <p className="mt-1.5 text-[0.9rem] text-slate-300/80">
                             {incident.address || "Location unavailable"}
                           </p>
-                          <div className="mt-3 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                          <div className="mt-3 flex flex-wrap items-center gap-2.5 text-[11px] font-bold text-slate-500">
                             <span>{incident.reporterName}</span>
-                            <span>·</span>
+                            <span className="opacity-50">•</span>
                             <span>{getCommunitySupportLabel(incident.supportCount)}</span>
-                            <span>·</span>
+                            <span className="opacity-50">•</span>
                             <span>{formatAdminDateTime(incident.createdAt)}</span>
                           </div>
                         </div>
 
-                        <div className="shrink-0 text-left lg:text-right">
-                          <div className="mb-2 flex justify-start lg:justify-end">
-                            <AdminAuthorityBadge authority={incident.assignedAuthority} />
+                        <div className="shrink-0 text-left lg:text-right flex lg:flex-col items-center lg:items-end justify-between gap-3">
+                          <AdminAuthorityBadge authority={incident.assignedAuthority} />
+                          <div className="flex flex-col items-end">
+                            <p className="text-sm font-bold text-white">
+                              {formatAdminRelativeTime(incident.lastUpdatedAt)}
+                            </p>
+                            <p className="mt-1 max-w-xs text-xs text-slate-400/80 line-clamp-1">
+                              {incident.latestUpdate?.note || "No update note available."}
+                            </p>
                           </div>
-                          <p className="text-sm font-bold text-white">
-                            {formatAdminRelativeTime(incident.lastUpdatedAt)}
-                          </p>
-                          <p className="mt-1 max-w-xs text-xs text-slate-400 line-clamp-2">
-                            {incident.latestUpdate?.note || "No update note available."}
-                          </p>
                         </div>
                       </div>
                     </button>
@@ -238,15 +238,15 @@ const AdminDashboard = () => {
 
             <div className="space-y-4">
               <AdminSurface className="p-5 md:p-6">
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center justify-between gap-3 mb-2">
                   <div>
-                    <p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300/75">
+                    <p className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-400/80">
                       Authority Workload
                     </p>
-                    <h2 className="mt-2 text-2xl font-black text-white">Department Overview</h2>
+                    <h2 className="mt-1 text-[1.6rem] font-black text-white">Department Overview</h2>
                   </div>
                   <AdminActionButton variant="subtle" onClick={() => navigate("/admin/authorities")}>
-                    Open Board
+                    Detailed Board
                   </AdminActionButton>
                 </div>
 
@@ -294,26 +294,26 @@ const AdminDashboard = () => {
               </AdminSurface>
 
               <AdminSurface className="p-5 md:p-6">
-                <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center justify-between gap-3 mb-2">
                   <div>
-                    <p className="text-[11px] font-black uppercase tracking-[0.22em] text-emerald-300/75">
+                    <p className="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-400/80">
                       Broadcast Status
                     </p>
-                    <h2 className="mt-2 text-2xl font-black text-white">Official Alerts</h2>
+                    <h2 className="mt-1 text-[1.6rem] font-black text-white">Official Alerts</h2>
                   </div>
-                  <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm font-bold text-red-200">
+                  <div className="rounded-[0.8rem] border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-[0.85rem] font-bold text-red-300">
                     {broadcasts.activeCount || 0} active
                   </div>
                 </div>
 
-                <div className="mt-5 rounded-[1.4rem] border border-white/10 bg-white/[0.03] p-4">
-                  <div className="flex items-center gap-2 text-sm font-bold text-white">
-                    <Radio size={16} className="text-emerald-300" />
+                <div className="mt-4 rounded-3xl border border-transparent bg-white/[0.02] hover:bg-white/[0.03] transition-colors p-5">
+                  <div className="flex items-center gap-2.5 text-xs font-black uppercase tracking-widest text-emerald-400 mb-2">
+                    <Radio size={14} className="text-emerald-400" />
                     Latest dispatch
                   </div>
                   {broadcasts.latestOfficial ? (
                     <>
-                      <p className="mt-3 text-lg font-black text-white">
+                      <p className="text-lg font-black text-white leading-tight">
                         {broadcasts.latestOfficial.title}
                       </p>
                       <p className="mt-2 text-sm text-slate-300/80">

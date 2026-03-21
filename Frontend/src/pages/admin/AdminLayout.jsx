@@ -45,11 +45,12 @@ const AdminLayout = () => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#060a10] text-white selection:bg-emerald-500/20">
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute -left-24 top-[-12rem] h-[34rem] w-[34rem] rounded-full bg-emerald-500/10 blur-[160px]" />
-        <div className="absolute bottom-[-12rem] right-[-8rem] h-[28rem] w-[28rem] rounded-full bg-cyan-500/10 blur-[150px]" />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:72px_72px] [mask-image:radial-gradient(ellipse_70%_60%_at_50%_50%,black,transparent)]" />
+    <div className="relative min-h-screen overflow-hidden bg-wayanad-bg text-wayanad-text font-sans selection:bg-emerald-500/20">
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="user-aurora-1 absolute top-[-20%] left-[-12%] w-[700px] h-[700px] rounded-full blur-[160px] will-change-transform bg-emerald-500/[0.08]" />
+        <div className="user-aurora-2 absolute bottom-[-12%] right-[-8%] w-[550px] h-[550px] rounded-full blur-[140px] will-change-transform bg-cyan-500/[0.06]" />
+        <div className="user-aurora-3 absolute top-[35%] right-[10%] w-[400px] h-[400px] rounded-full blur-[120px] will-change-transform bg-teal-500/[0.05]" />
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay"></div>
       </div>
 
       <button
@@ -76,7 +77,7 @@ const AdminLayout = () => {
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: -280, opacity: 0 }}
                 transition={{ type: "spring", stiffness: 220, damping: 26 }}
-                className="fixed inset-y-0 left-0 z-40 flex w-80 flex-col border-r border-white/10 bg-[linear-gradient(180deg,rgba(10,15,25,0.92),rgba(10,15,25,0.82))] p-6 backdrop-blur-3xl lg:static lg:z-10"
+                className="fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-white/5 bg-wayanad-bg/40 p-6 backdrop-blur-[40px] lg:static lg:z-10 lg:border-r-0 lg:bg-transparent lg:pr-4"
               >
                 <div className="flex items-center gap-4 px-2">
                   <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-emerald-500/10 text-xl font-black text-emerald-300">
@@ -116,13 +117,13 @@ const AdminLayout = () => {
                             setIsSidebarOpen(false);
                           }
                         }}
-                        className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-bold transition-all ${
+                        className={`flex items-center gap-3 rounded-2xl px-4 py-3.5 text-[0.95rem] font-bold transition-all duration-300 ${
                           isActive
-                            ? "border border-emerald-400/20 bg-emerald-500/10 text-white"
-                            : "border border-transparent text-slate-300 hover:border-white/10 hover:bg-white/[0.03]"
+                            ? "bg-gradient-to-r from-emerald-500/20 to-emerald-500/5 text-emerald-400 border border-emerald-500/20 shadow-[0_4px_20px_-4px_rgba(16,185,129,0.2)]"
+                            : "border border-transparent text-wayanad-muted hover:text-white hover:bg-white/[0.03] hover:border-white/5"
                         }`}
                       >
-                        <Icon size={18} className={isActive ? "text-emerald-300" : "text-slate-400"} />
+                        <Icon size={18} className={isActive ? "text-emerald-400" : "text-wayanad-muted"} />
                         <span>{item.label}</span>
                       </Link>
                     );
