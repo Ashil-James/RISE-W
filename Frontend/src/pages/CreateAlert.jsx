@@ -134,18 +134,16 @@ const CreateAlert = () => {
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-6">
-        <form onSubmit={handleSubmit} className="glass-card rounded-[2rem] p-6 md:p-7 space-y-6">
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.24em] text-cyan-400/80 font-black mb-2">
-              Community Alert
-            </p>
-            <h2 className="text-2xl font-black text-wayanad-text tracking-tight">
-              Share a local update people nearby should know about
-            </h2>
+      <div className="max-w-2xl mx-auto">
+        <form onSubmit={handleSubmit} className="glass-card rounded-[2rem] p-6 md:p-8 space-y-6">
+          <div className="flex items-start gap-4 p-4 rounded-2xl bg-cyan-500/5 border border-cyan-500/20 mb-2">
+            <Info size={20} className="text-cyan-400 shrink-0 mt-0.5" />
+            <div className="text-sm text-cyan-100/80 leading-relaxed">
+              <span className="font-bold text-cyan-300">Community alerts publish immediately</span> and are marked separately from official warnings. Keep your update factual and use "Critical" only for urgent safety risks.
+            </div>
           </div>
 
-          <div className="space-y-3">
+          <div className="space-y-3 mt-4">
             <label className="text-xs font-black uppercase tracking-[0.18em] text-wayanad-muted">
               Alert Category
             </label>
@@ -166,7 +164,7 @@ const CreateAlert = () => {
             <label className="text-xs font-black uppercase tracking-[0.18em] text-wayanad-muted">
               Severity
             </label>
-            <div className="grid gap-3">
+            <div className="grid grid-cols-3 gap-3">
               {SEVERITY_OPTIONS.map((option) => {
                 const active = formData.severity === option.id;
                 return (
@@ -174,23 +172,19 @@ const CreateAlert = () => {
                     key={option.id}
                     type="button"
                     onClick={() => setFormData((previous) => ({ ...previous, severity: option.id }))}
-                    className={`text-left rounded-2xl border p-4 transition-colors ${
-                      active ? option.className : "border-white/10 bg-white/[0.03] text-wayanad-muted"
+                    className={`flex flex-col items-center justify-center text-center rounded-2xl border p-4 transition-all ${
+                      active ? option.className : "border-white/10 bg-white/[0.02] text-wayanad-muted hover:bg-white/[0.05]"
                     }`}
                   >
-                    <div className="flex items-start gap-3">
-                      <div className={`p-2 rounded-xl border ${active ? option.className : "border-white/10 bg-white/[0.03] text-wayanad-muted"}`}>
-                        <option.icon size={16} />
-                      </div>
-                      <div>
-                        <p className="text-sm font-black">{option.label}</p>
-                        <p className="text-xs mt-1 opacity-80">{option.description}</p>
-                      </div>
-                    </div>
+                    <option.icon size={20} className="mb-2" />
+                    <p className="text-sm font-black">{option.label}</p>
                   </button>
                 );
               })}
             </div>
+            <p className="text-xs text-wayanad-muted text-center mt-2 px-4">
+              {SEVERITY_OPTIONS.find((o) => o.id === formData.severity)?.description}
+            </p>
           </div>
 
           <div className="space-y-3">
@@ -272,46 +266,7 @@ const CreateAlert = () => {
           </button>
         </form>
 
-        <div className="space-y-6">
-          <div className="glass-card rounded-[2rem] p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <ShieldCheck size={18} className="text-emerald-500" />
-              <h3 className="text-lg font-black text-wayanad-text">Before You Post</h3>
-            </div>
-            <div className="space-y-4 text-sm text-wayanad-muted">
-              <p>Community alerts publish immediately, so keep the title factual and the message clear.</p>
-              <p>Official alerts come from authorities and admins. Your alert will always be marked as community-submitted.</p>
-              <p>Use critical severity only for urgent safety risks or major service disruption.</p>
-            </div>
-          </div>
 
-          <div className="glass-card rounded-[2rem] p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <AlertTriangle size={18} className="text-cyan-400" />
-              <h3 className="text-lg font-black text-wayanad-text">What Residents Will See</h3>
-            </div>
-            <div className="rounded-[1.6rem] border border-cyan-500/20 bg-cyan-500/10 p-4">
-              <div className="flex flex-wrap items-center gap-2 mb-3">
-                <span className="text-[10px] font-black uppercase tracking-[0.18em] px-2.5 py-1 rounded-full bg-cyan-500/10 text-cyan-400">
-                  Community
-                </span>
-                <span className="text-[10px] font-black uppercase tracking-[0.18em] px-2.5 py-1 rounded-full bg-white/5 text-wayanad-muted">
-                  {SEVERITY_OPTIONS.find((option) => option.id === formData.severity)?.label || "Info"}
-                </span>
-              </div>
-              <p className="text-sm font-black text-wayanad-text">
-                {formData.title || "Your alert title will appear here"}
-              </p>
-              <p className="text-sm text-wayanad-text/80 mt-2">
-                {formData.message || "Residents will see your details here once the alert is published."}
-              </p>
-              <p className="text-xs text-wayanad-muted mt-3 flex items-center gap-1.5">
-                <MapPin size={12} />
-                {formData.location || "Township Area"}
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
     </motion.div>
   );

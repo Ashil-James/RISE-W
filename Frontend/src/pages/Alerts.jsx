@@ -70,75 +70,67 @@ const AlertCard = ({ alert, onOpen }) => {
 
   return (
     <motion.button
-      whileHover={{ y: -4, scale: 1.01 }}
+      whileHover={{ y: -2, scale: 1.005 }}
       whileTap={{ scale: 0.99 }}
       onClick={interactive ? () => onOpen(alert) : undefined}
-      className={`w-full text-left rounded-[2rem] border p-6 relative overflow-hidden transition-all duration-300 group ${
-        interactive ? "cursor-pointer hover:border-emerald-500/40 hover:shadow-[0_0_30px_rgba(16,185,129,0.1)]" : ""
+      className={`w-full text-left rounded-[1.5rem] border p-4 md:p-5 relative overflow-hidden transition-all duration-300 group ${
+        interactive ? "cursor-pointer hover:border-emerald-500/40 hover:bg-white/[0.03]" : ""
       }`}
       style={{
         background: "rgba(255,255,255,0.02)",
         borderColor: accent.border,
       }}
     >
-      <div className={`absolute inset-0 bg-gradient-to-r from-transparent via-[${accent.bg.split(',').slice(0,3).join(',')},0.02)] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-xl`} />
+      <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -translate-y-1/2 translate-x-1/2" />
       
-      <div className="relative z-10 flex items-start gap-5">
-        <div
-          className={`mt-1 p-3 rounded-2xl ${accent.text}`}
-          style={{ background: accent.bg }}
-        >
-          <Icon size={20} />
+      <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex-1 min-w-0 flex items-center gap-4">
+          <div className={`p-2.5 rounded-xl shrink-0 ${accent.text}`} style={{ background: accent.bg }}>
+            <Icon size={18} />
+          </div>
+
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${accent.soft} ${accent.text}`}>
+                {alert.severityLabel}
+              </span>
+              <span className={`text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                alert.isOfficial ? "bg-emerald-500/10 text-emerald-400" : "bg-cyan-500/10 text-cyan-400"
+              }`}>
+                {alert.sourceLabel}
+              </span>
+            </div>
+            
+            <h3 className="text-[1.1rem] font-bold text-wayanad-text truncate">
+              {alert.title}
+            </h3>
+            
+            <div className="flex items-center gap-2.5 text-xs text-wayanad-muted mt-1.5">
+              <span className="flex items-center gap-1 min-w-0">
+                <MapPin size={12} className="shrink-0 text-white/40" />
+                <span className="truncate">{alert.location}</span>
+              </span>
+              <span className="w-1 h-1 rounded-full bg-white/20 shrink-0" />
+              <span className="truncate">{alert.categoryLabel}</span>
+            </div>
+          </div>
         </div>
 
-        <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            <span className={`text-[10px] font-black uppercase tracking-[0.18em] px-2.5 py-1 rounded-full ${accent.soft} ${accent.text}`}>
-              {alert.severityLabel}
+        <div className="flex items-center justify-between md:justify-end gap-5 pl-14 md:pl-0">
+          <div className="flex flex-col items-start md:items-end shrink-0">
+            <span className="text-[10px] uppercase tracking-wider text-wayanad-muted font-bold mb-1">
+              {alert.createdAtLabel}
             </span>
-            <span
-              className={`text-[10px] font-black uppercase tracking-[0.18em] px-2.5 py-1 rounded-full ${
-                alert.isOfficial
-                  ? "bg-emerald-500/10 text-emerald-400"
-                  : "bg-cyan-500/10 text-cyan-400"
-              }`}
-            >
-              {alert.sourceLabel}
-            </span>
-            <span className="text-[10px] font-black uppercase tracking-[0.18em] px-2.5 py-1 rounded-full bg-white/5 text-wayanad-muted">
-              {alert.categoryLabel}
-            </span>
-          </div>
-
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-3">
-            <div className="min-w-0">
-              <h3 className="text-lg font-black text-wayanad-text tracking-tight">
-                {alert.title}
-              </h3>
-              <p className="text-sm text-wayanad-text/80 mt-2 leading-relaxed">
-                {alert.message}
-              </p>
-            </div>
-
-            <div className="text-left lg:text-right shrink-0">
-              <p className="text-sm font-bold text-wayanad-text">{alert.relativeTime}</p>
-              <p className="text-xs text-wayanad-muted mt-1">{alert.createdAtLabel}</p>
+            <div className="flex items-center gap-1.5 text-sm font-medium text-wayanad-text">
+              {alert.relativeTime}
             </div>
           </div>
-
-          <div className="flex flex-wrap items-center justify-between gap-3 mt-4">
-            <p className="text-xs font-bold text-wayanad-muted flex items-center gap-1.5">
-              <MapPin size={12} />
-              {alert.location}
-            </p>
-
-            {alert.actionTarget && (
-              <span className="text-sm font-bold text-emerald-500 flex items-center gap-1">
-                {alert.actionLabel}
-                <ChevronRight size={15} />
-              </span>
-            )}
-          </div>
+          
+          {interactive && (
+            <div className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-emerald-500/10 group-hover:text-emerald-500 group-hover:border-emerald-500/30 transition-all shrink-0">
+              <ChevronRight size={16} className="translate-x-0 group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          )}
         </div>
       </div>
     </motion.button>
@@ -235,60 +227,32 @@ const Alerts = () => {
         </button>
       </motion.div>
 
-      <motion.div variants={fadeUp} className="grid xl:grid-cols-[1.35fr_0.9fr] gap-5">
-        <div className="glass-card rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden border border-red-500/20 shadow-[0_0_40px_rgba(239,68,68,0.05)] group">
-          <div
-            className="absolute -right-12 -top-12 h-64 w-64 rounded-full blur-[80px]"
-            style={{ background: "rgba(239,68,68,0.15)" }}
-          />
-          <div className="relative z-10">
-            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-red-400/80 mb-2">
-              Stay Informed
-            </p>
-            <h2 className="text-2xl md:text-3xl font-black text-wayanad-text tracking-tight">
-              Watch urgent alerts before they become problems
+      <motion.div variants={fadeUp} className="flex flex-col md:flex-row gap-4 mb-2">
+        <div className="flex-1 glass-card rounded-[1.5rem] p-5 md:p-6 flex items-center justify-between border border-white/5">
+          <div>
+            <h2 className="text-xl font-bold text-wayanad-text tracking-tight mb-3">
+              Alerts Overview
             </h2>
-            <p className="text-sm text-wayanad-muted mt-3 max-w-2xl">
-              Official alerts come from township authorities. Community alerts come from residents and are always labeled separately.
-            </p>
-
-            <div className="grid grid-cols-3 gap-4 mt-8">
-              {statCards.map((card) => (
-                <div key={card.label} className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 backdrop-blur-md hover:bg-white/[0.04] transition-colors">
-                  <card.icon size={20} className="text-emerald-500 mb-4 drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                  <p className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70">{card.value}</p>
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-wayanad-muted font-black mt-2">
-                    {card.label}
-                  </p>
-                </div>
-              ))}
+            <div className="flex flex-wrap gap-4 text-sm font-medium text-wayanad-text">
+              <span className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5"><ShieldAlert size={14} className="text-red-400"/> {alerts.filter((a) => a.isActive).length} Active</span>
+              <span className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5"><AlertTriangle size={14} className="text-emerald-500"/> {alerts.filter((a) => a.isOfficial).length} Official</span>
+              <span className="flex items-center gap-2 bg-white/5 px-3 py-1.5 rounded-lg border border-white/5"><Users size={14} className="text-cyan-400"/> {alerts.filter((a) => a.isCommunity).length} Community</span>
             </div>
           </div>
         </div>
 
-        <div className="glass-card rounded-[2.5rem] p-8 md:p-10 border border-cyan-500/20 relative overflow-hidden group shadow-[0_0_30px_rgba(6,182,212,0.05)]">
-          <div className="absolute inset-0 bg-gradient-to-b from-cyan-500/5 to-transparent pointer-events-none" />
-          <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-cyan-500/10 blur-[80px] rounded-full group-hover:bg-cyan-500/20 transition-colors duration-700" />
-          
-          <div className="relative z-10">
-            <p className="text-[11px] font-black uppercase tracking-[0.28em] text-cyan-400 mb-3">
-              Community Alerts
-            </p>
-            <h3 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-cyan-100 tracking-tight leading-tight">
-              Share local updates responsibly
-            </h3>
-            <p className="text-sm text-cyan-100/60 mt-4 leading-relaxed">
-              Community alerts publish immediately and appear with a clear community label so residents can distinguish them from official warnings.
+        <div className="glass-card rounded-[1.5rem] p-5 md:p-6 border border-cyan-500/20 flex flex-col justify-center bg-cyan-500/5">
+            <p className="text-sm text-cyan-100/80 mb-3 max-w-[200px] leading-snug">
+              Share local updates to keep your neighbors informed.
             </p>
             <button
               onClick={() => navigate("/create-alert")}
-              className="mt-8 inline-flex items-center gap-3 rounded-xl px-5 py-3.5 text-sm font-bold text-white transition-transform hover:scale-105 hover:shadow-[0_0_20px_rgba(8,145,178,0.4)]"
+              className="inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white transition-transform hover:scale-105"
               style={{ background: "linear-gradient(135deg, #0891b2, #06b6d4)" }}
             >
-              <Plus size={18} strokeWidth={2.5} />
-              Publish an Update
+              <Plus size={16} strokeWidth={2.5} />
+              Publish Alert
             </button>
-          </div>
         </div>
       </motion.div>
 
@@ -355,62 +319,62 @@ const Alerts = () => {
       ) : (
         <>
           {featuredAlert && (
-            <motion.div variants={fadeUp} className="glass-card rounded-[2.5rem] p-8 md:p-10 relative overflow-hidden border border-red-500/30 group shadow-[0_0_40px_rgba(239,68,68,0.08)]">
+            <motion.div variants={fadeUp} className="glass-card rounded-[1.8rem] p-6 relative overflow-hidden border border-red-500/30 group mb-6">
               <div
-                className="absolute -right-10 -top-10 h-64 w-64 rounded-full blur-[80px]"
-                style={{ background: featuredAlert.type === "critical" ? "rgba(239,68,68,0.2)" : "rgba(16,185,129,0.2)" }}
+                className="absolute top-0 right-0 h-64 w-64 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"
+                style={{ background: featuredAlert.type === "critical" ? "rgba(239,68,68,0.15)" : "rgba(16,185,129,0.15)" }}
               />
 
-              <div className="relative z-10">
-                <div className="flex flex-wrap items-center gap-2 mb-4">
-                  <span className={`text-[10px] font-black uppercase tracking-[0.18em] px-2.5 py-1 rounded-full ${getAccent(featuredAlert.type).soft} ${getAccent(featuredAlert.type).text}`}>
-                    Featured {featuredAlert.severityLabel}
-                  </span>
-                  <span className={`text-[10px] font-black uppercase tracking-[0.18em] px-2.5 py-1 rounded-full ${
-                    featuredAlert.isOfficial ? "bg-emerald-500/10 text-emerald-400" : "bg-cyan-500/10 text-cyan-400"
-                  }`}>
-                    {featuredAlert.sourceLabel}
-                  </span>
-                  <span className="text-[10px] font-black uppercase tracking-[0.18em] px-2.5 py-1 rounded-full bg-white/5 text-wayanad-muted">
-                    {featuredAlert.categoryLabel}
-                  </span>
+              <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md ${getAccent(featuredAlert.type).soft} ${getAccent(featuredAlert.type).text}`}>
+                      Featured {featuredAlert.severityLabel}
+                    </span>
+                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md ${
+                      featuredAlert.isOfficial ? "bg-emerald-500/10 text-emerald-400" : "bg-cyan-500/10 text-cyan-400"
+                    }`}>
+                      {featuredAlert.sourceLabel}
+                    </span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md bg-white/5 text-wayanad-muted">
+                      {featuredAlert.categoryLabel}
+                    </span>
+                  </div>
+
+                  <h2 className="text-xl font-bold text-wayanad-text mb-2 truncate">
+                    {featuredAlert.title}
+                  </h2>
+                  <p className="text-sm text-wayanad-text/80 line-clamp-1 max-w-2xl">
+                    {featuredAlert.message}
+                  </p>
+
+                  <div className="flex items-center gap-3 mt-3 text-xs text-wayanad-muted">
+                    <span className="flex items-center gap-1.5">
+                      <MapPin size={12} className="text-white/40" />
+                      <span className="truncate">{featuredAlert.location}</span>
+                    </span>
+                    <span className="w-1 h-1 rounded-full bg-white/20 shrink-0" />
+                    <span>{featuredAlert.createdAtLabel}</span>
+                  </div>
                 </div>
 
-                <div className="flex flex-col xl:flex-row xl:items-start xl:justify-between gap-5">
-                  <div className="min-w-0">
-                    <h2 className="text-2xl md:text-3xl font-black text-wayanad-text tracking-tight">
-                      {featuredAlert.title}
-                    </h2>
-                    <p className="text-sm md:text-base text-wayanad-text/80 mt-3 leading-relaxed max-w-3xl">
-                      {featuredAlert.message}
-                    </p>
-
-                    <div className="flex flex-wrap items-center gap-4 mt-5 text-sm">
-                      <span className="text-wayanad-muted flex items-center gap-1.5">
-                        <MapPin size={14} />
-                        {featuredAlert.location}
-                      </span>
-                      <span className="text-wayanad-muted">{featuredAlert.createdAtLabel}</span>
-                    </div>
-                  </div>
-
-                  <div className="xl:text-right shrink-0">
-                    <p className="text-sm font-black text-wayanad-text">{featuredAlert.relativeTime}</p>
-                    <p className="text-xs text-wayanad-muted mt-1">
+                <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-4 border-t md:border-t-0 md:border-l border-white/10 pt-4 md:pt-0 md:pl-6 shrink-0 md:min-w-[160px]">
+                  <div className="text-left md:text-right">
+                    <p className="text-lg font-bold text-wayanad-text">{featuredAlert.relativeTime}</p>
+                    <p className="text-[11px] uppercase tracking-wider text-red-400 font-bold mt-1">
                       {featuredAlert.isActive ? "Active now" : "Older update"}
                     </p>
-
-                    {featuredAlert.actionTarget && (
-                      <button
-                        onClick={() => openAlertAction(featuredAlert)}
-                        className="mt-5 inline-flex items-center gap-2 rounded-2xl px-4 py-3 text-sm font-bold text-white"
-                        style={{ background: "linear-gradient(135deg, #10b981, #059669)" }}
-                      >
-                        {featuredAlert.actionLabel}
-                        <ChevronRight size={16} />
-                      </button>
-                    )}
                   </div>
+
+                  {featuredAlert.actionTarget && (
+                    <button
+                      onClick={() => openAlertAction(featuredAlert)}
+                      className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-bold text-white bg-white/5 hover:bg-emerald-500 hover:text-white transition-colors border border-white/10 hover:border-emerald-500"
+                    >
+                      {featuredAlert.actionLabel}
+                      <ChevronRight size={16} />
+                    </button>
+                  )}
                 </div>
               </div>
             </motion.div>
