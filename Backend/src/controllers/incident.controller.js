@@ -93,26 +93,115 @@ const CATEGORY_TO_AUTHORITY = {
     "Wildlife Intrusion": "CIVIL",
 };
 
+// ── Sub-category urgency scores (0–100 scale) ──
+// Higher = more dangerous / time-sensitive
+const SUB_CATEGORY_URGENCY = {
+    // ── Water & Sanitation ──
+    "No Water Supply":              70,
+    "Low Water Pressure":           35,
+    "Contaminated / Dirty Water":   80,
+    "Major Pipe Burst":             88,
+    "Minor Leakage":                30,
+    "Sewage Overflow":              82,
+    "Open Manhole":                 85,
+    "Blocked Drainage":             55,
+    "Borewell / Well Issue":        45,
+    "Water Tank Overflow":          50,
+    "Public Toilet Issue":          40,
+    "Illegal Water Connection":     35,
+
+    // ── Power Issue ──
+    "Complete Power Outage":        75,
+    "Phase Failure":                60,
+    "Voltage Fluctuation":          50,
+    "Fallen Wire / Live Cable":     92,
+    "Leaning / Damaged Pole":       65,
+    "Street Light Not Working":     35,
+    "Transformer Sparking / Fire":  95,
+    "Meter Malfunction":            30,
+    "Frequent Tripping":            45,
+    "Unauthorized Hooking":         40,
+    "Tree Branches Touching Wires": 55,
+
+    // ── Infrastructure ──
+    "Pothole":                      45,
+    "Road Crack / Major Damage":    60,
+    "Collapsed Wall / Fence":       70,
+    "Damaged Bridge / Culvert":     80,
+    "Damaged Footpath":             35,
+    "Broken Traffic Signal":        65,
+    "Landslide / Debris on Road":   90,
+    "Waterlogged Road / Flooding":  75,
+    "Missing Road Signage":         30,
+    "Construction Site Hazard":     60,
+    "Encroachment on Public Space": 25,
+
+    // ── Wildlife Intrusion ──
+    "Snake Sighting / Entry":       78,
+    "Elephant Movement / Raid":     90,
+    "Monkey Menace":                40,
+    "Leopard / Big Cat Sighting":   95,
+    "Wild Boar Damage":             65,
+    "Beehive / Wasp Nest":          55,
+    "Stray Dog / Cat Issue":        35,
+    "Injured Wild Animal":          60,
+    "Illegal Poaching Activity":    70,
+};
+
+// Keywords that boost urgency for custom "Other" sub-category text
+const HIGH_URGENCY_KEYWORDS = [
+    "fire", "flood", "collapse", "electrocution", "explosion", "trapped",
+    "death", "dying", "emergency", "critical", "danger", "life",
+    "attack", "injured", "bleeding", "unconscious", "drowning",
+    "gas leak", "toxic", "poison", "child", "children", "baby",
+    "hospital", "ambulance", "rescue",
+];
+
+const MEDIUM_URGENCY_KEYWORDS = [
+    "broken", "blocked", "damage", "fallen", "stuck", "overflow",
+    "sparking", "smoke", "crack", "leak", "burst", "contaminated",
+    "outage", "hazard", "unsafe", "risk", "accident", "snake",
+    "animal", "wild", "stray", "bite",
+];
+
+// Category base scores for "Other" / unknown sub-categories
+const CATEGORY_BASE_SCORE = {
+    "Water & Sanitation": 45,
+    "Power Issue":        45,
+    "Infrastructure":     35,
+    "Wildlife Intrusion": 50,
+};
+
 const calculateInitialUrgency = (title, category) => {
-    let score = 30; // base score
+    const titleTrimmed = (title || "").trim();
 
-    // Adjust by category if needed
-    if (category === "Power Issue" || category === "Water & Sanitation") {
-        score += 10;
+    // 1. Exact match against known sub-categories
+    if (SUB_CATEGORY_URGENCY[titleTrimmed] != null) {
+        const base = SUB_CATEGORY_URGENCY[titleTrimmed];
+        // Add a small ±3 jitter so identical issues don't all stack at the same score
+        const jitter = Math.floor(Math.random() * 7) - 3;
+        return Math.min(100, Math.max(1, base + jitter));
     }
 
-    const titleLower = (title || "").toLowerCase();
+    // 2. Custom "Other" text — use NLP keyword analysis
+    const titleLower = titleTrimmed.toLowerCase();
+    let score = CATEGORY_BASE_SCORE[category] || 35;
 
-    // Overrides based on severity keywords
-    if (titleLower.includes("critical emergency")) {
-        score = 85 + Math.floor(Math.random() * 10); // 85-94
-    } else if (titleLower.includes("general failure")) {
-        score = 50 + Math.floor(Math.random() * 15); // 50-64
-    } else {
-        score += Math.floor(Math.random() * 10); // Add a little randomness
+    // Scan for high-urgency keywords
+    const highHits = HIGH_URGENCY_KEYWORDS.filter(kw => titleLower.includes(kw)).length;
+    const mediumHits = MEDIUM_URGENCY_KEYWORDS.filter(kw => titleLower.includes(kw)).length;
+
+    if (highHits > 0) {
+        // At least one critical keyword → 70-90 range
+        score = Math.min(95, 70 + (highHits * 5));
+    } else if (mediumHits > 0) {
+        // Moderate severity keywords → 50-70 range
+        score = Math.min(75, 50 + (mediumHits * 5));
     }
 
-    return Math.min(100, Math.max(1, score));
+    // Small randomness for custom entries too
+    const jitter = Math.floor(Math.random() * 5) - 2;
+    return Math.min(100, Math.max(1, score + jitter));
 };
 
 export const createIncident = asyncHandler(async (req, res) => {

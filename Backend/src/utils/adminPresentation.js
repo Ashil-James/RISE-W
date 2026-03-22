@@ -39,9 +39,9 @@ export const getIncidentUrgencyScore = (incident) =>
 export const getIncidentUrgencyLevel = (incident) => {
     const score = getIncidentUrgencyScore(incident);
 
-    if (score >= 10) return "critical";
-    if (score >= 5) return "high";
-    if (score >= 2) return "medium";
+    if (score >= 75) return "critical";
+    if (score >= 50) return "high";
+    if (score >= 30) return "medium";
     return "low";
 };
 
