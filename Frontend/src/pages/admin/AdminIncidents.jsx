@@ -39,7 +39,7 @@ const DEFAULT_QUERY = {
   status: "all",
   urgency: "all",
   community: "all",
-  sort: "newest",
+  sort: "highest_urgency",
   search: "",
   page: "1",
 };

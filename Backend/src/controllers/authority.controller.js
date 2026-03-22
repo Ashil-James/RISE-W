@@ -24,7 +24,7 @@ const WATER_INCIDENT_FILTER = {
 export const getWaterIncidents = asyncHandler(async (req, res) => {
     const incidents = await Incident.find(WATER_INCIDENT_FILTER)
         .populate("reportedBy", "name email")
-        .sort({ createdAt: -1 });
+        .sort({ urgencyScore: -1, createdAt: -1 });
 
     res.json(new ApiResponse(200, incidents, "Water incidents retrieved successfully"));
 });
@@ -183,7 +183,7 @@ export const getPowerIncidents = asyncHandler(async (req, res) => {
         assignedAuthority: "ELECTRICITY"
     })
         .populate("reportedBy", "name email")
-        .sort({ createdAt: -1 });
+        .sort({ urgencyScore: -1, createdAt: -1 });
 
     res.json(new ApiResponse(200, incidents, "Power incidents retrieved successfully"));
 });
@@ -438,7 +438,7 @@ export const getRoadIncidents = asyncHandler(async (req, res) => {
         assignedAuthority: "CIVIL"
     })
         .populate("reportedBy", "name email")
-        .sort({ createdAt: -1 });
+        .sort({ urgencyScore: -1, createdAt: -1 });
 
     res.json(new ApiResponse(200, incidents, "Road incidents retrieved successfully"));
 });

@@ -122,7 +122,7 @@ const AuthorityWaterMatrix = () => {
         if (urgencyFilter === "Low (0-49)" && row.urg >= 50) return false;
 
         return true;
-    });
+    }).sort((a, b) => b.urg - a.urg);
 
     return (
         <div className="space-y-6 pb-12">

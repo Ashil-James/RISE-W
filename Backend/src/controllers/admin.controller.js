@@ -94,10 +94,12 @@ const sortIncidents = (items, sort) => {
         });
     }
 
-    return sorted.sort(
-        (left, right) =>
-            new Date(right.createdAt || 0).getTime() - new Date(left.createdAt || 0).getTime(),
-    );
+    return sorted.sort((left, right) => {
+        if (right.urgencyScore !== left.urgencyScore) {
+            return right.urgencyScore - left.urgencyScore;
+        }
+        return new Date(right.createdAt || 0).getTime() - new Date(left.createdAt || 0).getTime();
+    });
 };
 
 const buildIncidentCounts = (items) => ({
