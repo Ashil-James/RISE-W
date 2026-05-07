@@ -147,6 +147,17 @@ const ReportDetails = () => {
   }
 
   const latestAuthorityUpdate = report.latestAuthorityUpdate;
+  const supportCount = report.supportCount || 0;
+  const supportHeadline = report.isSupporter
+    ? `${supportCount} total ${supportCount === 1 ? "upvote" : "upvotes"}, including yours.`
+    : supportCount > 0
+      ? `${supportCount} ${supportCount === 1 ? "citizen has" : "citizens have"} upvoted this case.`
+      : "No citizen upvotes yet.";
+  const supportDescription = supportCount > 0
+    ? "Every upvote is visible to the authority and raises the community priority signal."
+    : report.isReporter
+      ? "When other citizens support this report, their upvotes will appear here."
+      : "Community support drives faster authority response times and builds public pressure.";
   const readOnlyMessage = report.rawStatus === "CLOSED"
     ? "You confirmed the authority's fix, so this case is fully closed."
     : report.rawStatus === "REJECTED"
@@ -449,7 +460,7 @@ const ReportDetails = () => {
             <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/10 rounded-full blur-[60px] pointer-events-none group-hover:bg-emerald-500/20 transition-colors duration-700"></div>
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-cyan-500/10 rounded-full blur-[60px] pointer-events-none group-hover:bg-cyan-500/20 transition-colors duration-700"></div>
 
-            {(report.supportCount || 0) > 0 ? (
+            {supportCount > 0 ? (
               <>
                 <div className="flex items-center gap-4 mb-6 relative z-10">
                   <div className="flex -space-x-3">
@@ -457,18 +468,18 @@ const ReportDetails = () => {
                     <div className="w-10 h-10 rounded-full bg-slate-800 border-2 border-emerald-900/50 shadow-md"></div>
                     <div className="w-10 h-10 rounded-full bg-slate-700 border-2 border-emerald-900/50 shadow-md"></div>
                     <div className="w-10 h-10 rounded-full bg-emerald-500/20 border-2 border-emerald-500/30 flex items-center justify-center text-[11px] font-black text-emerald-400 backdrop-blur-md shadow-[0_0_15px_rgba(16,185,129,0.2)]">
-                      +{report.supportCount}
+                      +{supportCount}
                     </div>
                   </div>
                   <span className="text-[10px] uppercase tracking-[0.2em] font-black text-emerald-500/80">Community Power</span>
                 </div>
 
                 <p className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-100 to-emerald-300 leading-snug mb-4 relative z-10">
-                  {report.supportCount} other {report.supportCount === 1 ? 'citizen stands' : 'citizens stand'} with you.
+                  {supportHeadline}
                 </p>
 
                 <p className="text-sm text-emerald-400/70 font-medium leading-relaxed relative z-10">
-                  High community volume forces automated priority escalation in the authority queue.
+                  {supportDescription}
                 </p>
               </>
             ) : (
@@ -481,11 +492,11 @@ const ReportDetails = () => {
                 </div>
 
                 <p className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-100 to-emerald-300 leading-snug mb-4 relative z-10">
-                  Be the first to stand behind this case.
+                  {supportHeadline}
                 </p>
 
                 <p className="text-sm text-emerald-400/70 font-medium leading-relaxed relative z-10">
-                  Community support drives faster authority response times and builds public pressure.
+                  {supportDescription}
                 </p>
               </>
             )}

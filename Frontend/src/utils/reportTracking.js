@@ -230,7 +230,10 @@ export const mapIncidentToReport = (incident) => {
   const viewerRelation = incident.viewerRelation || "REPORTER";
   const nextActionOwner = incident.nextActionOwner || statusMeta.nextActionOwner || "NONE";
   const lastUpdatedAt = latestUpdate?.changedAt || incident.updatedAt || incident.createdAt;
-  const supportCount = incident.upvotes || 0;
+  const supportCount = Math.max(
+    Number(incident.upvotes || 0),
+    Array.isArray(incident.upvotedBy) ? incident.upvotedBy.length : 0,
+  );
 
   return {
     id: incident._id || incident.id,
@@ -271,8 +274,8 @@ export const mapIncidentToReport = (incident) => {
     latestAuthorityUpdate,
     communitySummary:
       supportCount > 0
-        ? `${supportCount} ${supportCount === 1 ? "other resident supports" : "other residents support"} this case.`
-        : "No additional citizen support is attached to this case yet.",
+        ? `${supportCount} ${supportCount === 1 ? "citizen upvote" : "citizen upvotes"} on this case.`
+        : "No citizen upvotes are attached to this case yet.",
     canRevoke: viewerRelation === "REPORTER" && rawStatus === "OPEN",
     canRespondToResolution:
       viewerRelation === "REPORTER" && ["RESOLVED", "VERIFIED"].includes(rawStatus),

@@ -303,6 +303,11 @@ const MyReports = () => {
                     </span>
                     <span className="w-1 h-1 rounded-full bg-white/20 shrink-0" />
                     <span className="truncate">{report.authorityLabel}</span>
+                    <span className="w-1 h-1 rounded-full bg-white/20 shrink-0" />
+                    <span className="flex items-center gap-1.5 shrink-0 text-emerald-400 font-bold">
+                      <Users size={12} />
+                      {report.supportCount || 0}
+                    </span>
                   </div>
                 </div>
                 
