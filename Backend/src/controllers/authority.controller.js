@@ -14,6 +14,7 @@ import {
 const COMPLETED_STATUSES = ["RESOLVED", "VERIFIED", "CLOSED"];
 const INACTIVE_HIGH_URGENCY_STATUSES = [...COMPLETED_STATUSES, "REJECTED", "REVOKED"];
 const ALLOWED_AUTHORITY_STATUSES = ["OPEN", "ACCEPTED", "IN_PROGRESS", "RESOLVED", "VERIFIED", "CLOSED", "REJECTED", "REOPENED"];
+const DUPLICATE_DISPLAY_WINDOW_MS = 5 * 60 * 1000;
 const WATER_INCIDENT_FILTER = {
     $or: [
         { assignedAuthority: "WATER" },
@@ -21,12 +22,54 @@ const WATER_INCIDENT_FILTER = {
     ],
 };
 
+const normalizeDuplicateKeyPart = (value) =>
+    (value == null ? "" : String(value))
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ");
+
+const getReporterKey = (incident) => {
+    const reporter = incident?.reportedBy;
+    if (!reporter) return "";
+    return String(reporter._id || reporter);
+};
+
+const isNearDuplicateIncident = (left, right) => {
+    const leftTime = new Date(left.createdAt || 0).getTime();
+    const rightTime = new Date(right.createdAt || 0).getTime();
+
+    return (
+        getReporterKey(left) === getReporterKey(right) &&
+        normalizeDuplicateKeyPart(left.category) === normalizeDuplicateKeyPart(right.category) &&
+        normalizeDuplicateKeyPart(left.title) === normalizeDuplicateKeyPart(right.title) &&
+        normalizeDuplicateKeyPart(left.address) === normalizeDuplicateKeyPart(right.address) &&
+        Math.abs(leftTime - rightTime) <= DUPLICATE_DISPLAY_WINDOW_MS
+    );
+};
+
+const dedupeAuthorityIncidents = (incidents) => {
+    const sortedNewestFirst = [...incidents].sort(
+        (left, right) => new Date(right.createdAt || 0).getTime() - new Date(left.createdAt || 0).getTime(),
+    );
+
+    return sortedNewestFirst
+        .reduce((uniqueIncidents, incident) => {
+            const alreadyShown = uniqueIncidents.some((existing) => isNearDuplicateIncident(existing, incident));
+            return alreadyShown ? uniqueIncidents : [...uniqueIncidents, incident];
+        }, [])
+        .sort((left, right) => {
+            const urgencyDiff = (right.urgencyScore || 0) - (left.urgencyScore || 0);
+            if (urgencyDiff !== 0) return urgencyDiff;
+            return new Date(right.createdAt || 0).getTime() - new Date(left.createdAt || 0).getTime();
+        });
+};
+
 export const getWaterIncidents = asyncHandler(async (req, res) => {
     const incidents = await Incident.find(WATER_INCIDENT_FILTER)
         .populate("reportedBy", "name email")
         .sort({ urgencyScore: -1, createdAt: -1 });
 
-    res.json(new ApiResponse(200, incidents, "Water incidents retrieved successfully"));
+    res.json(new ApiResponse(200, dedupeAuthorityIncidents(incidents), "Water incidents retrieved successfully"));
 });
 
 export const getWaterDashboardStats = asyncHandler(async (req, res) => {
@@ -185,7 +228,7 @@ export const getPowerIncidents = asyncHandler(async (req, res) => {
         .populate("reportedBy", "name email")
         .sort({ urgencyScore: -1, createdAt: -1 });
 
-    res.json(new ApiResponse(200, incidents, "Power incidents retrieved successfully"));
+    res.json(new ApiResponse(200, dedupeAuthorityIncidents(incidents), "Power incidents retrieved successfully"));
 });
 
 export const getPowerDashboardStats = asyncHandler(async (req, res) => {
@@ -447,7 +490,7 @@ export const getRoadIncidents = asyncHandler(async (req, res) => {
         .populate("reportedBy", "name email")
         .sort({ urgencyScore: -1, createdAt: -1 });
 
-    res.json(new ApiResponse(200, incidents, "Road incidents retrieved successfully"));
+    res.json(new ApiResponse(200, dedupeAuthorityIncidents(incidents), "Road incidents retrieved successfully"));
 });
 
 export const getRoadDashboardStats = asyncHandler(async (req, res) => {

@@ -205,6 +205,36 @@ const calculateInitialUrgency = (title, category) => {
 };
 
 const normalizeDuplicateField = (value) => (value == null ? "" : String(value).trim());
+const normalizeDuplicateKey = (value) => normalizeDuplicateField(value).toLowerCase().replace(/\s+/g, " ");
+
+const coordinatesAreClose = (leftCoordinates = [], rightCoordinates = []) => {
+    if (leftCoordinates.length < 2 || rightCoordinates.length < 2) return false;
+
+    const [leftLon, leftLat] = leftCoordinates.map(Number);
+    const [rightLon, rightLat] = rightCoordinates.map(Number);
+    if ([leftLon, leftLat, rightLon, rightLat].some((value) => Number.isNaN(value))) return false;
+
+    return Math.abs(leftLat - rightLat) <= 0.0005 && Math.abs(leftLon - rightLon) <= 0.0005;
+};
+
+const isDuplicateSubmission = (incident, incidentData) => {
+    const sameCoreIssue =
+        normalizeDuplicateKey(incident.title) === normalizeDuplicateKey(incidentData.title) &&
+        normalizeDuplicateKey(incident.category) === normalizeDuplicateKey(incidentData.category);
+
+    if (!sameCoreIssue) return false;
+
+    const sameDescription =
+        normalizeDuplicateKey(incident.description) === normalizeDuplicateKey(incidentData.description);
+    const sameAddress =
+        normalizeDuplicateKey(incident.address) === normalizeDuplicateKey(incidentData.address);
+    const sameCoordinates = coordinatesAreClose(
+        incident.location?.coordinates,
+        incidentData.location?.coordinates,
+    );
+
+    return sameDescription || sameAddress || sameCoordinates;
+};
 
 export const createIncident = asyncHandler(async (req, res) => {
     let locationData = undefined;
@@ -239,15 +269,15 @@ export const createIncident = asyncHandler(async (req, res) => {
         incidentData.location = locationData;
     }
 
-    const duplicateWindowStart = new Date(Date.now() - 45 * 1000);
-    const recentDuplicate = await Incident.findOne({
+    const duplicateWindowStart = new Date(Date.now() - 5 * 60 * 1000);
+    const recentCandidates = await Incident.find({
         reportedBy: req.user._id,
         title: incidentData.title,
-        description: incidentData.description,
         category: incidentData.category,
-        address: incidentData.address,
         createdAt: { $gte: duplicateWindowStart },
-    }).sort({ createdAt: -1 });
+    }).sort({ createdAt: -1 }).limit(10);
+
+    const recentDuplicate = recentCandidates.find((incident) => isDuplicateSubmission(incident, incidentData));
 
     if (recentDuplicate) {
         return res.status(200).json(
