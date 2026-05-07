@@ -405,7 +405,7 @@ const ReportIncident = () => {
               )}
             </div>
           ) : (
-            <div className="w-full h-[360px] animate-fade-up mb-4">
+            <div className="w-full h-[460px] animate-fade-up mb-4">
               <LocationPickerMap 
                 location={coords}
                 setLocation={setCoords}

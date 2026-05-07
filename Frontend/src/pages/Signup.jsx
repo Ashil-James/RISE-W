@@ -381,7 +381,7 @@ const Signup = () => {
                   )}
                 </div>
               ) : (
-                <div className="w-full h-[280px] overflow-hidden rounded-2xl border border-emerald-900/10 dark:border-white/10 shadow-[0_4px_20px_rgba(16,185,129,0.1)] animate-fade-up ring-1 ring-emerald-500/20">
+                <div className="w-full h-[420px] overflow-hidden rounded-2xl border border-emerald-900/10 dark:border-white/10 shadow-[0_4px_20px_rgba(16,185,129,0.1)] animate-fade-up ring-1 ring-emerald-500/20">
                   <LocationPickerMap 
                     location={location}
                     setLocation={setLocation}
