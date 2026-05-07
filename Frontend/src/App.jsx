@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom
 import Layout from "./components/Layout"; // User Layout (Navbar, Footer)
 import PrivateRoute from "./components/PrivateRoute"; // Route Guard
 import AuthorityRedirect from "./components/AuthorityRedirect"; // [NEW] Handles Authority Redirection
+import DepartmentGuard from "./components/DepartmentGuard"; // [NEW] Prevents cross-department URL access
 
 // --- CONTEXTS ---
 import { AuthProvider } from "./context/AuthContext"; // [NEW] Handles Login Roles
@@ -101,7 +102,7 @@ function App() {
                 </Route>
 
                 {/* --- AUTHORITY ROUTES (Protected) --- */}
-                {/* Only Water Authority users can access /authority paths */}
+                {/* Only authority users can access /authority paths */}
                 <Route
                   path="/authority"
                   element={
@@ -113,34 +114,38 @@ function App() {
                   <Route index element={<AuthorityRedirect />} />
                   <Route path="profile" element={<AuthorityProfile />} />
 
-                  {/* Water Authority */}
-                  <Route path="water/dashboard" element={<AuthorityWaterDashboard />} />
-                  <Route path="water/matrix" element={<AuthorityWaterMatrix />} />
-                  <Route path="water/case/:id" element={<AuthorityWaterCase />} />
-                  <Route path="water/profile" element={<AuthorityProfile />} />
-                  <Route path="water/settings" element={<AuthoritySettings />} />
-                  <Route path="water/help" element={<AuthorityHelp />} />
-                  <Route path="water/broadcasts" element={<AuthorityBroadcastAlerts />} />
+                  {/* Water Authority — only WATER department can access */}
+                  <Route element={<DepartmentGuard allowed={["WATER"]} />}>
+                    <Route path="water/dashboard" element={<AuthorityWaterDashboard />} />
+                    <Route path="water/matrix" element={<AuthorityWaterMatrix />} />
+                    <Route path="water/case/:id" element={<AuthorityWaterCase />} />
+                    <Route path="water/profile" element={<AuthorityProfile />} />
+                    <Route path="water/settings" element={<AuthoritySettings />} />
+                    <Route path="water/help" element={<AuthorityHelp />} />
+                    <Route path="water/broadcasts" element={<AuthorityBroadcastAlerts />} />
+                  </Route>
 
+                  {/* Power Authority — only ELECTRICITY department can access */}
+                  <Route element={<DepartmentGuard allowed={["ELECTRICITY"]} />}>
+                    <Route path="power/dashboard" element={<AuthorityPowerDashboard />} />
+                    <Route path="power/matrix" element={<AuthorityPowerMatrix />} />
+                    <Route path="power/case/:id" element={<AuthorityPowerCase />} />
+                    <Route path="power/profile" element={<AuthorityProfile />} />
+                    <Route path="power/settings" element={<AuthoritySettings />} />
+                    <Route path="power/help" element={<AuthorityHelp />} />
+                    <Route path="power/broadcasts" element={<AuthorityBroadcastAlerts />} />
+                  </Route>
 
-                  {/* Power Authority */}
-                  <Route path="power/dashboard" element={<AuthorityPowerDashboard />} />
-                  <Route path="power/matrix" element={<AuthorityPowerMatrix />} />
-                  <Route path="power/case/:id" element={<AuthorityPowerCase />} />
-                  <Route path="power/profile" element={<AuthorityProfile />} />
-                  <Route path="power/settings" element={<AuthoritySettings />} />
-                  <Route path="power/help" element={<AuthorityHelp />} />
-                  <Route path="power/broadcasts" element={<AuthorityBroadcastAlerts />} />
-
-
-                  {/* Road Infrastructure Authority */}
-                  <Route path="road/dashboard" element={<AuthorityRoadDashboard />} />
-                  <Route path="road/matrix" element={<AuthorityRoadMatrix />} />
-                  <Route path="road/case/:id" element={<AuthorityRoadCase />} />
-                  <Route path="road/profile" element={<AuthorityProfile />} />
-                  <Route path="road/settings" element={<AuthoritySettings />} />
-                  <Route path="road/help" element={<AuthorityHelp />} />
-                  <Route path="road/broadcasts" element={<AuthorityBroadcastAlerts />} />
+                  {/* Road Infrastructure Authority — only CIVIL department can access */}
+                  <Route element={<DepartmentGuard allowed={["CIVIL"]} />}>
+                    <Route path="road/dashboard" element={<AuthorityRoadDashboard />} />
+                    <Route path="road/matrix" element={<AuthorityRoadMatrix />} />
+                    <Route path="road/case/:id" element={<AuthorityRoadCase />} />
+                    <Route path="road/profile" element={<AuthorityProfile />} />
+                    <Route path="road/settings" element={<AuthoritySettings />} />
+                    <Route path="road/help" element={<AuthorityHelp />} />
+                    <Route path="road/broadcasts" element={<AuthorityBroadcastAlerts />} />
+                  </Route>
 
                 </Route>
 

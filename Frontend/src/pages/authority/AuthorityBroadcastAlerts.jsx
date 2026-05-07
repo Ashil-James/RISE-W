@@ -10,12 +10,15 @@ import {
     ChevronRight,
     Search,
     Filter,
-    ShieldAlert
+    ShieldAlert,
+    Crosshair,
+    Globe
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { useAuth } from "../../context/AuthContext";
 import { useAlerts } from "../../context/AlertContext";
+import ProximityMapPicker from "../../components/ProximityMapPicker";
 
 const CustomDropdown = ({ options, value, onChange, placeholder, theme, isUrgent = false }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -87,6 +90,11 @@ const AuthorityBroadcastAlerts = () => {
         priority: "Normal",
         customTitle: "",
     });
+
+    // Proximity targeting state
+    const [proximityEnabled, setProximityEnabled] = useState(false);
+    const [targetCenter, setTargetCenter] = useState(null);
+    const [targetRadiusKm, setTargetRadiusKm] = useState(5);
 
     // Auto-set priority for Wildlife Alert
     useEffect(() => {
@@ -168,6 +176,14 @@ const AuthorityBroadcastAlerts = () => {
                 isAuthority: true
             };
 
+            // Attach proximity target area if enabled
+            if (proximityEnabled && targetCenter) {
+                dataToPost.targetArea = {
+                    center: { lat: targetCenter.lat, lng: targetCenter.lng },
+                    radiusKm: targetRadiusKm,
+                };
+            }
+
             await axios.post("/api/v1/broadcasts", dataToPost, config);
 
             setSent(true);
@@ -176,6 +192,9 @@ const AuthorityBroadcastAlerts = () => {
             setTimeout(() => {
                 setSent(false);
                 setFormData({ title: "", message: "", location: "", priority: "Normal", customTitle: "" });
+                setProximityEnabled(false);
+                setTargetCenter(null);
+                setTargetRadiusKm(5);
             }, 3000);
 
         } catch (error) {
@@ -326,6 +345,67 @@ const AuthorityBroadcastAlerts = () => {
                                         placeholder="e.g. Sector B, Main Road Area"
                                     />
                                 </div>
+                            </div>
+
+                            {/* Proximity Targeting Toggle + Map */}
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-[10px] font-black text-slate-500 dark:text-gray-400 uppercase tracking-widest ml-1 flex items-center gap-2">
+                                        <Crosshair size={14} className={proximityEnabled ? theme.text : ""} />
+                                        Proximity Targeting
+                                    </label>
+                                    <button
+                                        type="button"
+                                        onClick={() => setProximityEnabled(!proximityEnabled)}
+                                        className={`relative w-14 h-7 rounded-full transition-all duration-300 border ${
+                                            proximityEnabled
+                                                ? `${theme.bg} ${theme.border} shadow-lg`
+                                                : "bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10"
+                                        }`}
+                                    >
+                                        <div className={`absolute top-0.5 w-6 h-6 rounded-full transition-all duration-300 flex items-center justify-center ${
+                                            proximityEnabled
+                                                ? `left-7 ${theme.button.split(' ')[0]} shadow-md`
+                                                : "left-0.5 bg-slate-300 dark:bg-white/20"
+                                        }`}>
+                                            {proximityEnabled ? <Crosshair size={12} /> : <Globe size={12} className="text-white/70" />}
+                                        </div>
+                                    </button>
+                                </div>
+
+                                <p className="text-xs text-slate-400 dark:text-gray-500 font-medium ml-1">
+                                    {proximityEnabled
+                                        ? "Alert will be sent only to users within the selected area."
+                                        : "Alert will be broadcast globally to all users."
+                                    }
+                                </p>
+
+                                <AnimatePresence>
+                                    {proximityEnabled && (
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: "auto" }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            transition={{ duration: 0.3 }}
+                                            className="overflow-hidden"
+                                        >
+                                            <ProximityMapPicker
+                                                center={targetCenter}
+                                                setCenter={setTargetCenter}
+                                                radiusKm={targetRadiusKm}
+                                                setRadiusKm={setTargetRadiusKm}
+                                            />
+                                            {targetCenter && (
+                                                <div className={`mt-3 flex items-center gap-2 px-4 py-3 rounded-xl ${theme.bg} border ${theme.border} text-xs font-bold ${theme.text}`}>
+                                                    <Crosshair size={14} />
+                                                    <span>
+                                                        Targeting {targetRadiusKm} km radius around ({targetCenter.lat.toFixed(4)}, {targetCenter.lng.toFixed(4)})
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
                             </div>
 
                             {/* Alert Message */}

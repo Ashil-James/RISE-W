@@ -4,6 +4,12 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
+// Email format validator — rejects things like "@example.com" or "user@", etc.
+const isValidEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+};
+
 const getUserStats = async (userId) => {
     const total = await Incident.countDocuments({ reportedBy: userId });
     const resolved = await Incident.countDocuments({
@@ -19,6 +25,10 @@ const getUserStats = async (userId) => {
 
 export const registerUser = asyncHandler(async (req, res) => {
     const { name, email, password, phoneNumber, location } = req.body;
+
+    if (!email || !isValidEmail(email)) {
+        throw new ApiError(400, "Please provide a valid email address");
+    }
 
     const userExists = await User.findOne({ email });
 
@@ -63,8 +73,8 @@ export const registerUser = asyncHandler(async (req, res) => {
 export const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
-    if (!email) {
-        throw new ApiError(400, "email is required");
+    if (!email || !isValidEmail(email)) {
+        throw new ApiError(400, "Please provide a valid email address");
     }
 
     const user = await User.findOne({ email });
