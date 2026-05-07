@@ -204,6 +204,8 @@ const calculateInitialUrgency = (title, category) => {
     return Math.min(100, Math.max(1, score + jitter));
 };
 
+const normalizeDuplicateField = (value) => (value == null ? "" : String(value).trim());
+
 export const createIncident = asyncHandler(async (req, res) => {
     let locationData = undefined;
     if (req.body.latitude && req.body.longitude) {
@@ -214,15 +216,15 @@ export const createIncident = asyncHandler(async (req, res) => {
     }
 
     const incidentData = {
-        title: req.body.title,
-        description: req.body.description,
-        category: req.body.category,
-        address: req.body.address,
+        title: normalizeDuplicateField(req.body.title),
+        description: normalizeDuplicateField(req.body.description),
+        category: normalizeDuplicateField(req.body.category),
+        address: normalizeDuplicateField(req.body.address),
         image: req.body.image,
         reportedBy: req.user._id,
         status: 'OPEN',
         urgencyScore: calculateInitialUrgency(req.body.title, req.body.category),
-        assignedAuthority: CATEGORY_TO_AUTHORITY[req.body.category] || "CIVIL",
+        assignedAuthority: CATEGORY_TO_AUTHORITY[normalizeDuplicateField(req.body.category)] || "CIVIL",
         statusHistory: [
             createStatusHistoryEntry({
                 status: "OPEN",
@@ -235,6 +237,26 @@ export const createIncident = asyncHandler(async (req, res) => {
 
     if (locationData) {
         incidentData.location = locationData;
+    }
+
+    const duplicateWindowStart = new Date(Date.now() - 45 * 1000);
+    const recentDuplicate = await Incident.findOne({
+        reportedBy: req.user._id,
+        title: incidentData.title,
+        description: incidentData.description,
+        category: incidentData.category,
+        address: incidentData.address,
+        createdAt: { $gte: duplicateWindowStart },
+    }).sort({ createdAt: -1 });
+
+    if (recentDuplicate) {
+        return res.status(200).json(
+            new ApiResponse(
+                200,
+                serializeIncidentForViewer(recentDuplicate, req.user),
+                "Duplicate submission ignored; existing incident returned",
+            ),
+        );
     }
 
     const incident = await Incident.create(incidentData);

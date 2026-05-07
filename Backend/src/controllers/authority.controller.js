@@ -243,6 +243,9 @@ export const getPowerCriticalIncidents = asyncHandler(async (req, res) => {
 export const updateIncidentStatus = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { status, authorityMessage, resolutionImage } = req.body;
+    const normalizedAuthorityMessage = typeof authorityMessage === "string"
+        ? authorityMessage.trim()
+        : authorityMessage;
 
     if (!status && authorityMessage == null && !resolutionImage) {
         return res.status(400).json(new ApiResponse(400, null, "No authority updates were provided"));
@@ -266,6 +269,10 @@ export const updateIncidentStatus = asyncHandler(async (req, res) => {
         return res.status(400).json(new ApiResponse(400, null, "This incident can no longer be updated by the authority"));
     }
 
+    if (status === "REJECTED" && !normalizedAuthorityMessage) {
+        return res.status(400).json(new ApiResponse(400, null, "A valid rejection reason is required"));
+    }
+
     const previousStatus = incident.status;
 
     if (status) {
@@ -275,10 +282,10 @@ export const updateIncidentStatus = asyncHandler(async (req, res) => {
         }
     }
     if (authorityMessage != null) {
-        incident.authorityMessage = authorityMessage;
+        incident.authorityMessage = normalizedAuthorityMessage;
     }
     if (status === "REJECTED") {
-        incident.rejectionReason = authorityMessage || incident.authorityMessage || incident.rejectionReason;
+        incident.rejectionReason = normalizedAuthorityMessage;
     }
     if (resolutionImage) {
         incident.resolutionImage = resolutionImage;
@@ -289,7 +296,7 @@ export const updateIncidentStatus = asyncHandler(async (req, res) => {
             status,
             actorRole: "AUTHORITY",
             actorLabel: getAuthorityLabel(incident.assignedAuthority),
-            note: authorityMessage?.trim() || getDefaultStatusNote(status, incident),
+            note: normalizedAuthorityMessage || getDefaultStatusNote(status, incident),
             proofImage: resolutionImage || incident.resolutionImage || "",
         });
     } else if (status && status === previousStatus && (authorityMessage != null || resolutionImage)) {
@@ -297,8 +304,8 @@ export const updateIncidentStatus = asyncHandler(async (req, res) => {
         const latestEntry = history[history.length - 1];
 
         if (latestEntry?.status === status && latestEntry?.actorRole === "AUTHORITY") {
-            if (authorityMessage?.trim()) {
-                latestEntry.note = authorityMessage.trim();
+            if (normalizedAuthorityMessage) {
+                latestEntry.note = normalizedAuthorityMessage;
             } else if (!latestEntry.note) {
                 latestEntry.note = getDefaultStatusNote(status, incident);
             }

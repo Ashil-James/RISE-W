@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 const ReportIncident = () => {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
+  const submissionLockRef = useRef(false);
   const { addReport, refreshReports } = useReports();
   const { user } = useUser();
 
@@ -153,6 +154,8 @@ const ReportIncident = () => {
 
   // ── Submit with duplicate check ──
   const handleSubmit = async () => {
+    if (submissionLockRef.current || isSubmitting) return;
+    submissionLockRef.current = true;
     setIsSubmitting(true);
     const imgUrl = await uploadImage();
     setUploadedImageUrl(imgUrl);
@@ -188,6 +191,7 @@ const ReportIncident = () => {
             setPendingReport(report);
             setShowDuplicateModal(true);
             setIsSubmitting(false);
+            submissionLockRef.current = false;
             return;
           }
         }
@@ -218,14 +222,15 @@ const ReportIncident = () => {
 
       if (!res.ok) throw new Error("Submission failed");
       
-      const newReport = buildReport(imgUrl);
-      addReport(newReport);
+      await refreshReports(user?.token, { force: true, showLoading: false });
       setIsSubmitting(false);
       setTimeout(() => setStep(3), 800);
     } catch (e) {
       console.error(e);
       alert(t("report.submitFailed"));
       setIsSubmitting(false);
+    } finally {
+      submissionLockRef.current = false;
     }
   };
 
@@ -255,12 +260,19 @@ const ReportIncident = () => {
   };
 
   // ── Submit anyway (user says "no, mine is different") ──
-  const handleSubmitAnyway = () => {
+  const handleSubmitAnyway = async () => {
+    if (submissionLockRef.current || isSubmitting) return;
+    submissionLockRef.current = true;
+    setIsSubmitting(true);
     setShowDuplicateModal(false);
     if (pendingReport) {
-      addReport(pendingReport);
-      setTimeout(() => setStep(3), 800);
+      const result = await addReport(pendingReport);
+      if (result?.success) {
+        setTimeout(() => setStep(3), 800);
+      }
     }
+    setIsSubmitting(false);
+    submissionLockRef.current = false;
   };
 
   const timeAgo = (dateStr) => {

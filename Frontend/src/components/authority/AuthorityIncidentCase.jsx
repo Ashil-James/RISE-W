@@ -145,6 +145,7 @@ const AuthorityIncidentCase = ({
     const [actionError, setActionError] = useState("");
     const [saving, setSaving] = useState(false);
     const [isRejecting, setIsRejecting] = useState(false);
+    const [acceptMessage, setAcceptMessage] = useState("");
     const [rejectReason, setRejectReason] = useState("");
     const [uploadFile, setUploadFile] = useState(null);
     const [resolutionProof, setResolutionProof] = useState(null);
@@ -257,8 +258,14 @@ const AuthorityIncidentCase = ({
         }
     };
 
-    const handleAccept = () => {
-        updateDBStatus("Accepted");
+    const handleAccept = async () => {
+        const didUpdate = await updateDBStatus("Accepted", {
+            authorityMessage: acceptMessage.trim() || undefined,
+        });
+
+        if (didUpdate) {
+            setAcceptMessage("");
+        }
     };
 
     const handleReject = async () => {
@@ -270,12 +277,18 @@ const AuthorityIncidentCase = ({
 
         if (didUpdate) {
             setIsRejecting(false);
+            setRejectReason("");
         }
     };
 
     const handleStatusSelectChange = (event) => {
         const selected = event.target.value;
         if (selected === "Reopened") return;
+        if (selected === "Rejected") {
+            setIsRejecting(true);
+            setActionError("");
+            return;
+        }
         if (selected === "Resolved") {
             // Show upload UI locally — backend update happens only after proof is uploaded
             setStatus("Resolved");
@@ -343,6 +356,7 @@ const AuthorityIncidentCase = ({
     const showOperationalProtocol = ["Accepted", "In Progress", "Resolved", "Reopened"].includes(status);
     const showReopenBanner = status === "Reopened";
     const selectValue = status === "Reopened" ? "Reopened" : status;
+    const canRejectCase = ["New", "Accepted", "In Progress", "Reopened"].includes(status);
     const severityText = urgencyScore >= 75 ? "Critical" : urgencyScore >= 50 ? "High" : "Moderate";
     const severityClass = urgencyScore >= 75 ? "text-red-400" : urgencyScore >= 50 ? theme.moderateText : theme.accentText;
     const progressBarClass = urgencyScore >= 75
@@ -468,6 +482,19 @@ const AuthorityIncidentCase = ({
                         {status === "New" && (
                             <div className="space-y-4">
                                 <h3 className="text-lg font-bold text-white">Primary Acceptance</h3>
+                                <div>
+                                    <label className="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">
+                                        Optional acceptance message
+                                    </label>
+                                    <textarea
+                                        value={acceptMessage}
+                                        onChange={(event) => setAcceptMessage(event.target.value)}
+                                        disabled={saving}
+                                        className={`w-full bg-black/40 border border-white/10 rounded-xl p-3 text-white text-sm focus:outline-none ${theme.selectFocus} disabled:opacity-60`}
+                                        rows={2}
+                                        placeholder="Add a note for the citizen, e.g. inspection team assigned or expected response time..."
+                                    />
+                                </div>
                                 <div className="flex gap-4">
                                     <button
                                         onClick={handleAccept}
@@ -478,7 +505,10 @@ const AuthorityIncidentCase = ({
                                         Accept Complaint
                                     </button>
                                     <button
-                                        onClick={() => setIsRejecting(true)}
+                                        onClick={() => {
+                                            setIsRejecting(true);
+                                            setActionError("");
+                                        }}
                                         disabled={saving}
                                         className="flex-1 py-3 bg-red-500/10 hover:bg-red-500/20 disabled:opacity-60 text-red-500 border border-red-500/20 rounded-xl font-bold transition-all flex items-center justify-center gap-2"
                                     >
@@ -501,7 +531,10 @@ const AuthorityIncidentCase = ({
                                         />
                                         <div className="flex justify-end gap-3">
                                             <button
-                                                onClick={() => setIsRejecting(false)}
+                                                onClick={() => {
+                                                    setIsRejecting(false);
+                                                    setRejectReason("");
+                                                }}
                                                 className="px-4 py-2 text-sm text-gray-400 hover:text-white font-bold"
                                             >
                                                 Cancel
@@ -509,9 +542,9 @@ const AuthorityIncidentCase = ({
                                             <button
                                                 onClick={handleReject}
                                                 disabled={!rejectReason.trim() || saving}
-                                                className="px-6 py-2 bg-red-500 hover:bg-red-400 disabled:opacity-50 text-white rounded-xl text-sm font-bold shadow-lg shadow-red-500/25"
+                                                className="px-6 py-2 bg-red-500 hover:bg-red-400 disabled:opacity-50 text-white rounded-xl text-sm font-bold shadow-lg shadow-red-500/25 flex items-center gap-2"
                                             >
-                                                {saving ? "Saving..." : "Confirm Reject"}
+                                                {saving ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : "Confirm Reject"}
                                             </button>
                                         </div>
                                     </motion.div>
@@ -547,8 +580,46 @@ const AuthorityIncidentCase = ({
                                         <option value="Accepted" className="bg-neutral-900">Accepted</option>
                                         <option value="In Progress" className="bg-neutral-900">In Progress</option>
                                         <option value="Resolved" className="bg-neutral-900">Resolved</option>
+                                        {canRejectCase && <option value="Rejected" className="bg-neutral-900">Reject Case</option>}
                                     </select>
                                 </div>
+
+                                {isRejecting && status !== "New" && canRejectCase && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="bg-red-500/10 border border-red-500/20 rounded-xl p-5 mb-6"
+                                    >
+                                        <label className="block text-xs font-bold text-red-400 uppercase tracking-wider mb-2">
+                                            Rejection reason is required
+                                        </label>
+                                        <textarea
+                                            value={rejectReason}
+                                            onChange={(event) => setRejectReason(event.target.value)}
+                                            className="w-full bg-black/40 border border-red-500/20 rounded-xl p-3 text-white text-sm focus:outline-none focus:border-red-500 mb-3"
+                                            rows={3}
+                                            placeholder="Explain why this issue cannot be accepted or continued..."
+                                        />
+                                        <div className="flex justify-end gap-3">
+                                            <button
+                                                onClick={() => {
+                                                    setIsRejecting(false);
+                                                    setRejectReason("");
+                                                }}
+                                                className="px-4 py-2 text-sm text-gray-400 hover:text-white font-bold"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                onClick={handleReject}
+                                                disabled={!rejectReason.trim() || saving}
+                                                className="px-6 py-2 bg-red-500 hover:bg-red-400 disabled:opacity-50 text-white rounded-xl text-sm font-bold shadow-lg shadow-red-500/25 flex items-center gap-2"
+                                            >
+                                                {saving ? <><Loader2 size={14} className="animate-spin" /> Saving...</> : "Confirm Reject"}
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                )}
 
                                 {status === "Resolved" && !resolutionProof && (
                                     <motion.div
