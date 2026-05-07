@@ -230,7 +230,7 @@ export const mapIncidentToReport = (incident) => {
   const viewerRelation = incident.viewerRelation || "REPORTER";
   const nextActionOwner = incident.nextActionOwner || statusMeta.nextActionOwner || "NONE";
   const lastUpdatedAt = latestUpdate?.changedAt || incident.updatedAt || incident.createdAt;
-  const supportCount = incident.upvotes || 0;
+  const supportCount = incident.supportCount || incident.upvotes || 0;
 
   return {
     id: incident._id || incident.id,

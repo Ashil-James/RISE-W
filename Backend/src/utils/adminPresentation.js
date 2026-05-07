@@ -34,7 +34,7 @@ export const getAdminIncidentBucket = (status) => {
 };
 
 export const getIncidentUrgencyScore = (incident) =>
-    Number(incident?.urgencyScore || 0) + Number(incident?.upvotes || 0);
+    Number(incident?.urgencyScore || 0);
 
 export const getIncidentUrgencyLevel = (incident) => {
     const score = getIncidentUrgencyScore(incident);

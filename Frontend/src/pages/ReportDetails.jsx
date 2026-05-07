@@ -194,10 +194,18 @@ const ReportDetails = () => {
             <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-cyan-500/10 blur-[100px] rounded-full group-hover:bg-cyan-500/20 transition-all duration-700" />
 
             <div className="relative z-10">
-              <div className="flex justify-between items-start mb-8">
-                <span className="text-[11px] font-black px-4 py-2 rounded-2xl bg-white/5 text-wayanad-muted border border-white/10 uppercase tracking-[0.2em] shadow-inner backdrop-blur-md">
-                  CASE ID: {report.displayId}
-                </span>
+              <div className="flex flex-wrap justify-between items-start gap-4 mb-8">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="text-[11px] font-black px-4 py-2 rounded-2xl bg-white/5 text-wayanad-muted border border-white/10 uppercase tracking-[0.2em] shadow-inner backdrop-blur-md">
+                    CASE ID: {report.displayId}
+                  </span>
+                  {(report.supportCount || 0) > 0 && (
+                    <span className="text-[11px] font-black px-4 py-2 rounded-2xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 uppercase tracking-[0.2em] shadow-inner backdrop-blur-md flex items-center gap-2">
+                      <Users size={14} />
+                      {report.supportCount} {report.supportCount === 1 ? 'Support' : 'Supports'}
+                    </span>
+                  )}
+                </div>
                 <span className={`text-[11px] font-black px-4 py-2 rounded-2xl flex items-center gap-2 shadow-inner backdrop-blur-md ${report.statusColor}`}>
                   <span className="w-2 h-2 rounded-full bg-current animate-pulse"></span>
                   {report.status}
@@ -481,11 +489,13 @@ const ReportDetails = () => {
                 </div>
 
                 <p className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-100 to-emerald-300 leading-snug mb-4 relative z-10">
-                  Be the first to stand behind this case.
+                  {report.isReporter ? "No other citizens have supported this yet." : "Be the first to stand behind this case."}
                 </p>
 
                 <p className="text-sm text-emerald-400/70 font-medium leading-relaxed relative z-10">
-                  Community support drives faster authority response times and builds public pressure.
+                  {report.isReporter 
+                    ? "As other residents upvote this, it will gain higher priority in the authority's queue." 
+                    : "Community support drives faster authority response times and builds public pressure."}
                 </p>
               </>
             )}

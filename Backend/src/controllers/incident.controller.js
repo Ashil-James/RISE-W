@@ -641,7 +641,22 @@ export const upvoteIncident = asyncHandler(async (req, res) => {
 
     incident.upvotes = (incident.upvotes || 0) + 1;
     incident.upvotedBy = [...(incident.upvotedBy || []), req.user._id];
+    
+    // Each upvote increases the urgency score to prioritize community-backed issues
+    incident.urgencyScore = Math.min(100, (incident.urgencyScore || 1) + 1);
+    
     await incident.save();
+
+    // Notify the original reporter about the new upvote
+    if (incident.reportedBy.toString() !== req.user._id.toString()) {
+        await Notification.create({
+            recipient: incident.reportedBy,
+            title: "New Upvote on Your Report",
+            message: `Your report "${incident.title}" received a new upvote. Total upvotes: ${incident.upvotes}`,
+            type: "INCIDENT_UPDATE",
+            relatedId: incident._id,
+        });
+    }
 
     return res.status(200).json(
         new ApiResponse(200, serializeIncidentForViewer(incident, req.user), "Upvote recorded successfully"),

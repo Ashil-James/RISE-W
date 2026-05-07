@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Archive,
   Plus,
+  Users,
 } from "lucide-react";
 import { useUser } from "../context/UserContext";
 import { useAlerts } from "../context/AlertContext";
@@ -265,7 +266,16 @@ const Home = () => {
                     
                     <div className="flex items-center justify-between sm:justify-end gap-5 pl-2 md:pl-0">
                       <div className="flex items-center gap-2 text-xs font-medium text-wayanad-muted shrink-0">
-                        <span className="truncate max-w-[120px]">{caseSummary.mostRecentlyUpdated.authorityLabel}</span>
+                        {(caseSummary.mostRecentlyUpdated.supportCount || 0) > 0 && (
+                          <>
+                            <div className="flex items-center gap-1.5 text-emerald-500">
+                              <Users size={12} />
+                              <span className="font-bold">{caseSummary.mostRecentlyUpdated.supportCount}</span>
+                            </div>
+                            <span className="w-1 h-1 rounded-full bg-white/20 shrink-0" />
+                          </>
+                        )}
+                        <span className="truncate max-w-[100px]">{caseSummary.mostRecentlyUpdated.authorityLabel}</span>
                         <span className="w-1 h-1 rounded-full bg-white/20 shrink-0" />
                         <span className="shrink-0">{caseSummary.mostRecentlyUpdated.lastUpdatedLabel}</span>
                       </div>

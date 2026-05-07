@@ -199,6 +199,7 @@ export const serializeIncidentForViewer = (incidentInput, viewer = null) => {
 
     return {
         ...incident,
+        supportCount: Number(incident.upvotes || 0),
         statusHistory,
         latestUpdate: statusHistory[statusHistory.length - 1] || null,
         viewerRelation: getViewerRelation(incident, viewer),

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Zap, Droplets, PawPrint, Construction, ArrowLeft, HelpCircle,
@@ -45,35 +45,67 @@ const ReportIncident = () => {
   const { t } = useTranslation();
 
   const categories = [
-    { id: "water", label: t("category.water"), icon: Droplets, color: "#3b82f6", bg: "rgba(59,130,246,0.1)" },
-    { id: "wildlife", label: t("category.wildlife"), icon: PawPrint, color: "#f97316", bg: "rgba(249,115,22,0.1)" },
-    { id: "power", label: t("category.power"), icon: Zap, color: "#eab308", bg: "rgba(234,179,8,0.1)" },
-    { id: "infra", label: t("category.infra"), icon: Construction, color: "#6b7280", bg: "rgba(107,114,128,0.1)" },
+    { id: "water", label: t("category.water"), canonical: "Water & Sanitation", icon: Droplets, color: "#3b82f6", bg: "rgba(59,130,246,0.1)" },
+    { id: "wildlife", label: t("category.wildlife"), canonical: "Wildlife Intrusion", icon: PawPrint, color: "#f97316", bg: "rgba(249,115,22,0.1)" },
+    { id: "power", label: t("category.power"), canonical: "Power Issue", icon: Zap, color: "#eab308", bg: "rgba(234,179,8,0.1)" },
+    { id: "infra", label: t("category.infra"), canonical: "Infrastructure", icon: Construction, color: "#6b7280", bg: "rgba(107,114,128,0.1)" },
   ];
 
   const CATEGORY_ISSUES = {
     [t("category.water")]: [
-      t("issue.noWater"), t("issue.lowPressure"), t("issue.dirtyWater"),
-      t("issue.pipeBurst"), t("issue.leakage"), t("issue.sewage"), t("issue.manhole"),
-      t("issue.blockedDrain"), t("issue.borewell"), t("issue.tankOverflow"),
-      t("issue.toilet"), t("issue.illegalWater"), t("issue.other"),
+      { label: t("issue.noWater"), canonical: "No Water Supply" },
+      { label: t("issue.lowPressure"), canonical: "Low Water Pressure" },
+      { label: t("issue.dirtyWater"), canonical: "Contaminated / Dirty Water" },
+      { label: t("issue.pipeBurst"), canonical: "Major Pipe Burst" },
+      { label: t("issue.leakage"), canonical: "Minor Leakage" },
+      { label: t("issue.sewage"), canonical: "Sewage Overflow" },
+      { label: t("issue.manhole"), canonical: "Open Manhole" },
+      { label: t("issue.blockedDrain"), canonical: "Blocked Drainage" },
+      { label: t("issue.borewell"), canonical: "Borewell / Well Issue" },
+      { label: t("issue.tankOverflow"), canonical: "Water Tank Overflow" },
+      { label: t("issue.toilet"), canonical: "Public Toilet Issue" },
+      { label: t("issue.illegalWater"), canonical: "Illegal Water Connection" },
+      { label: t("issue.other"), canonical: "Other" },
     ],
     [t("category.power")]: [
-      t("issue.powerOutage"), t("issue.phaseFailure"), t("issue.voltage"),
-      t("issue.liveCable"), t("issue.damagedPole"), t("issue.streetLight"),
-      t("issue.sparking"), t("issue.meter"), t("issue.tripping"),
-      t("issue.hooking"), t("issue.branches"), t("issue.other"),
+      { label: t("issue.powerOutage"), canonical: "Complete Power Outage" },
+      { label: t("issue.phaseFailure"), canonical: "Phase Failure" },
+      { label: t("issue.voltage"), canonical: "Voltage Fluctuation" },
+      { label: t("issue.liveCable"), canonical: "Fallen Wire / Live Cable" },
+      { label: t("issue.damagedPole"), canonical: "Leaning / Damaged Pole" },
+      { label: t("issue.streetLight"), canonical: "Street Light Not Working" },
+      { label: t("issue.sparking"), canonical: "Transformer Sparking / Fire" },
+      { label: t("issue.meter"), canonical: "Meter Malfunction" },
+      { label: t("issue.tripping"), canonical: "Frequent Tripping" },
+      { label: t("issue.hooking"), canonical: "Unauthorized Hooking" },
+      { label: t("issue.branches"), canonical: "Tree Branches Touching Wires" },
+      { label: t("issue.other"), canonical: "Other" },
     ],
     [t("category.infra")]: [
-      t("issue.pothole"), t("issue.roadDamage"), t("issue.collapsedWall"),
-      t("issue.bridge"), t("issue.footpath"), t("issue.trafficSignal"),
-      t("issue.landslide"), t("issue.waterlogged"),
-      t("issue.roadSign"), t("issue.hazard"), t("issue.encroachment"), t("issue.other"),
+      { label: t("issue.pothole"), canonical: "Pothole" },
+      { label: t("issue.roadDamage"), canonical: "Road Crack / Major Damage" },
+      { label: t("issue.collapsedWall"), canonical: "Collapsed Wall / Fence" },
+      { label: t("issue.bridge"), canonical: "Damaged Bridge / Culvert" },
+      { label: t("issue.footpath"), canonical: "Damaged Footpath" },
+      { label: t("issue.trafficSignal"), canonical: "Broken Traffic Signal" },
+      { label: t("issue.landslide"), canonical: "Landslide / Debris on Road" },
+      { label: t("issue.waterlogged"), canonical: "Waterlogged Road / Flooding" },
+      { label: t("issue.roadSign"), canonical: "Missing Road Signage" },
+      { label: t("issue.hazard"), canonical: "Construction Site Hazard" },
+      { label: t("issue.encroachment"), canonical: "Encroachment on Public Space" },
+      { label: t("issue.other"), canonical: "Other" },
     ],
     [t("category.wildlife")]: [
-      t("issue.snake"), t("issue.elephant"), t("issue.monkey"),
-      t("issue.catSighting"), t("issue.boar"), t("issue.beehive"),
-      t("issue.stray"), t("issue.injuredAnimal"), t("issue.poaching"), t("issue.other"),
+      { label: t("issue.snake"), canonical: "Snake Sighting / Entry" },
+      { label: t("issue.elephant"), canonical: "Elephant Movement / Raid" },
+      { label: t("issue.monkey"), canonical: "Monkey Menace" },
+      { label: t("issue.catSighting"), canonical: "Leopard / Big Cat Sighting" },
+      { label: t("issue.boar"), canonical: "Wild Boar Damage" },
+      { label: t("issue.beehive"), canonical: "Beehive / Wasp Nest" },
+      { label: t("issue.stray"), canonical: "Stray Dog / Cat Issue" },
+      { label: t("issue.injuredAnimal"), canonical: "Injured Wild Animal" },
+      { label: t("issue.poaching"), canonical: "Illegal Poaching Activity" },
+      { label: t("issue.other"), canonical: "Other" },
     ],
   };
 
@@ -117,8 +149,39 @@ const ReportIncident = () => {
       console.error("Auto-categorize failed:", e);
     }
   };
+  // ── Auto-detect GPS location on form load ──
+  useEffect(() => {
+    // Only auto-detect once, and only if we don't already have coords
+    if (coords || !navigator.geolocation) return;
 
-  // Native geolocating handled in LocationPickerMap component now.
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        setCoords({ lat, lon });
+
+        // Reverse geocode to get a human-readable name
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`
+          );
+          const data = await res.json();
+          if (data?.display_name) {
+            const parts = data.display_name.split(', ');
+            setLocationName(parts.slice(0, 3).join(', '));
+          } else {
+            setLocationName(`${lat.toFixed(4)}, ${lon.toFixed(4)}`);
+          }
+        } catch {
+          setLocationName(`${lat.toFixed(4)}, ${lon.toFixed(4)}`);
+        }
+      },
+      (err) => {
+        console.warn("Geolocation failed:", err.message);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+    );
+  }, []); // Run once on mount
 
   // ── Upload image (shared between flows) ──
   const uploadImage = async () => {
@@ -131,25 +194,6 @@ const ReportIncident = () => {
     } catch (e) { console.error(e); alert("Image upload failed."); return null; }
   };
 
-  // ── Build report object ──
-  const buildReport = (imgUrl) => {
-    const finalCategory = formData.specificIssue === t("issue.other") ? customCategory : selectedCategory.label;
-    const finalIssue = formData.specificIssue === t("issue.other") ? customIssue : (formData.specificIssue || selectedCategory.label);
-    
-    return {
-      id: "#" + Math.floor(10000 + Math.random() * 90000),
-      category: finalCategory,
-      issue: finalIssue,
-      description: formData.description,
-      location: formData.address || locationName || (coords ? `GPS: ${coords.lat.toFixed(4)}, ${coords.lon.toFixed(4)}` : "Manual Location Entry"),
-      address: formData.address || locationName || "",
-      latitude: coords?.lat || null, longitude: coords?.lon || null,
-      image: imgUrl || null,
-      date: t("report.justNow"), status: "Open",
-      statusColor: "text-orange-500 bg-orange-500/10",
-      authorityMessage: null, authorityProof: null,
-    };
-  };
 
   // ── Submit with duplicate check ──
   const handleSubmit = async () => {
@@ -157,8 +201,16 @@ const ReportIncident = () => {
     const imgUrl = await uploadImage();
     setUploadedImageUrl(imgUrl);
 
-    const finalCategory = formData.specificIssue === t("issue.other") ? customCategory : selectedCategory.label;
-    const finalIssue = formData.specificIssue === t("issue.other") ? customIssue : (formData.specificIssue || selectedCategory.label);
+    const isOtherIssue = formData.specificIssue === t("issue.other");
+    const finalCategory = isOtherIssue ? customCategory : selectedCategory.label;
+    const finalIssue = isOtherIssue ? customIssue : (formData.specificIssue || selectedCategory.label);
+
+    const selectedIssueObj = !isOtherIssue 
+      ? CATEGORY_ISSUES[selectedCategory.label]?.find(i => i.label === formData.specificIssue)
+      : null;
+
+    const canonicalCategory = selectedCategory.canonical;
+    const canonicalIssue = selectedIssueObj?.canonical || finalIssue;
 
     // If we have GPS coords, check for nearby duplicates first
     if (coords) {
@@ -172,8 +224,8 @@ const ReportIncident = () => {
           body: JSON.stringify({
             latitude: coords.lat,
             longitude: coords.lon,
-            category: finalCategory,
-            title: finalIssue,
+            category: canonicalCategory,
+            title: canonicalIssue,
             description: formData.description || "",
             addressDetails: formData.address || "",
           }),
@@ -184,8 +236,16 @@ const ReportIncident = () => {
           if (result.data && result.data.length > 0) {
             // Nearby duplicates found — show modal
             setNearbyIncidents(result.data);
-            const report = buildReport(imgUrl);
-            setPendingReport(report);
+            setPendingReport({
+              issue: finalIssue,
+              description: formData.description,
+              category: canonicalCategory,
+              subCategory: canonicalIssue,
+              latitude: coords?.lat,
+              longitude: coords?.lon,
+              address: formData.address || locationName,
+              image: imgUrl,
+            });
             setShowDuplicateModal(true);
             setIsSubmitting(false);
             return;
@@ -196,30 +256,22 @@ const ReportIncident = () => {
       }
     }
 
-    // No duplicates found — create normally
+    // No duplicates found — create normally via addReport (which handles the POST)
     try {
-      const res = await fetch("/api/v1/incidents", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${user?.token}`,
-        },
-        body: JSON.stringify({
-          title: finalIssue,
-          description: formData.description,
-          category: finalCategory,
-          subCategory: finalIssue,
-          latitude: coords?.lat,
-          longitude: coords?.lon,
-          address: formData.address || locationName,
-          image: imgUrl,
-        }),
-      });
+      const report = {
+        issue: finalIssue,
+        description: formData.description,
+        category: canonicalCategory,
+        subCategory: canonicalIssue,
+        latitude: coords?.lat,
+        longitude: coords?.lon,
+        address: formData.address || locationName,
+        image: imgUrl,
+      };
 
-      if (!res.ok) throw new Error("Submission failed");
+      const result = await addReport(report);
+      if (!result.success) throw new Error(result.message || "Submission failed");
       
-      const newReport = buildReport(imgUrl);
-      addReport(newReport);
       setIsSubmitting(false);
       setTimeout(() => setStep(3), 800);
     } catch (e) {
@@ -255,11 +307,15 @@ const ReportIncident = () => {
   };
 
   // ── Submit anyway (user says "no, mine is different") ──
-  const handleSubmitAnyway = () => {
+  const handleSubmitAnyway = async () => {
     setShowDuplicateModal(false);
     if (pendingReport) {
-      addReport(pendingReport);
-      setTimeout(() => setStep(3), 800);
+      const result = await addReport(pendingReport);
+      if (result.success) {
+        setTimeout(() => setStep(3), 800);
+      } else {
+        alert(result.message || t("report.submitFailed"));
+      }
     }
   };
 
@@ -348,7 +404,7 @@ const ReportIncident = () => {
             className="w-full bg-wayanad-bg border border-wayanad-border rounded-xl p-4 text-wayanad-text outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all">
             <option value="">{t("report.selectOption")}</option>
             {selectedCategory && CATEGORY_ISSUES[selectedCategory.label]?.map(issue => (
-              <option key={issue} value={issue}>{issue}</option>
+              <option key={issue.label} value={issue.label}>{issue.label}</option>
             ))}
           </select>
 

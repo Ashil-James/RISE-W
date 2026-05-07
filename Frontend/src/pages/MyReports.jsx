@@ -299,7 +299,12 @@ const MyReports = () => {
                   <div className="flex items-center gap-2.5 text-xs text-wayanad-muted">
                     <span className="flex items-center gap-1.5 min-w-0">
                       <MapPin size={12} className="shrink-0 text-white/40" />
-                      <span className="truncate">{report.location}</span>
+                      <span className="truncate max-w-[120px]">{report.location}</span>
+                    </span>
+                    <span className="w-1 h-1 rounded-full bg-white/20 shrink-0" />
+                    <span className={`flex items-center gap-1.5 shrink-0 ${(report.supportCount || 0) > 0 ? 'text-emerald-500' : 'text-wayanad-muted'}`}>
+                      <Users size={12} />
+                      <span className="font-bold">{report.supportCount || 0}</span>
                     </span>
                     <span className="w-1 h-1 rounded-full bg-white/20 shrink-0" />
                     <span className="truncate">{report.authorityLabel}</span>

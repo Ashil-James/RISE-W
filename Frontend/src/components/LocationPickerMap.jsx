@@ -52,7 +52,13 @@ const LocationPickerMap = ({ location, setLocation, locationName, setLocationNam
 
   // Attempt to auto-detect if no location exists yet
   useEffect(() => {
-    if (!location && navigator.geolocation) {
+    if (location) {
+      // Location already set (e.g. from auto-detect) — just center the map
+      setMapCenter([location.lat, location.lon]);
+      return;
+    }
+
+    if (navigator.geolocation) {
       setIsLocating(true);
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -66,12 +72,13 @@ const LocationPickerMap = ({ location, setLocation, locationName, setLocationNam
           // If denied/fails, fall back to Wayanad default (but don't set it as User's actual location until they click)
           setMapCenter([11.6, 76.1]);
           setIsLocating(false);
-        }
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
       );
-    } else if (!location) {
+    } else {
        setMapCenter([11.6, 76.1]);
     }
-  }, [location, setLocation, setLocationName]);
+  }, []);
 
   return (
     <div className="flex flex-col h-full bg-wayanad-panel border border-wayanad-border rounded-xl overflow-hidden mt-2">
