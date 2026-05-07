@@ -334,9 +334,7 @@ const AuthorityIncidentCase = ({
         minute: "2-digit",
     });
     const urgencyScore = Math.max(0, Math.min(100, incident.urgencyScore || 0));
-    const affectedUsers = urgencyScore > 20
-        ? Math.round(urgencyScore * affectedUsersMultiplier)
-        : affectedUsersFallback;
+    const affectedUsers = (incident.upvotes || 0) + 1;
     const evidenceImages = Array.isArray(incident.images)
         ? incident.images
         : incident.image

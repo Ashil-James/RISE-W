@@ -151,7 +151,9 @@ const ReportDetails = () => {
     ? "You confirmed the authority's fix, so this case is fully closed."
     : report.rawStatus === "REJECTED"
       ? report.rejectionReason || report.authorityMessage || "The authority rejected this issue."
-      : "You revoked this issue before the authority accepted it.";
+      : report.rawStatus === "REVOKED"
+        ? "You revoked this issue before the authority accepted it."
+        : "";
 
   return (
     <motion.div
@@ -190,7 +192,7 @@ const ReportDetails = () => {
             {/* Cinematic Background Glows */}
             <div className="absolute -top-32 -right-32 w-96 h-96 bg-emerald-500/10 blur-[100px] rounded-full group-hover:bg-emerald-500/20 transition-all duration-700" />
             <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-cyan-500/10 blur-[100px] rounded-full group-hover:bg-cyan-500/20 transition-all duration-700" />
-            
+
             <div className="relative z-10">
               <div className="flex justify-between items-start mb-8">
                 <span className="text-[11px] font-black px-4 py-2 rounded-2xl bg-white/5 text-wayanad-muted border border-white/10 uppercase tracking-[0.2em] shadow-inner backdrop-blur-md">
@@ -211,7 +213,7 @@ const ReportDetails = () => {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 border-t border-white/10 relative">
                 <div className="absolute top-0 left-0 w-1/3 h-[1px] bg-gradient-to-r from-emerald-500/50 to-transparent" />
-                
+
                 <div className="group/stat">
                   <p className="text-[10px] uppercase tracking-[0.2em] text-emerald-500/60 font-black mb-2 group-hover/stat:text-emerald-400 transition-colors">Submitted</p>
                   <p className="text-base font-black text-emerald-50 drop-shadow-md">{report.submittedDateTime.split(',')[0]}</p>
@@ -230,7 +232,7 @@ const ReportDetails = () => {
 
           <div className="glass-card rounded-[2.5rem] p-6 md:p-10 border border-white/5 relative overflow-hidden group">
             <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
-            
+
             <div className="flex items-center gap-3 mb-10 relative z-10">
               <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
                 <Clock3 size={22} strokeWidth={2.5} />
@@ -244,8 +246,8 @@ const ReportDetails = () => {
                 const isCompleted = !isLatest || report.rawStatus === "CLOSED" || report.rawStatus === "REJECTED";
 
                 return (
-                  <motion.div 
-                    key={entry.id} 
+                  <motion.div
+                    key={entry.id}
                     className="relative"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -389,11 +391,11 @@ const ReportDetails = () => {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300" />
                   <div className="absolute inset-0 border border-white/10 rounded-3xl z-20 pointer-events-none group-hover/image:border-emerald-500/50 transition-colors duration-500"></div>
                   <img src={report.image} alt="Evidence" className="w-full h-full object-cover relative z-0 group-hover/image:scale-105 transition-transform duration-[800ms] ease-out" />
-                  
+
                   <div className="absolute bottom-4 right-4 z-20 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover/image:translate-y-0">
                     <div className="bg-emerald-500/80 backdrop-blur-md text-white p-2 rounded-xl shadow-lg flex items-center gap-2">
-                       <span className="text-xs font-bold tracking-wider">VIEW FULL</span>
-                       <ExternalLink size={14} />
+                      <span className="text-xs font-bold tracking-wider">VIEW FULL</span>
+                      <ExternalLink size={14} />
                     </div>
                   </div>
                 </div>
@@ -477,11 +479,11 @@ const ReportDetails = () => {
                   </div>
                   <h3 className="text-sm uppercase tracking-[0.2em] font-black text-emerald-500/80">Community Support</h3>
                 </div>
-                
+
                 <p className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-100 to-emerald-300 leading-snug mb-4 relative z-10">
                   Be the first to stand behind this case.
                 </p>
-                
+
                 <p className="text-sm text-emerald-400/70 font-medium leading-relaxed relative z-10">
                   Community support drives faster authority response times and builds public pressure.
                 </p>
